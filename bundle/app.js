@@ -1903,6 +1903,10 @@
       arrayMerge(this.data.extensions ??= [], exts);
       return this;
     }
+    addFilenames(filenames) {
+      arrayMerge(this.data.filenames ??= [], filenames);
+      return this;
+    }
     addImages(images) {
       arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
       return this;
@@ -1920,10 +1924,6 @@
       for (const other of others) this.graph.edges.dialect.connect(this.key, other);
       return this;
     }
-    addLicenses(others) {
-      for (const other of others) this.graph.edges.license.connect(this.key, other);
-      return this;
-    }
     addImplements(others) {
       for (const other of others) this.graph.edges.impl.connect(this.key, other);
       return this;
@@ -1936,6 +1936,10 @@
       for (const other of others) this.graph.edges.lib.connect(this.key, other);
       return this;
     }
+    addLicenses(others) {
+      for (const other of others) this.graph.edges.license.connect(this.key, other);
+      return this;
+    }
     addParadigms(others) {
       for (const otherkey of others) this.graph.edges.paradigm.connect(this.key, otherkey);
       return this;
@@ -1946,6 +1950,10 @@
     }
     addPosts(others) {
       for (const other of others) this.graph.edges.post.connect(this.key, other);
+      return this;
+    }
+    addStackovTags(stackovTags) {
+      arrayMerge(this.data.stackovTags ??= [], stackovTags);
       return this;
     }
     addTags(others) {
@@ -2345,7 +2353,7 @@
                 ...onClickOnEnter(() => {
                   main.doResetGroup(groupKey);
                 }),
-                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row", children: [
+                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
                   /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
                   /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
                 ] })
