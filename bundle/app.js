@@ -1509,6 +1509,9 @@
     map(callback) {
       return new _IterTap(this.array ? this.array.map(callback) : []);
     }
+    reduce(callback, init) {
+      return this.array ? this.array.reduce(callback, init) : init;
+    }
     sort(cmp) {
       return this.array ? [...this.array].sort(cmp) : [];
     }
@@ -1533,9 +1536,9 @@
     get size() {
       return this.array ? this.array.length : 0;
     }
-    /** Return all non-null and non-undefined values. */
+    /** Return all non-null and non-undefined values (if strings, returns the ones with length > 0). */
     get existing() {
-      return this.filter((v4) => v4 !== void 0 && v4 !== null);
+      return this.filter((v4) => v4 !== void 0 && v4 !== null && (typeof v4 !== "string" || v4.length > 0));
     }
     get reverse() {
       return new _IterTap(this.array ? [...this.array].reverse() : void 0);
@@ -1754,7 +1757,7 @@
     dialectOf: ({ relDialectOf }, flt) => flt.matches((key) => relDialectOf.has(key)),
     extensions: ({ extensions }, flt) => flt.matches((key) => extensions.includes(key)),
     hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
-    hasWikipedia: (pl, val) => val.value === pl.websites.some((site) => site.kind === "wikipedia"),
+    hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
     implements: ({ relImplements }, flt) => flt.matches((key) => relImplements.has(key)),
     influenced: ({ relInfluenced }, flt) => flt.matches((key) => relInfluenced.has(key)),
     influencedBy: ({ relInfluencedBy }, flt) => flt.matches((key) => relInfluencedBy.has(key)),
@@ -1824,18 +1827,14 @@
     }
   };
   var NBase = class extends Node {
-    addWebsites(links) {
-      arrayMerge(this.data.websites ??= [], links, (l1, l22) => l1.href === l22.href);
-      return this;
-    }
     get name() {
       return this.data.name ? this.data.name : this.plainKey;
     }
     get description() {
       return this.data.description || this.name;
     }
-    get websites() {
-      return new IterTap(this.data.websites);
+    get urlHome() {
+      return this.data.extHomeURL;
     }
     get keywords() {
       return new IterTap(this.data.keywords);
@@ -1881,6 +1880,24 @@
     }
     get year() {
       return this.data.year;
+    }
+    get urlRepository() {
+      return this.data.extRepositoryURL;
+    }
+    get urlGithub() {
+      return this.data.extGithubPath ? `https://github.com/${this.data.extGithubPath}` : void 0;
+    }
+    get urlWikipedia() {
+      return this.data.extWikipediaPath ? `https://github.com/${this.data.extGithubPath}` : void 0;
+    }
+    get urlReddit() {
+      return this.data.extRedditPath ? `https://reddit.com/${this.data.extRedditPath}` : void 0;
+    }
+    get urlStackov() {
+      return this.stackovTags ? `https://stackoverflow.com/questions/tagged/${this.stackovTags.join("+")}` : void 0;
+    }
+    get stackovTags() {
+      return new IterTap(this.data.stackovTags);
     }
     releasedRecently(minYear) {
       const relYear = this.lastReleaseYear;
@@ -2109,6 +2126,9 @@
   var NPost = class _NPost extends NBase {
     static kind = "post";
     kind = _NPost.kind;
+    set path(path) {
+      this.data.path = path;
+    }
     get author() {
       return this.data.author;
     }
@@ -2121,11 +2141,8 @@
     get title() {
       return this.name;
     }
-    set link(link) {
-      this.data.websites = [link];
-    }
-    get link() {
-      return this.websites.first;
+    get href() {
+      return `/blog/${this.plainKey}`;
     }
     addPls(others) {
       for (const other of others) this.graph.edges.post.connect(other, this.key);
@@ -2136,13 +2153,6 @@
     }
   };
   var EBase = class extends Edge {
-    addRefs(links) {
-      arrayMerge(this.data.refs ??= [], links, (l1, l22) => l1.href === l22.href);
-      return this;
-    }
-    get refs() {
-      return new IterTap(this.data.refs);
-    }
   };
   var EApp = class extends EBase {
     kind = "app";
@@ -3149,11 +3159,6 @@
     }
   }
 
-  // packages/frontend/src/components/misc/anchor.tsx
-  function Anchor({ link, class: cssClass2 }) {
-    return /* @__PURE__ */ u4("a", { href: link.href, title: `${link.title} (${link.kind})`, class: tw(cssClass2), children: link.title });
-  }
-
   // packages/frontend/src/components/misc/pill.tsx
   function Pill({ name, nodeKey, kind, tab }) {
     return /* @__PURE__ */ u4(
@@ -3207,13 +3212,6 @@
             /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: pl.description || "..." }),
             /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
               /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-xl", children: "Details" }),
-              !pl.websites.isEmpty && /* @__PURE__ */ u4("div", { children: [
-                /* @__PURE__ */ u4("h2", { class: "mt-4", children: "Websites" }),
-                pl.websites.map((link) => /* @__PURE__ */ u4("div", { class: tw("overflow-hidden text-ellipsis whitespace-nowrap"), children: [
-                  /* @__PURE__ */ u4(Pill, { name: link.kind ?? "link", nodeKey: "NA", kind: link.kind ?? "link" }),
-                  /* @__PURE__ */ u4(Anchor, { link })
-                ] }, link.href)).existing
-              ] }),
               relations(pl).map(([title, iterTap]) => /* @__PURE__ */ u4("div", { children: [
                 /* @__PURE__ */ u4("h2", { class: "mt-4 text-xl", children: title }),
                 iterTap.existing.map(({ name, key, kind }) => /* @__PURE__ */ u4(Pill, { name, nodeKey: key, kind, tab }, key))

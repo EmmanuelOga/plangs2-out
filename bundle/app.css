@@ -585,6 +585,9 @@
   .m-1 {
     margin: var(--spacing-1, 0.25rem);
   }
+  .m-36 {
+    margin: var(--spacing-36, 9rem);
+  }
   .-mx-4 {
     margin-inline: calc(var(--spacing-4, 1rem) * -1);
   }
@@ -1447,9 +1450,6 @@
   }
   .text-ellipsis {
     text-overflow: ellipsis;
-  }
-  .whitespace-nowrap {
-    white-space: nowrap;
   }
   .text-background {
     color: var(--color-background);
