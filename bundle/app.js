@@ -1659,6 +1659,15 @@
     set(from, to, data) {
       return this.connect(from, to).merge(data);
     }
+    delete(from, to) {
+      const f5 = this.adjFrom.delete(from, to);
+      const t3 = this.adjTo.delete(to, from);
+      return f5 || t3;
+    }
+    /** Get all edges. Uses the adjFrom map, but both maps should have the same values. */
+    get values() {
+      return this.adjFrom.values();
+    }
     get size() {
       return this.adjFrom.size;
     }
