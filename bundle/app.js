@@ -1858,6 +1858,9 @@
   var NPlang = class _NPlang extends NBase {
     static kind = "pl";
     kind = _NPlang.kind;
+    get ranking() {
+      return this.data.languishRanking;
+    }
     get href() {
       return `/${this.plainKey}`;
     }
@@ -3281,6 +3284,15 @@
         activateFacetsMain(pg);
         const grid = elem("plGrid");
         if (!grid) return;
+        const thumbns = [...elems("plThumb")];
+        thumbns.sort((a4, b3) => {
+          console.log(a4);
+          const rankA = Number.parseInt(a4.dataset.nodeRanking ?? "0", 10);
+          const rankB = Number.parseInt(b3.dataset.nodeRanking ?? "0", 10);
+          console.log("Comparing", rankA, rankB);
+          return rankA - rankB;
+        });
+        for (const thumb of thumbns) grid.appendChild(thumb);
         on(grid, "click", ({ target }) => {
           const pl = getPl(pg, target);
           if (pl) renderPlInfo({ pl, tab: "plangs" });
