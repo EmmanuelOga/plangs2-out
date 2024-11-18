@@ -554,548 +554,6 @@
     };
   }
 
-  // packages/frontend/src/auxiliar/styles.ts
-  var BAR = "bg-linear-to-b from-secondary to-background";
-  var BORDER = "border-primary/85 border-dotted";
-  var HOVER = "hover:bg-hiliteb hover:text-hilitef cursor-pointer";
-  var HOVER_SVG = "hover:stroke-1 hover:stroke-hiliteb";
-  var HOVER_SVG_GROUP = "group-hover:stroke-1 group-hover:stroke-hiliteb";
-  var INPUT = "bg-background text-foreground placeholder:text-foreground/50";
-  function tw(...classes) {
-    return classes.flat(5).filter((s4) => typeof s4 === "string" && !/^;|;$/.test(s4)).join(" ");
-  }
-  function classesExcept(elem2, ...cssClasses) {
-    return [...new Set(elem2.classList).difference(new Set(cssClasses))].join(" ");
-  }
-
-  // node_modules/preact/hooks/dist/hooks.module.js
-  var t2;
-  var r2;
-  var u3;
-  var i4;
-  var o3 = 0;
-  var f3 = [];
-  var c3 = l;
-  var e2 = c3.__b;
-  var a3 = c3.__r;
-  var v3 = c3.diffed;
-  var l3 = c3.__c;
-  var m2 = c3.unmount;
-  var s3 = c3.__;
-  function d3(n2, t3) {
-    c3.__h && c3.__h(r2, n2, o3 || t3), o3 = 0;
-    var u5 = r2.__H || (r2.__H = { __: [], __h: [] });
-    return n2 >= u5.__.length && u5.__.push({}), u5.__[n2];
-  }
-  function h3(n2) {
-    return o3 = 1, p3(D, n2);
-  }
-  function p3(n2, u5, i6) {
-    var o4 = d3(t2++, 2);
-    if (o4.t = n2, !o4.__c && (o4.__ = [i6 ? i6(u5) : D(void 0, u5), function(n3) {
-      var t3 = o4.__N ? o4.__N[0] : o4.__[0], r3 = o4.t(t3, n3);
-      t3 !== r3 && (o4.__N = [r3, o4.__[1]], o4.__c.setState({}));
-    }], o4.__c = r2, !r2.u)) {
-      var f5 = function(n3, t3, r3) {
-        if (!o4.__c.__H) return true;
-        var u6 = o4.__c.__H.__.filter(function(n4) {
-          return !!n4.__c;
-        });
-        if (u6.every(function(n4) {
-          return !n4.__N;
-        })) return !c4 || c4.call(this, n3, t3, r3);
-        var i7 = false;
-        return u6.forEach(function(n4) {
-          if (n4.__N) {
-            var t4 = n4.__[0];
-            n4.__ = n4.__N, n4.__N = void 0, t4 !== n4.__[0] && (i7 = true);
-          }
-        }), !(!i7 && o4.__c.props === n3) && (!c4 || c4.call(this, n3, t3, r3));
-      };
-      r2.u = true;
-      var c4 = r2.shouldComponentUpdate, e3 = r2.componentWillUpdate;
-      r2.componentWillUpdate = function(n3, t3, r3) {
-        if (this.__e) {
-          var u6 = c4;
-          c4 = void 0, f5(n3, t3, r3), c4 = u6;
-        }
-        e3 && e3.call(this, n3, t3, r3);
-      }, r2.shouldComponentUpdate = f5;
-    }
-    return o4.__N || o4.__;
-  }
-  function y3(n2, u5) {
-    var i6 = d3(t2++, 3);
-    !c3.__s && C2(i6.__H, u5) && (i6.__ = n2, i6.i = u5, r2.__H.__h.push(i6));
-  }
-  function A2(n2) {
-    return o3 = 5, T2(function() {
-      return { current: n2 };
-    }, []);
-  }
-  function T2(n2, r3) {
-    var u5 = d3(t2++, 7);
-    return C2(u5.__H, r3) && (u5.__ = n2(), u5.__H = r3, u5.__h = n2), u5.__;
-  }
-  function x2(n2) {
-    var u5 = r2.context[n2.__c], i6 = d3(t2++, 9);
-    return i6.c = n2, u5 ? (null == i6.__ && (i6.__ = true, u5.sub(r2)), u5.props.value) : n2.__;
-  }
-  function j2() {
-    for (var n2; n2 = f3.shift(); ) if (n2.__P && n2.__H) try {
-      n2.__H.__h.forEach(z2), n2.__H.__h.forEach(B2), n2.__H.__h = [];
-    } catch (t3) {
-      n2.__H.__h = [], c3.__e(t3, n2.__v);
-    }
-  }
-  c3.__b = function(n2) {
-    r2 = null, e2 && e2(n2);
-  }, c3.__ = function(n2, t3) {
-    n2 && t3.__k && t3.__k.__m && (n2.__m = t3.__k.__m), s3 && s3(n2, t3);
-  }, c3.__r = function(n2) {
-    a3 && a3(n2), t2 = 0;
-    var i6 = (r2 = n2.__c).__H;
-    i6 && (u3 === r2 ? (i6.__h = [], r2.__h = [], i6.__.forEach(function(n3) {
-      n3.__N && (n3.__ = n3.__N), n3.i = n3.__N = void 0;
-    })) : (i6.__h.forEach(z2), i6.__h.forEach(B2), i6.__h = [], t2 = 0)), u3 = r2;
-  }, c3.diffed = function(n2) {
-    v3 && v3(n2);
-    var t3 = n2.__c;
-    t3 && t3.__H && (t3.__H.__h.length && (1 !== f3.push(t3) && i4 === c3.requestAnimationFrame || ((i4 = c3.requestAnimationFrame) || w3)(j2)), t3.__H.__.forEach(function(n3) {
-      n3.i && (n3.__H = n3.i), n3.i = void 0;
-    })), u3 = r2 = null;
-  }, c3.__c = function(n2, t3) {
-    t3.some(function(n3) {
-      try {
-        n3.__h.forEach(z2), n3.__h = n3.__h.filter(function(n4) {
-          return !n4.__ || B2(n4);
-        });
-      } catch (r3) {
-        t3.some(function(n4) {
-          n4.__h && (n4.__h = []);
-        }), t3 = [], c3.__e(r3, n3.__v);
-      }
-    }), l3 && l3(n2, t3);
-  }, c3.unmount = function(n2) {
-    m2 && m2(n2);
-    var t3, r3 = n2.__c;
-    r3 && r3.__H && (r3.__H.__.forEach(function(n3) {
-      try {
-        z2(n3);
-      } catch (n4) {
-        t3 = n4;
-      }
-    }), r3.__H = void 0, t3 && c3.__e(t3, r3.__v));
-  };
-  var k2 = "function" == typeof requestAnimationFrame;
-  function w3(n2) {
-    var t3, r3 = function() {
-      clearTimeout(u5), k2 && cancelAnimationFrame(t3), setTimeout(n2);
-    }, u5 = setTimeout(r3, 100);
-    k2 && (t3 = requestAnimationFrame(r3));
-  }
-  function z2(n2) {
-    var t3 = r2, u5 = n2.__c;
-    "function" == typeof u5 && (n2.__c = void 0, u5()), r2 = t3;
-  }
-  function B2(n2) {
-    var t3 = r2;
-    n2.__c = n2.__(), r2 = t3;
-  }
-  function C2(n2, t3) {
-    return !n2 || n2.length !== t3.length || t3.some(function(t4, r3) {
-      return t4 !== n2[r3];
-    });
-  }
-  function D(n2, t3) {
-    return "function" == typeof t3 ? t3(n2) : t3;
-  }
-
-  // packages/frontend/src/auxiliar/dispatchable.ts
-  var Dispatchable = class {
-    constructor(data) {
-      this.data = data;
-    }
-    dispatcher;
-    clone() {
-      const Ctor = this.constructor;
-      const clone = new Ctor(this.data);
-      clone.dispatcher = this.dispatcher;
-      return clone;
-    }
-    dispatch() {
-      this.dispatcher?.(this.clone());
-      return this;
-    }
-  };
-  function useDispatchable(factory) {
-    const [state, dispatcher] = h3(factory);
-    state.dispatcher = dispatcher;
-    return state;
-  }
-  function useRootState(state) {
-    const ref = A2();
-    y3(() => {
-      const root = ref.current?.parentElement;
-      if (root && state) root.state = state;
-    }, [state]);
-    return ref;
-  }
-
-  // node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
-  var f4 = 0;
-  var i5 = Array.isArray;
-  function u4(e3, t3, n2, o4, i6, u5) {
-    t3 || (t3 = {});
-    var a4, c4, p4 = t3;
-    if ("ref" in p4) for (c4 in p4 = {}, t3) "ref" == c4 ? a4 = t3[c4] : p4[c4] = t3[c4];
-    var l4 = { type: e3, props: p4, key: n2, ref: a4, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: --f4, __i: -1, __u: 0, __source: i6, __self: u5 };
-    if ("function" == typeof e3 && (a4 = e3.defaultProps)) for (c4 in a4) void 0 === p4[c4] && (p4[c4] = a4[c4]);
-    return l.vnode && l.vnode(l4), l4;
-  }
-
-  // packages/frontend/src/auxiliar/icons.tsx
-  var css = "fill-current size-[1.5rem] sm:size-[1.75rem] lg:size-[2rem] xl:size-[2.25rem] 2xl:size-[2.5rem]";
-  var ABC = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Alphabetic" }),
-    /* @__PURE__ */ u4(
-      "path",
-      {
-        class: "fill",
-        d: "M3.0805,8.3675,2.31,10.878c-.028.091-.0705.122-.154.122H.756c-.0845,0-.1125-.0455-.1-.15L3.5425,1.9285A2.51436,2.51436,0,0,0,3.669,1.107c0-.0615.028-.107.084-.107H5.7c.0705,0,.084.015.1.0915L9.0355,10.863c.0145.0915,0,.137-.084.137H7.381a.14051.14051,0,0,1-.1405-.0915L6.428,8.3675Zm2.9-1.6595c-.294-1.005-.9525-3.12-1.233-4.1855h-.014c-.224,1.02-.785,2.8-1.2045,4.1855Z"
-      }
-    ),
-    /* @__PURE__ */ u4(
-      "path",
-      {
-        class: "fill",
-        d: "M9.613,17c-.0565,0-.1125-.015-.1125-.122v-1.02a.346.346,0,0,1,.042-.1825l4.861-7.032H9.711c-.0705,0-.1125-.0145-.1-.106l.21-1.4155C9.835,7.031,9.877,7,9.9465,7H16.463c.069,0,.084.031.084.0915v1.096a.3265.3265,0,0,1-.0705.213L11.7,15.3415h5.015c.069,0,.1.0455.069.137l-.2235,1.4c-.0135.091-.042.122-.126.122Z"
-      }
-    )
-  ] });
-  var RANKING = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Ranking" }),
-    /* @__PURE__ */ u4(
-      "path",
-      {
-        class: "fill",
-        d: "M9,2a.497.497,0,0,0-.3735.168l-5.5,5A.48949.48949,0,0,0,3,7.497.5.5,0,0,0,3.497,8H14.5a.5.5,0,0,0,.5-.5V7.497a.48949.48949,0,0,0-.1275-.329l-5.5-5A.5.5,0,0,0,9,2Z"
-      }
-    ),
-    /* @__PURE__ */ u4(
-      "path",
-      {
-        class: "fill",
-        d: "M9,16a.5.5,0,0,0,.3735-.168l5.5-5A.48949.48949,0,0,0,15,10.503.5.5,0,0,0,14.503,10H3.5a.5.5,0,0,0-.5.5v.003a.48949.48949,0,0,0,.1275.329l5.5,5A.497.497,0,0,0,9,16Z"
-      }
-    )
-  ] });
-  var FULLCIRCLE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Circle" }),
-    /* @__PURE__ */ u4("circle", { class: "fill", cx: "9", cy: "9", r: "8" })
-  ] });
-  var SUN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Sun" }),
-    /* @__PURE__ */ u4("path", { d: "m9,5.05c2.18152,0,3.95,1.76848,3.95,3.95s-1.76848,3.95-3.95,3.95-3.95-1.76848-3.95-3.95,1.76848-3.95,3.95-3.95Zm-.9-4.8v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25V.25c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25Zm0,15v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25v-2.5c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25ZM0,8.35v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25H.25c-.13807,0-.25.11193-.25.25Zm15,0v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25h-2.5c-.13807,0-.25.11193-.25.25Zm-2.01021-4.23913l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355ZM1.98978,15.11121l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355Zm-.01031-11.8587l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Zm10.9902,10.99001l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Z" })
-  ] });
-  var MOON = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Moon" }),
-    /* @__PURE__ */ u4("path", { d: "M9,1a8,8,0,1,0,8,8A8,8,0,0,0,9,1Zm.5,14.982c-.165.0115-.332.018-.5.018A7,7,0,0,1,9,2c.168,0,.335.0065.5.018A11,11,0,0,0,9.5,15.982Z" })
-  ] });
-  var MENU = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Menu" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "8" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "3" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "13" })
-  ] });
-  var CLOSE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Close" }),
-    /* @__PURE__ */ u4("path", { d: "M13.2425,3.343,9,7.586,4.7575,3.343a.5.5,0,0,0-.707,0L3.343,4.05a.5.5,0,0,0,0,.707L7.586,9,3.343,13.2425a.5.5,0,0,0,0,.707l.707.7075a.5.5,0,0,0,.707,0L9,10.414l4.2425,4.243a.5.5,0,0,0,.707,0l.7075-.707a.5.5,0,0,0,0-.707L10.414,9l4.243-4.2425a.5.5,0,0,0,0-.707L13.95,3.343a.5.5,0,0,0-.70711-.00039Z" })
-  ] });
-  var FILTER_EDIT = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Filter Edit" }),
-    /* @__PURE__ */ u4("path", { d: "M17.8925,10.8605,16.14,9.1075A.36952.36952,0,0,0,15.8765,9H15.865a.41651.41651,0,0,0-.282.1235l-5.411,5.411a.304.304,0,0,0-.0765.128l-1.0135,3c-.0345.1145.1395.2585.238.2585a.15858.15858,0,0,0,.0185,0c.084-.0195,2.5615-.882,3-1.014a.3.3,0,0,0,.126-.0755l5.412-5.4145A.41749.41749,0,0,0,18,11.15.37152.37152,0,0,0,17.8925,10.8605Zm-5.8,5.4815c-.657.1975-1.65.6145-2.215.784l.78-2.2155Z" }),
-    /* @__PURE__ */ u4("path", { d: "M15.473,1H1.527a.5.5,0,0,0-.3935.8085L7,9.2945V15a.496.496,0,0,0,.84.4125L9.83,13.336a.61.61,0,0,0,.17-.4225V9.2945l5.8665-7.486A.5.5,0,0,0,15.473,1Z" })
-  ] });
-  var BOOLEAN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Boolean" }),
-    /* @__PURE__ */ u4("path", { d: "M12,4.25a4.75,4.75,0,0,1,0,9.5H6a4.75,4.75,0,0,1,0-9.5ZM12,3H6A6,6,0,0,0,6,15h6A6,6,0,0,0,12,3Zm0,3A3,3,0,1,1,9,9,3,3,0,0,1,12,6Z" })
-  ] });
-  var DESELECT = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Deselect" }),
-    /* @__PURE__ */ u4("path", { d: "m2,9h1v3h-1v-3Zm1,6v-1h-1v1.5555c0,.24549.19901.4445.4445.4445h1.5555v-1h-1Zm3,1h3v-1h-3v1Zm9-7h1v-3h-1v3Zm.5555-7h-1.5555v1h1v1h1v-1.5555c0-.24549-.19901-.4445-.4445-.4445Zm-6.5555,1h3v-1h-3v1ZM1.10295,1.97065l14.92632,14.92632c.15973.15973.41869.15972.57841,0l.28956-.28956c.15972-.15972.15973-.41869,0-.57841L1.97092,1.10268c-.15972-.15972-.41869-.15972-.57841,0l-.28956.28956c-.15972.15972-.15972.41869,0,.57841Zm14.89705,11.74835v-2.719h-1v1.719l1,1Zm-3.282,1.281h-1.718v1h2.718l-1-1ZM2,4.281v2.719h1v-1.719l-1-1Zm3.281-1.281h1.719v-1h-2.719l1,1Z" })
-  ] });
-  var SORT_DOWN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Sort Down" }),
-    /* @__PURE__ */ u4("rect", { id: "Canvas", fill: "#ff13dc", opacity: "0", width: "18", height: "18" }),
-    /* @__PURE__ */ u4("rect", { class: "fill", height: "2", rx: "0.5", width: "6", x: "1", y: "12" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "8", x: "1", y: "8" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "4" }),
-    /* @__PURE__ */ u4("path", { d: "M16,12H14.9965V4.5a.494.494,0,0,0-.488-.5L14.503,4h-.496a.5.5,0,0,0-.5.5L13.5035,12H12.5a.25.25,0,0,0-.25.25.245.245,0,0,0,.0735.175l1.7685,2.0165a.25.25,0,0,0,.316,0l1.7685-2.0165a.245.245,0,0,0,.0735-.175A.25.25,0,0,0,16,12Z" })
-  ] });
-  var SORT_UP = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Sort Up" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "6", x: "1", y: "4" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "8", x: "1", y: "8" }),
-    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "12" }),
-    /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
-  ] });
-
-  // packages/auxiliar/src/map2.ts
-  var Map2 = class {
-    #map = /* @__PURE__ */ new Map();
-    has(k1, k22) {
-      return this.#map.get(k1)?.has(k22) ?? false;
-    }
-    set(k1, k22, v4) {
-      let m22 = this.#map.get(k1);
-      if (!m22) {
-        m22 = /* @__PURE__ */ new Map();
-        this.#map.set(k1, m22);
-      }
-      m22.set(k22, v4);
-      return this;
-    }
-    getOrSet(k1, k22, whenMissing) {
-      let v4 = this.get(k1, k22);
-      if (v4 === void 0) this.set(k1, k22, v4 = whenMissing());
-      return v4;
-    }
-    delete(k1, k22) {
-      return this.#map.get(k1)?.delete(k22) ?? false;
-    }
-    // Delete all keys [k1, *] from the map.
-    delete1(k1) {
-      const map = this.#map.get(k1);
-      if (map) {
-        this.#map.delete(k1);
-        return map.size > 0;
-      }
-      return false;
-    }
-    clear() {
-      this.#map.clear();
-    }
-    get(k1, k22) {
-      return this.#map.get(k1)?.get(k22);
-    }
-    getMap(k1) {
-      return this.#map.get(k1);
-    }
-    /** Get a consolidated map of all keys in the second dimension. */
-    getMap2() {
-      const res = /* @__PURE__ */ new Map();
-      for (const [_k1, map2] of this.#map) {
-        for (const [k22, v4] of map2) res.set(k22, v4);
-      }
-      return res;
-    }
-    get size() {
-      let size = 0;
-      for (const map of this.#map.values()) size += map.size;
-      return size;
-    }
-    get isEmpty() {
-      for (const map of this.#map.values()) if (map.size > 0) return false;
-      return true;
-    }
-    /** Returns the size of the second dimension for a given key in the first dimension. */
-    size2(k1) {
-      return this.#map.get(k1)?.size ?? 0;
-    }
-    /** Returns an iterator of the keys in the first dimension. */
-    keys() {
-      return this.#map.keys().filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
-    }
-    entries() {
-      return this.#map.entries().filter(([_k1, map2]) => map2.size > 0);
-    }
-    *flatEntries() {
-      for (const [k1, map2] of this.#map) {
-        for (const [k22, v4] of map2) yield [k1, k22, v4];
-      }
-    }
-    values() {
-      return [...this.#map.values()].flatMap((map) => [...map.values()]);
-    }
-    /**
-     * NOTE: This will work best if the keys are strings, symbols or numbers.
-     * Otherwise JavaScript will convert them to strings, which may not be what you want.
-     */
-    toObject(mapper) {
-      const object = {};
-      for (const [k1, k22, v4] of this.flatEntries()) {
-        (object[k1] = object[k1] ?? {})[k22] = mapper(v4);
-      }
-      return object;
-    }
-    toString() {
-      const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
-      return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
-    }
-  };
-
-  // packages/auxiliar/src/filters.ts
-  var Filter = class _Filter {
-    constructor(mode = "any", values = /* @__PURE__ */ new Set()) {
-      this.mode = mode;
-      this.values = values;
-    }
-    get isEmpty() {
-      return this.values.size === 0;
-    }
-    add(value) {
-      this.values.add(value);
-      return this;
-    }
-    delete(value) {
-      return this.values.delete(value);
-    }
-    has(value) {
-      return this.values.has(value);
-    }
-    clear() {
-      this.values.clear();
-    }
-    get size() {
-      return this.values.size;
-    }
-    matches(predicate) {
-      return this.mode === "all" ? this.all(predicate) : this.any(predicate);
-    }
-    all(predicate) {
-      for (const v4 of this.values) if (!predicate(v4)) return false;
-      return true;
-    }
-    any(predicate) {
-      for (const v4 of this.values) if (predicate(v4)) return true;
-      return false;
-    }
-    get value() {
-      return this;
-    }
-    get isPresent() {
-      return !this.isEmpty;
-    }
-    equalTo(other) {
-      if (!other) return false;
-      if (!(other instanceof _Filter)) return false;
-      if (this.mode !== other.mode) return false;
-      if (this.values.size !== other.values.size) return false;
-      for (const v4 of this.values) if (!other.values.has(v4)) return false;
-      return true;
-    }
-    clone() {
-      return new _Filter(this.mode, new Set(this.values));
-    }
-    toJSON() {
-      return { mode: this.mode, values: [...this.values] };
-    }
-    serializable() {
-      return this.isEmpty ? void 0 : this.toJSON();
-    }
-    // biome-ignore lint/suspicious/noExplicitAny: we can't know for sure the type of the values here.
-    static isSerialized(val) {
-      return !!val && typeof val === "object" && "mode" in val && (val.mode === "all" || val.mode === "any") && "values" in val && Array.isArray(val.values);
-    }
-  };
-
-  // packages/auxiliar/src/value.ts
-  var ValBase = class {
-    constructor(value) {
-      this.value = value;
-    }
-    get isNil() {
-      return this.value === void 0 || this.value === null;
-    }
-    get isPresent() {
-      return !this.isNil;
-    }
-    // biome-ignore lint/suspicious/noExplicitAny: We can't be more specific here.
-    serializable() {
-      return this.isPresent ? this.value : void 0;
-    }
-  };
-  var ValNil = class _ValNil extends ValBase {
-    constructor(value = void 0) {
-      super(value);
-    }
-    equalTo(other) {
-      return other instanceof _ValNil;
-    }
-  };
-  var ValNumber = class _ValNumber extends ValBase {
-    equalTo(other) {
-      return other instanceof _ValNumber && this.value === other.value;
-    }
-  };
-  var ValBool = class _ValBool extends ValBase {
-    get isPresent() {
-      return !this.isNil && this.value === true;
-    }
-    equalTo(other) {
-      return other instanceof _ValBool && this.value === other.value;
-    }
-  };
-  var ValString = class _ValString extends ValBase {
-    get isPresent() {
-      return !this.isNil && this.value.length > 0 && !/^\s*$/.test(this.value);
-    }
-    equalTo(other) {
-      return other instanceof _ValString && this.value === other.value;
-    }
-  };
-  var ValSet = class _ValSet extends ValBase {
-    get isPresent() {
-      return !this.isNil && this.value.size > 0;
-    }
-    equalTo(other) {
-      if (!(other instanceof _ValSet)) return false;
-      if (this.value === other.value) return true;
-      if (this.value.size !== other.value.size) return false;
-      for (const v4 of this.value) if (!other.value.has(v4)) return false;
-      return true;
-    }
-    serializable() {
-      return this.isPresent ? ["Set", [...this.value]] : void 0;
-    }
-    // biome-ignore lint/suspicious/noExplicitAny: we cannot know for sure the type of the values.
-    static isSerialized(val) {
-      return Array.isArray(val) && val[0] === "Set" && Array.isArray(val[1]);
-    }
-  };
-  var EMPTY_REGEX = /(?:)/;
-  var ValRegExp = class _ValRegExp extends ValBase {
-    get isPresent() {
-      return !this.isNil && this.value.source !== EMPTY_REGEX.source;
-    }
-    equalTo(other) {
-      return other instanceof _ValRegExp && this.value.source === other.value.source;
-    }
-    serializable() {
-      const { value } = this;
-      return this.isPresent ? value.flags ? ["RegExp", value.source, value.flags] : ["RegExp", value.source] : void 0;
-    }
-    static isSerialized(val) {
-      return Array.isArray(val) && val[0] === "RegExp" && typeof val[1] === "string" && (val[2] === void 0 || typeof val[2] === "string");
-    }
-  };
-  function deserializeValue(val) {
-    if (val === void 0 || val === null) return new ValNil(val);
-    switch (typeof val) {
-      case "number":
-        return new ValNumber(val);
-      case "boolean":
-        return new ValBool(val);
-      case "string":
-        return new ValString(val);
-    }
-    if (ValRegExp.isSerialized(val)) return new ValRegExp(new RegExp(val[1], val[2]));
-    if (ValSet.isSerialized(val)) return new ValSet(new Set(val[1]));
-    if (Filter.isSerialized(val)) return new Filter(val.mode, new Set(val.values));
-    console.log("Attempt to deserialize an unrecognized value shape:", val);
-  }
-
   // node_modules/rison2/lib/token.mjs
   var NULL = "!n";
   var TRUE = "!t";
@@ -1481,6 +939,541 @@
     }
   };
 
+  // packages/frontend/src/auxiliar/styles.ts
+  var BAR = "bg-linear-to-b from-secondary to-background";
+  var BORDER = "border-primary/85 border-dotted";
+  var HOVER = "hover:bg-hiliteb hover:text-hilitef cursor-pointer";
+  var HOVER_SVG = "hover:stroke-1 hover:stroke-hiliteb";
+  var HOVER_SVG_GROUP = "group-hover:stroke-1 group-hover:stroke-hiliteb";
+  var INPUT = "bg-background text-foreground placeholder:text-foreground/50";
+  function tw(...classes) {
+    return classes.flat(5).filter((s4) => typeof s4 === "string" && !/^;|;$/.test(s4)).join(" ");
+  }
+  function classesExcept(elem2, ...cssClasses) {
+    return [...new Set(elem2.classList).difference(new Set(cssClasses))].join(" ");
+  }
+
+  // node_modules/preact/hooks/dist/hooks.module.js
+  var t2;
+  var r2;
+  var u3;
+  var i4;
+  var o3 = 0;
+  var f3 = [];
+  var c3 = l;
+  var e2 = c3.__b;
+  var a3 = c3.__r;
+  var v3 = c3.diffed;
+  var l3 = c3.__c;
+  var m2 = c3.unmount;
+  var s3 = c3.__;
+  function d3(n2, t3) {
+    c3.__h && c3.__h(r2, n2, o3 || t3), o3 = 0;
+    var u5 = r2.__H || (r2.__H = { __: [], __h: [] });
+    return n2 >= u5.__.length && u5.__.push({}), u5.__[n2];
+  }
+  function h3(n2) {
+    return o3 = 1, p3(D, n2);
+  }
+  function p3(n2, u5, i6) {
+    var o4 = d3(t2++, 2);
+    if (o4.t = n2, !o4.__c && (o4.__ = [i6 ? i6(u5) : D(void 0, u5), function(n3) {
+      var t3 = o4.__N ? o4.__N[0] : o4.__[0], r3 = o4.t(t3, n3);
+      t3 !== r3 && (o4.__N = [r3, o4.__[1]], o4.__c.setState({}));
+    }], o4.__c = r2, !r2.u)) {
+      var f5 = function(n3, t3, r3) {
+        if (!o4.__c.__H) return true;
+        var u6 = o4.__c.__H.__.filter(function(n4) {
+          return !!n4.__c;
+        });
+        if (u6.every(function(n4) {
+          return !n4.__N;
+        })) return !c4 || c4.call(this, n3, t3, r3);
+        var i7 = false;
+        return u6.forEach(function(n4) {
+          if (n4.__N) {
+            var t4 = n4.__[0];
+            n4.__ = n4.__N, n4.__N = void 0, t4 !== n4.__[0] && (i7 = true);
+          }
+        }), !(!i7 && o4.__c.props === n3) && (!c4 || c4.call(this, n3, t3, r3));
+      };
+      r2.u = true;
+      var c4 = r2.shouldComponentUpdate, e3 = r2.componentWillUpdate;
+      r2.componentWillUpdate = function(n3, t3, r3) {
+        if (this.__e) {
+          var u6 = c4;
+          c4 = void 0, f5(n3, t3, r3), c4 = u6;
+        }
+        e3 && e3.call(this, n3, t3, r3);
+      }, r2.shouldComponentUpdate = f5;
+    }
+    return o4.__N || o4.__;
+  }
+  function y3(n2, u5) {
+    var i6 = d3(t2++, 3);
+    !c3.__s && C2(i6.__H, u5) && (i6.__ = n2, i6.i = u5, r2.__H.__h.push(i6));
+  }
+  function A2(n2) {
+    return o3 = 5, T2(function() {
+      return { current: n2 };
+    }, []);
+  }
+  function T2(n2, r3) {
+    var u5 = d3(t2++, 7);
+    return C2(u5.__H, r3) && (u5.__ = n2(), u5.__H = r3, u5.__h = n2), u5.__;
+  }
+  function x2(n2) {
+    var u5 = r2.context[n2.__c], i6 = d3(t2++, 9);
+    return i6.c = n2, u5 ? (null == i6.__ && (i6.__ = true, u5.sub(r2)), u5.props.value) : n2.__;
+  }
+  function j2() {
+    for (var n2; n2 = f3.shift(); ) if (n2.__P && n2.__H) try {
+      n2.__H.__h.forEach(z2), n2.__H.__h.forEach(B2), n2.__H.__h = [];
+    } catch (t3) {
+      n2.__H.__h = [], c3.__e(t3, n2.__v);
+    }
+  }
+  c3.__b = function(n2) {
+    r2 = null, e2 && e2(n2);
+  }, c3.__ = function(n2, t3) {
+    n2 && t3.__k && t3.__k.__m && (n2.__m = t3.__k.__m), s3 && s3(n2, t3);
+  }, c3.__r = function(n2) {
+    a3 && a3(n2), t2 = 0;
+    var i6 = (r2 = n2.__c).__H;
+    i6 && (u3 === r2 ? (i6.__h = [], r2.__h = [], i6.__.forEach(function(n3) {
+      n3.__N && (n3.__ = n3.__N), n3.i = n3.__N = void 0;
+    })) : (i6.__h.forEach(z2), i6.__h.forEach(B2), i6.__h = [], t2 = 0)), u3 = r2;
+  }, c3.diffed = function(n2) {
+    v3 && v3(n2);
+    var t3 = n2.__c;
+    t3 && t3.__H && (t3.__H.__h.length && (1 !== f3.push(t3) && i4 === c3.requestAnimationFrame || ((i4 = c3.requestAnimationFrame) || w3)(j2)), t3.__H.__.forEach(function(n3) {
+      n3.i && (n3.__H = n3.i), n3.i = void 0;
+    })), u3 = r2 = null;
+  }, c3.__c = function(n2, t3) {
+    t3.some(function(n3) {
+      try {
+        n3.__h.forEach(z2), n3.__h = n3.__h.filter(function(n4) {
+          return !n4.__ || B2(n4);
+        });
+      } catch (r3) {
+        t3.some(function(n4) {
+          n4.__h && (n4.__h = []);
+        }), t3 = [], c3.__e(r3, n3.__v);
+      }
+    }), l3 && l3(n2, t3);
+  }, c3.unmount = function(n2) {
+    m2 && m2(n2);
+    var t3, r3 = n2.__c;
+    r3 && r3.__H && (r3.__H.__.forEach(function(n3) {
+      try {
+        z2(n3);
+      } catch (n4) {
+        t3 = n4;
+      }
+    }), r3.__H = void 0, t3 && c3.__e(t3, r3.__v));
+  };
+  var k2 = "function" == typeof requestAnimationFrame;
+  function w3(n2) {
+    var t3, r3 = function() {
+      clearTimeout(u5), k2 && cancelAnimationFrame(t3), setTimeout(n2);
+    }, u5 = setTimeout(r3, 100);
+    k2 && (t3 = requestAnimationFrame(r3));
+  }
+  function z2(n2) {
+    var t3 = r2, u5 = n2.__c;
+    "function" == typeof u5 && (n2.__c = void 0, u5()), r2 = t3;
+  }
+  function B2(n2) {
+    var t3 = r2;
+    n2.__c = n2.__(), r2 = t3;
+  }
+  function C2(n2, t3) {
+    return !n2 || n2.length !== t3.length || t3.some(function(t4, r3) {
+      return t4 !== n2[r3];
+    });
+  }
+  function D(n2, t3) {
+    return "function" == typeof t3 ? t3(n2) : t3;
+  }
+
+  // packages/frontend/src/auxiliar/dispatchable.ts
+  var Dispatchable = class {
+    constructor(data) {
+      this.data = data;
+    }
+    dispatcher;
+    clone() {
+      const Ctor = this.constructor;
+      const clone = new Ctor(this.data);
+      clone.dispatcher = this.dispatcher;
+      return clone;
+    }
+    dispatch() {
+      this.dispatcher?.(this.clone());
+      return this;
+    }
+  };
+  function useDispatchable(factory) {
+    const [state, dispatcher] = h3(factory);
+    state.dispatcher = dispatcher;
+    return state;
+  }
+  function useRootState(state) {
+    const ref = A2();
+    y3(() => {
+      const root = ref.current?.parentElement;
+      if (root && state) root.state = state;
+    }, [state]);
+    return ref;
+  }
+
+  // node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
+  var f4 = 0;
+  var i5 = Array.isArray;
+  function u4(e3, t3, n2, o4, i6, u5) {
+    t3 || (t3 = {});
+    var a4, c4, p4 = t3;
+    if ("ref" in p4) for (c4 in p4 = {}, t3) "ref" == c4 ? a4 = t3[c4] : p4[c4] = t3[c4];
+    var l4 = { type: e3, props: p4, key: n2, ref: a4, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: --f4, __i: -1, __u: 0, __source: i6, __self: u5 };
+    if ("function" == typeof e3 && (a4 = e3.defaultProps)) for (c4 in a4) void 0 === p4[c4] && (p4[c4] = a4[c4]);
+    return l.vnode && l.vnode(l4), l4;
+  }
+
+  // packages/frontend/src/auxiliar/icons.tsx
+  var css = "fill-current size-[1.5rem] sm:size-[1.75rem] lg:size-[2rem] xl:size-[2.25rem] 2xl:size-[2.5rem]";
+  var ABC = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Alphabetic" }),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M3.0805,8.3675,2.31,10.878c-.028.091-.0705.122-.154.122H.756c-.0845,0-.1125-.0455-.1-.15L3.5425,1.9285A2.51436,2.51436,0,0,0,3.669,1.107c0-.0615.028-.107.084-.107H5.7c.0705,0,.084.015.1.0915L9.0355,10.863c.0145.0915,0,.137-.084.137H7.381a.14051.14051,0,0,1-.1405-.0915L6.428,8.3675Zm2.9-1.6595c-.294-1.005-.9525-3.12-1.233-4.1855h-.014c-.224,1.02-.785,2.8-1.2045,4.1855Z"
+      }
+    ),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M9.613,17c-.0565,0-.1125-.015-.1125-.122v-1.02a.346.346,0,0,1,.042-.1825l4.861-7.032H9.711c-.0705,0-.1125-.0145-.1-.106l.21-1.4155C9.835,7.031,9.877,7,9.9465,7H16.463c.069,0,.084.031.084.0915v1.096a.3265.3265,0,0,1-.0705.213L11.7,15.3415h5.015c.069,0,.1.0455.069.137l-.2235,1.4c-.0135.091-.042.122-.126.122Z"
+      }
+    )
+  ] });
+  var RANKING = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Ranking" }),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M14.259,7.6a2.3635,2.3635,0,0,0,1.6805-2.2255c0-1.521-1.0885-2.625-3.0895-2.625a5.365,5.365,0,0,0-2.561.6245.13949.13949,0,0,0-.064.144V4.542c0,.064.0165.0795.0965.05A4.33146,4.33146,0,0,1,12.626,3.95c1.4085,0,2,.688,2,1.584,0,1.0245-.8645,1.569-2.273,1.569h-.591c-.08,0-.096.05-.096.112V8.223c0,.064.032.096.112.096h.672c1.5845,0,2.641.5765,2.641,1.857,0,1.009-.704,1.8725-2.4325,1.8725a7.11785,7.11785,0,0,1-2.497-.654,3.79252,3.79252,0,0,0,.3305-1.54,3.01569,3.01569,0,0,0-3.224-3.192A6.30249,6.30249,0,0,0,4.5,7.392V1.625a.375.375,0,0,0-.375-.375H3.379a.3735.3735,0,0,0-.3.15L1.65,2.545a.747.747,0,0,0-.15.45v.124a.375.375,0,0,0,.375.375H3v7.125a.375.375,0,0,0,.375.375h.75a.375.375,0,0,0,.375-.375V8.7775a5.26947,5.26947,0,0,1,2.516-.754c1.2735,0,2.05.6225,2.05,1.8765,0,.9625-.4695,1.8975-1.9,3.4775A24.53582,24.53582,0,0,1,4.6,15.897a.25.25,0,0,0-.0845.2095v.709c0,.161.106.1845.169.1845H10.575c.1185,0,.156-.0425.2-.15l.235-.9755a.135.135,0,0,0-.0175-.1215.17851.17851,0,0,0-.15-.05H8.669c-1.209,0-1.457,0-1.932.031a15.25015,15.25015,0,0,0,1.859-2.0125c.3735-.4585.6955-.874.9695-1.275a8.3231,8.3231,0,0,0,3.1085.805c2.161,0,3.7775-1.104,3.7775-3.073A2.611,2.611,0,0,0,14.259,7.6Z"
+      }
+    )
+  ] });
+  var FULLCIRCLE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Circle" }),
+    /* @__PURE__ */ u4("circle", { class: "fill", cx: "9", cy: "9", r: "8" })
+  ] });
+  var SUN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Sun" }),
+    /* @__PURE__ */ u4("path", { d: "m9,5.05c2.18152,0,3.95,1.76848,3.95,3.95s-1.76848,3.95-3.95,3.95-3.95-1.76848-3.95-3.95,1.76848-3.95,3.95-3.95Zm-.9-4.8v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25V.25c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25Zm0,15v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25v-2.5c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25ZM0,8.35v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25H.25c-.13807,0-.25.11193-.25.25Zm15,0v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25h-2.5c-.13807,0-.25.11193-.25.25Zm-2.01021-4.23913l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355ZM1.98978,15.11121l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355Zm-.01031-11.8587l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Zm10.9902,10.99001l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Z" })
+  ] });
+  var MOON = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Moon" }),
+    /* @__PURE__ */ u4("path", { d: "M9,1a8,8,0,1,0,8,8A8,8,0,0,0,9,1Zm.5,14.982c-.165.0115-.332.018-.5.018A7,7,0,0,1,9,2c.168,0,.335.0065.5.018A11,11,0,0,0,9.5,15.982Z" })
+  ] });
+  var MENU = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Menu" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "8" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "3" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "14", x: "2", y: "13" })
+  ] });
+  var CLOSE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Close" }),
+    /* @__PURE__ */ u4("path", { d: "M13.2425,3.343,9,7.586,4.7575,3.343a.5.5,0,0,0-.707,0L3.343,4.05a.5.5,0,0,0,0,.707L7.586,9,3.343,13.2425a.5.5,0,0,0,0,.707l.707.7075a.5.5,0,0,0,.707,0L9,10.414l4.2425,4.243a.5.5,0,0,0,.707,0l.7075-.707a.5.5,0,0,0,0-.707L10.414,9l4.243-4.2425a.5.5,0,0,0,0-.707L13.95,3.343a.5.5,0,0,0-.70711-.00039Z" })
+  ] });
+  var FILTER_EDIT = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Filter Edit" }),
+    /* @__PURE__ */ u4("path", { d: "M17.8925,10.8605,16.14,9.1075A.36952.36952,0,0,0,15.8765,9H15.865a.41651.41651,0,0,0-.282.1235l-5.411,5.411a.304.304,0,0,0-.0765.128l-1.0135,3c-.0345.1145.1395.2585.238.2585a.15858.15858,0,0,0,.0185,0c.084-.0195,2.5615-.882,3-1.014a.3.3,0,0,0,.126-.0755l5.412-5.4145A.41749.41749,0,0,0,18,11.15.37152.37152,0,0,0,17.8925,10.8605Zm-5.8,5.4815c-.657.1975-1.65.6145-2.215.784l.78-2.2155Z" }),
+    /* @__PURE__ */ u4("path", { d: "M15.473,1H1.527a.5.5,0,0,0-.3935.8085L7,9.2945V15a.496.496,0,0,0,.84.4125L9.83,13.336a.61.61,0,0,0,.17-.4225V9.2945l5.8665-7.486A.5.5,0,0,0,15.473,1Z" })
+  ] });
+  var BOOLEAN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Boolean" }),
+    /* @__PURE__ */ u4("path", { d: "M12,4.25a4.75,4.75,0,0,1,0,9.5H6a4.75,4.75,0,0,1,0-9.5ZM12,3H6A6,6,0,0,0,6,15h6A6,6,0,0,0,12,3Zm0,3A3,3,0,1,1,9,9,3,3,0,0,1,12,6Z" })
+  ] });
+  var DESELECT = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Deselect" }),
+    /* @__PURE__ */ u4("path", { d: "m2,9h1v3h-1v-3Zm1,6v-1h-1v1.5555c0,.24549.19901.4445.4445.4445h1.5555v-1h-1Zm3,1h3v-1h-3v1Zm9-7h1v-3h-1v3Zm.5555-7h-1.5555v1h1v1h1v-1.5555c0-.24549-.19901-.4445-.4445-.4445Zm-6.5555,1h3v-1h-3v1ZM1.10295,1.97065l14.92632,14.92632c.15973.15973.41869.15972.57841,0l.28956-.28956c.15972-.15972.15973-.41869,0-.57841L1.97092,1.10268c-.15972-.15972-.41869-.15972-.57841,0l-.28956.28956c-.15972.15972-.15972.41869,0,.57841Zm14.89705,11.74835v-2.719h-1v1.719l1,1Zm-3.282,1.281h-1.718v1h2.718l-1-1ZM2,4.281v2.719h1v-1.719l-1-1Zm3.281-1.281h1.719v-1h-2.719l1,1Z" })
+  ] });
+  var SORT_DOWN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Sort Down" }),
+    /* @__PURE__ */ u4("rect", { id: "Canvas", fill: "#ff13dc", opacity: "0", width: "18", height: "18" }),
+    /* @__PURE__ */ u4("rect", { class: "fill", height: "2", rx: "0.5", width: "6", x: "1", y: "12" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "8", x: "1", y: "8" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "4" }),
+    /* @__PURE__ */ u4("path", { d: "M16,12H14.9965V4.5a.494.494,0,0,0-.488-.5L14.503,4h-.496a.5.5,0,0,0-.5.5L13.5035,12H12.5a.25.25,0,0,0-.25.25.245.245,0,0,0,.0735.175l1.7685,2.0165a.25.25,0,0,0,.316,0l1.7685-2.0165a.245.245,0,0,0,.0735-.175A.25.25,0,0,0,16,12Z" })
+  ] });
+  var SORT_UP = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Sort Up" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "6", x: "1", y: "4" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "8", x: "1", y: "8" }),
+    /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "12" }),
+    /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
+  ] });
+
+  // packages/auxiliar/src/map2.ts
+  var Map2 = class {
+    #map = /* @__PURE__ */ new Map();
+    has(k1, k22) {
+      return this.#map.get(k1)?.has(k22) ?? false;
+    }
+    set(k1, k22, v4) {
+      let m22 = this.#map.get(k1);
+      if (!m22) {
+        m22 = /* @__PURE__ */ new Map();
+        this.#map.set(k1, m22);
+      }
+      m22.set(k22, v4);
+      return this;
+    }
+    getOrSet(k1, k22, whenMissing) {
+      let v4 = this.get(k1, k22);
+      if (v4 === void 0) this.set(k1, k22, v4 = whenMissing());
+      return v4;
+    }
+    delete(k1, k22) {
+      return this.#map.get(k1)?.delete(k22) ?? false;
+    }
+    // Delete all keys [k1, *] from the map.
+    delete1(k1) {
+      const map = this.#map.get(k1);
+      if (map) {
+        this.#map.delete(k1);
+        return map.size > 0;
+      }
+      return false;
+    }
+    clear() {
+      this.#map.clear();
+    }
+    get(k1, k22) {
+      return this.#map.get(k1)?.get(k22);
+    }
+    getMap(k1) {
+      return this.#map.get(k1);
+    }
+    /** Get a consolidated map of all keys in the second dimension. */
+    getMap2() {
+      const res = /* @__PURE__ */ new Map();
+      for (const [_k1, map2] of this.#map) {
+        for (const [k22, v4] of map2) res.set(k22, v4);
+      }
+      return res;
+    }
+    get size() {
+      let size = 0;
+      for (const map of this.#map.values()) size += map.size;
+      return size;
+    }
+    get isEmpty() {
+      for (const map of this.#map.values()) if (map.size > 0) return false;
+      return true;
+    }
+    /** Returns the size of the second dimension for a given key in the first dimension. */
+    size2(k1) {
+      return this.#map.get(k1)?.size ?? 0;
+    }
+    /** Returns an iterator of the keys in the first dimension. */
+    keys() {
+      return this.#map.keys().filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
+    }
+    entries() {
+      return [...this.#map.entries()].filter(([_k1, map2]) => map2.size > 0);
+    }
+    *flatEntries() {
+      for (const [k1, map2] of this.#map) {
+        for (const [k22, v4] of map2) yield [k1, k22, v4];
+      }
+    }
+    values() {
+      return [...this.#map.values()].flatMap((map) => [...map.values()]);
+    }
+    /**
+     * NOTE: This will work best if the keys are strings, symbols or numbers.
+     * Otherwise JavaScript will convert them to strings, which may not be what you want.
+     */
+    toObject(mapper) {
+      const object = {};
+      for (const [k1, k22, v4] of this.flatEntries()) {
+        (object[k1] = object[k1] ?? {})[k22] = mapper(v4);
+      }
+      return object;
+    }
+    toString() {
+      const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
+      return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
+    }
+  };
+
+  // packages/auxiliar/src/filters.ts
+  var Filter = class _Filter {
+    constructor(mode = "any", values = /* @__PURE__ */ new Set()) {
+      this.mode = mode;
+      this.values = values;
+    }
+    get isEmpty() {
+      return this.values.size === 0;
+    }
+    add(value) {
+      this.values.add(value);
+      return this;
+    }
+    delete(value) {
+      return this.values.delete(value);
+    }
+    has(value) {
+      return this.values.has(value);
+    }
+    clear() {
+      this.values.clear();
+    }
+    get size() {
+      return this.values.size;
+    }
+    matches(predicate) {
+      return this.mode === "all" ? this.all(predicate) : this.any(predicate);
+    }
+    all(predicate) {
+      for (const v4 of this.values) if (!predicate(v4)) return false;
+      return true;
+    }
+    any(predicate) {
+      for (const v4 of this.values) if (predicate(v4)) return true;
+      return false;
+    }
+    get value() {
+      return this;
+    }
+    get isPresent() {
+      return !this.isEmpty;
+    }
+    equalTo(other) {
+      if (!other) return false;
+      if (!(other instanceof _Filter)) return false;
+      if (this.mode !== other.mode) return false;
+      if (this.values.size !== other.values.size) return false;
+      for (const v4 of this.values) if (!other.values.has(v4)) return false;
+      return true;
+    }
+    clone() {
+      return new _Filter(this.mode, new Set(this.values));
+    }
+    toJSON() {
+      return { mode: this.mode, values: [...this.values] };
+    }
+    serializable() {
+      return this.isEmpty ? void 0 : this.toJSON();
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: we can't know for sure the type of the values here.
+    static isSerialized(val) {
+      return !!val && typeof val === "object" && "mode" in val && (val.mode === "all" || val.mode === "any") && "values" in val && Array.isArray(val.values);
+    }
+  };
+
+  // packages/auxiliar/src/value.ts
+  var ValBase = class {
+    constructor(value) {
+      this.value = value;
+    }
+    get isNil() {
+      return this.value === void 0 || this.value === null;
+    }
+    get isPresent() {
+      return !this.isNil;
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: We can't be more specific here.
+    serializable() {
+      return this.isPresent ? this.value : void 0;
+    }
+  };
+  var ValNil = class _ValNil extends ValBase {
+    constructor(value = void 0) {
+      super(value);
+    }
+    equalTo(other) {
+      return other instanceof _ValNil;
+    }
+  };
+  var ValNumber = class _ValNumber extends ValBase {
+    equalTo(other) {
+      return other instanceof _ValNumber && this.value === other.value;
+    }
+  };
+  var ValBool = class _ValBool extends ValBase {
+    get isPresent() {
+      return !this.isNil && this.value === true;
+    }
+    equalTo(other) {
+      return other instanceof _ValBool && this.value === other.value;
+    }
+  };
+  var ValString = class _ValString extends ValBase {
+    get isPresent() {
+      return !this.isNil && this.value.length > 0 && !/^\s*$/.test(this.value);
+    }
+    equalTo(other) {
+      return other instanceof _ValString && this.value === other.value;
+    }
+  };
+  var ValSet = class _ValSet extends ValBase {
+    get isPresent() {
+      return !this.isNil && this.value.size > 0;
+    }
+    equalTo(other) {
+      if (!(other instanceof _ValSet)) return false;
+      if (this.value === other.value) return true;
+      if (this.value.size !== other.value.size) return false;
+      for (const v4 of this.value) if (!other.value.has(v4)) return false;
+      return true;
+    }
+    serializable() {
+      return this.isPresent ? ["Set", [...this.value]] : void 0;
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: we cannot know for sure the type of the values.
+    static isSerialized(val) {
+      return Array.isArray(val) && val[0] === "Set" && Array.isArray(val[1]);
+    }
+  };
+  var EMPTY_REGEX = /(?:)/;
+  var ValRegExp = class _ValRegExp extends ValBase {
+    get isPresent() {
+      return !this.isNil && this.value.source !== EMPTY_REGEX.source;
+    }
+    equalTo(other) {
+      return other instanceof _ValRegExp && this.value.source === other.value.source;
+    }
+    serializable() {
+      const { value } = this;
+      return this.isPresent ? value.flags ? ["RegExp", value.source, value.flags] : ["RegExp", value.source] : void 0;
+    }
+    static isSerialized(val) {
+      return Array.isArray(val) && val[0] === "RegExp" && typeof val[1] === "string" && (val[2] === void 0 || typeof val[2] === "string");
+    }
+  };
+  function deserializeValue(val) {
+    if (val === void 0 || val === null) return new ValNil(val);
+    switch (typeof val) {
+      case "number":
+        return new ValNumber(val);
+      case "boolean":
+        return new ValBool(val);
+      case "string":
+        return new ValString(val);
+    }
+    if (ValRegExp.isSerialized(val)) return new ValRegExp(new RegExp(val[1], val[2]));
+    if (ValSet.isSerialized(val)) return new ValSet(new Set(val[1]));
+    if (Filter.isSerialized(val)) return new Filter(val.mode, new Set(val.values));
+    console.log("Attempt to deserialize an unrecognized value shape:", val);
+  }
+
   // packages/frontend/src/auxiliar/storage.ts
   var storageKey = (tab, key) => `${tab}-${key}`;
   function updateLocalStorage(tab, key, data) {
@@ -1518,6 +1511,581 @@
     }
   }
   var adjustGrid = debounce(doAdjustGrid, 30);
+
+  // packages/frontend/src/components/facets/misc/facet-bool.tsx
+  function FacetBool({
+    groupKey,
+    facetKey,
+    label: label2,
+    valueMapper = (checked) => new ValBool(checked)
+  }) {
+    const input = A2();
+    const main = x2(FacetsMainContext);
+    const toggle = handler((checkbox) => {
+      main.doSetValue(groupKey, facetKey, valueMapper(checkbox.checked));
+    });
+    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("block", "px-2"), children: [
+      /* @__PURE__ */ u4(
+        "input",
+        {
+          id: facetKey,
+          name: facetKey,
+          type: "checkbox",
+          class: tw("-mt-1"),
+          placeholder: label2,
+          ...onClickOnEnter(toggle),
+          checked: !!main.values.get(groupKey, facetKey)?.isPresent,
+          ref: input
+        }
+      ),
+      /* @__PURE__ */ u4("span", { class: "ml-2", children: label2 })
+    ] });
+  }
+
+  // packages/frontend/src/components/facets/misc/facet-group.tsx
+  function FacetGroup({
+    label: label2,
+    groupKey,
+    active,
+    children
+  }) {
+    const main = x2(FacetsMainContext);
+    const hasValues = main.groupHasValues(groupKey);
+    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
+      /* @__PURE__ */ u4(
+        "header",
+        {
+          class: tw(
+            "sticky top-0 z-10",
+            "shrink-0",
+            "p-2",
+            "flex flex-row",
+            "items-center justify-between",
+            "truncate",
+            "text-primary",
+            tw(BORDER, "border-b-1"),
+            BAR
+          ),
+          children: [
+            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
+            /* @__PURE__ */ u4(
+              "span",
+              {
+                tabIndex: 0,
+                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
+                ...onClickOnEnter(() => {
+                  main.doResetGroup(groupKey);
+                }),
+                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
+                ] })
+              }
+            )
+          ]
+        }
+      ),
+      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
+    ] });
+  }
+
+  // packages/frontend/src/components/facets/misc/facet-text.tsx
+  function FacetText({
+    groupKey,
+    facetKey,
+    label: label2
+  }) {
+    const main = x2(FacetsMainContext);
+    const onInput = handler((input) => {
+      main.doSetValue(groupKey, facetKey, new ValRegExp(new RegExp(`${input.value}`, "i")));
+    });
+    return /* @__PURE__ */ u4(
+      "input",
+      {
+        type: "search",
+        onInput,
+        placeholder: label2,
+        class: tw("w-full", INPUT),
+        value: main.values.get(groupKey, facetKey)?.value?.source ?? ""
+      }
+    );
+  }
+
+  // packages/frontend/src/components/icon-button/state.tsx
+  function useIconButtonState({ action, disabled, initial }) {
+    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
+    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
+    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
+    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
+    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
+    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
+    console.error(`Unknown action: ${action}`);
+  }
+  var IconButtonBaseState = class extends Dispatchable {
+    get disabled() {
+      return this.data.disabled;
+    }
+    set disabled(value) {
+      this.data.disabled = value;
+    }
+    get value() {
+      const { disabled, ...data } = this.data;
+      return data;
+    }
+  };
+  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "light" ? "light" : "dark", disabled });
+    }
+    get isDark() {
+      return this.data.mode === "dark";
+    }
+    get icon() {
+      return this.isDark ? SUN : MOON;
+    }
+    doAction() {
+      this.data.mode = this.isDark ? "light" : "dark";
+    }
+    runEffects() {
+      document.body.classList.toggle("dark", this.isDark);
+      localStorage.setItem("lightMode", this.data.mode);
+    }
+  };
+  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
+    }
+    get hide() {
+      return this.data.mode === "hide";
+    }
+    get icon() {
+      return this.hide ? MENU : CLOSE;
+    }
+    doAction() {
+      this.data.mode = this.hide ? "show" : "hide";
+    }
+    runEffects() {
+      elem("mainNav")?.classList.toggle("hidden", this.hide);
+      localStorage.setItem("hamburguer", this.data.mode);
+    }
+  };
+  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
+    }
+    get show() {
+      return this.data.mode === "show";
+    }
+    get icon() {
+      return /* @__PURE__ */ u4(
+        "span",
+        {
+          class: tw(
+            "inline-block",
+            "mt-[6px] scale-85",
+            this.show && "stroke-[1px] stroke-foreground/50",
+            this.show ? "text-hiliteb" : "text-primary"
+            // fmt.
+          ),
+          children: FILTER_EDIT
+        }
+      );
+    }
+    doAction() {
+      this.data.mode = this.show ? "hide" : "show";
+    }
+    runEffects() {
+      const fm = elems("facetsMain");
+      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
+      localStorage.setItem("facets", this.data.mode);
+    }
+  };
+  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
+    static initial(initial, disabled = false) {
+      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      const disabled = this.data.disabled;
+      const shadeAll = disabled || this.mode === "any";
+      const shadeAny = disabled || this.mode === "all";
+      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
+        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
+        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
+        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
+      ] });
+    }
+    doAction() {
+      this.data.mode = this.mode === "all" ? "any" : "all";
+    }
+    runEffects() {
+    }
+  };
+  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleClearFacets({ disabled, mode: "" });
+    }
+    get icon() {
+      return this.data.mode === "clearFacets" ? DESELECT : null;
+    }
+    doAction() {
+      this.data.mode = "";
+    }
+    doToggleMode(mode) {
+      this.data.mode = mode;
+      this.dispatch();
+    }
+    runEffects() {
+      for (const el of elems("facetsMain")) el.state?.doResetAll();
+    }
+  };
+  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleGridOrder({ disabled, mode: "alpha" });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      return this.mode === "alpha" ? ABC : RANKING;
+    }
+    doAction() {
+      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
+    }
+    /** Reorder the grid on dispatch. */
+    runEffects() {
+      const grid = elem("nodeGrid");
+      if (!grid) return;
+      const thumbns = [...elems("plThumb")].sort(CMP[this.mode]);
+      for (const thumb of thumbns) {
+        grid.appendChild(thumb);
+      }
+    }
+  };
+  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
+  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
+  var getKey = (el) => el.dataset.nodeKey ?? "";
+  var CMP = {
+    ranking: (elA, elB) => getRank(elA) - getRank(elB),
+    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
+  };
+
+  // packages/frontend/src/components/icon-button/icon-button.tsx
+  function IconButton({ action, disabled, initial, class: cssClass2 }) {
+    const state = useIconButtonState({ action, disabled, initial });
+    const self = useRootState(state);
+    y3(() => {
+      if (!state) return;
+      const newval = disabled === void 0 ? false : disabled;
+      if (newval !== state.disabled) {
+        state.disabled = newval;
+        state.dispatch();
+      }
+    }, [disabled]);
+    const toggle = () => {
+      if (!state) return;
+      state.doAction();
+      state.runEffects();
+      state.dispatch();
+      send(self.current, customEvent("icon-button", state.value));
+    };
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        ref: self,
+        tabIndex: disabled ? void 0 : 0,
+        ...onClickOnEnter(toggle),
+        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
+        children: state?.icon
+      }
+    );
+  }
+
+  // packages/frontend/src/components/facets/multisel/state.ts
+  var FacetMultiState = class extends Dispatchable {
+    /** Actions */
+    doSetValue(val) {
+      const { main, data } = this;
+      return main.doSetValue(data.groupKey, data.facetKey, val);
+    }
+    doAdd(val) {
+      if (!val) return false;
+      const { value } = this;
+      if (value.has(val)) return false;
+      value.add(val);
+      return this.doSetValue(value) === "changed";
+    }
+    doRemove(val) {
+      if (!val) return false;
+      const { value } = this;
+      if (!value.has(val)) return false;
+      value.delete(val);
+      return this.doSetValue(value) === "changed";
+    }
+    doSetMode(mode) {
+      const { value } = this;
+      if (value.mode === mode) return;
+      this.value.mode = mode === "all" ? "all" : "any";
+      this.doSetValue(value);
+    }
+    /** Queries */
+    get main() {
+      return this.data.main;
+    }
+    get value() {
+      const { main, groupKey, facetKey } = this.data;
+      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
+    }
+  };
+
+  // packages/frontend/src/components/facets/multisel/facet-multi.tsx
+  function FacetMulti({
+    active,
+    facetKey,
+    groupKey,
+    label: label2
+  }) {
+    const self = A2();
+    const input = A2();
+    const main = x2(FacetsMainContext);
+    const state = useDispatchable(() => new FacetMultiState({ main, groupKey, facetKey }));
+    y3(() => {
+      return on(self?.current, "icon-button", (ev) => {
+        ev.stopPropagation();
+        state.doSetMode(ev.detail.mode);
+      });
+    });
+    const maybeScroll = (value) => self.current?.querySelector(`button[data-value="${value}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const add = handler((input2, ev) => {
+      ev.stopPropagation();
+      if (ev.key !== "Enter") return;
+      const val = input2.value.startsWith(".") ? input2.value : `.${input2.value}`;
+      if (state.doAdd(val)) setTimeout(() => maybeScroll(val), 100);
+      input2.value = "";
+    });
+    const removePulse = debounce(() => {
+      for (const li of self.current?.querySelectorAll(".quick-pulse") ?? []) li.classList.remove("quick-pulse");
+    }, 150);
+    const nthButton = (n2) => self.current?.querySelector(`li:nth-child(${n2})>button`);
+    const remover = (idx) => handler((b3, ev) => {
+      ev.stopPropagation();
+      if (state.doRemove(b3.dataset.value)) {
+        setTimeout(() => {
+          const nb = nthButton(idx + 1) ?? nthButton(idx);
+          (nb ?? input.current)?.focus();
+          if (!nb) return;
+          nb.classList.add("quick-pulse");
+          setTimeout(() => removePulse(), 150);
+        }, 10);
+      }
+    });
+    function mapEntries(mapper) {
+      return Array.from([...state.value.values].entries()).map(mapper);
+    }
+    const body = () => /* @__PURE__ */ u4(k, { children: [
+      /* @__PURE__ */ u4(
+        "input",
+        {
+          type: "search",
+          name: facetKey,
+          ref: input,
+          placeholder: label2,
+          class: tw(INPUT, "w-full"),
+          onKeyDown: add
+        }
+      ),
+      /* @__PURE__ */ u4("span", { class: tw(state.value.size === 0 && "hidden", state.value.size < 2 ? "text-foreground/50" : "text-foreground", "pl-2"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: "any" }) }),
+      /* @__PURE__ */ u4("ul", { children: mapEntries(([idx, value]) => /* @__PURE__ */ u4("li", { children: /* @__PURE__ */ u4(
+        "button",
+        {
+          type: "button",
+          "data-value": value,
+          class: tw("inline-flex flex-row", "p-2", "w-full text-left", "cursor-pointer", HOVER),
+          ...onClickOnEnter(remover(idx)),
+          children: [
+            /* @__PURE__ */ u4("div", { class: "-mt-[2px] inline-block scale-75 text-red-500", children: CLOSE }),
+            value
+          ]
+        }
+      ) }, value)) })
+    ] });
+    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
+  }
+
+  // packages/frontend/src/components/facets/table/entries.ts
+  function generateEntries(pg, config) {
+    if (config.kind === "noderel") {
+      const { node, edge, dir } = config;
+      const emap = dir === "direct" ? pg.edges[edge].adjTo : pg.edges[edge].adjFrom;
+      if (!emap) {
+        console.error("No edges found for:", edge, dir);
+        return [];
+      }
+      return [...emap.entries()].filter(([, edges]) => edges.size > 0).map(([key, edges]) => {
+        const anyEdge = edges.values().next().value;
+        const name = (dir === "direct" ? anyEdge.nodeTo : anyEdge.nodeFrom)?.name ?? anyEdge.key;
+        return { value: key, label: name, count: edges.size };
+      });
+    }
+    if (config.kind === "year") {
+      const years = /* @__PURE__ */ new Map();
+      for (const { year } of pg.nodes.pl.values) {
+        if (!year) continue;
+        years.set(year, (years.get(year) ?? 0) + 1);
+      }
+      return [...years.entries()].map(([year, count]) => {
+        const strYear = `${year}`;
+        return { value: year, label: strYear, count };
+      });
+    }
+    console.error("Unknown config kind", config);
+    return [];
+  }
+  function label(col, config) {
+    if (col === "facet" && config.kind === "noderel") return config.node;
+    if (col === "facet" && config.kind === "year") return `${config.node} year`;
+    return col;
+  }
+  function icon(col, order) {
+    if (col === "facet") return order === "facet-asc" && SORT_UP || order === "facet-desc" && SORT_DOWN;
+    if (col === "count") return order === "count-asc" && SORT_UP || order === "count-desc" && SORT_DOWN;
+    return order === "sel-asc" && SORT_UP || order === "sel-desc" && SORT_DOWN;
+  }
+  function opposite(col, order) {
+    if (col === "facet") return order === "facet-asc" ? "facet-desc" : "facet-asc";
+    if (col === "count") return order === "count-desc" ? "count-asc" : "count-desc";
+    return order === "sel-desc" ? "sel-asc" : "sel-desc";
+  }
+  var CMP2 = {
+    "facet-asc": (a4, b3) => a4.label.localeCompare(b3.label),
+    "facet-desc": (a4, b3) => b3.label.localeCompare(a4.label),
+    "count-asc": (a4, b3) => a4.count - b3.count,
+    "count-desc": (a4, b3) => b3.count - a4.count,
+    "sel-asc": (a4, b3, isSel) => isSel ? Number(isSel(a4)) - Number(isSel(b3)) : 0,
+    "sel-desc": (a4, b3, isSel) => isSel ? Number(isSel(b3)) - Number(isSel(a4)) : 0
+  };
+  function sortEntries(entries, order, isSel) {
+    const less = CMP2[order];
+    return entries.sort((a4, b3) => less(a4, b3, isSel));
+  }
+
+  // packages/frontend/src/components/facets/table/header.tsx
+  function Header({
+    action,
+    class: cssClass2,
+    col,
+    config,
+    order
+  }) {
+    return /* @__PURE__ */ u4(
+      "button",
+      {
+        type: "button",
+        class: tw("p-1", "italic", "underline decoration-1 decoration-dotted", "cursor-pointer", cssClass2),
+        ...onClickOnEnter(action),
+        children: /* @__PURE__ */ u4("div", { class: tw(HOVER, "inline-flex w-full", "p-1", "items-center justify-between", "gap-1"), children: [
+          /* @__PURE__ */ u4("span", { children: label(col, config) }),
+          /* @__PURE__ */ u4("span", { class: tw("scale-75", "mt-1"), children: icon(col, order) }),
+          /* @__PURE__ */ u4("span", { class: "flex-1" })
+        ] })
+      }
+    );
+  }
+
+  // packages/frontend/src/components/facets/table/state.ts
+  var FacetTableState = class extends Dispatchable {
+    /** Actions */
+    doSetValue(val) {
+      const { main, data } = this;
+      return main.doSetValue(data.groupKey, data.facetKey, val);
+    }
+    doToggle(val) {
+      const { value } = this;
+      value.has(val) ? value.delete(val) : value.add(val);
+      this.doSetValue(value);
+    }
+    doSetMode(mode) {
+      const { value } = this;
+      if (value.mode === mode) return;
+      this.value.mode = mode === "all" ? "all" : "any";
+      this.doSetValue(value);
+    }
+    // Note that this is the only place where we dispatch locally instead of through the main state.
+    doToggleOrder(col) {
+      const { order } = this.data;
+      this.data.order = opposite(col, order);
+      sortEntries(this.data.entries, this.data.order, (entry) => this.value.has(entry.value));
+      this.dispatch();
+    }
+    doResetSelection() {
+      this.value.clear();
+      this.doSetValue(this.value);
+    }
+    /** Queries */
+    get main() {
+      return this.data.main;
+    }
+    /** Selected values. */
+    get value() {
+      const { main, groupKey, facetKey } = this.data;
+      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
+    }
+    /** All entries. */
+    get entries() {
+      return this.data.entries;
+    }
+    get order() {
+      return this.data.order;
+    }
+  };
+
+  // packages/frontend/src/components/facets/table/facet-table.tsx
+  function FacetTable({
+    groupKey,
+    facetKey,
+    config,
+    active
+  }) {
+    const self = A2();
+    const main = x2(FacetsMainContext);
+    const state = useDispatchable(() => {
+      const order = config.kind === "year" ? "facet-desc" : "facet-asc";
+      const entries = sortEntries(generateEntries(main.pg, config), order);
+      return new FacetTableState({ config, entries, facetKey, groupKey, main, order });
+    });
+    y3(
+      () => on(self?.current, "icon-button", (ev) => {
+        ev.stopPropagation();
+        state.doSetMode(ev.detail.mode === "all" ? "all" : "any");
+      })
+    );
+    const SUBGRID = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
+    const ROW = tw(SUBGRID, tw("border-b-1", BORDER));
+    const CENTER_ROW = tw("items-center justify-between");
+    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
+      /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
+        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "year" && "hidden") }) }) }),
+        /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
+          /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
+          /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
+          /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
+        ] })
+      ] }),
+      state.entries.map(
+        (entry) => tap(
+          onClickOnEnter(() => state.doToggle(entry.value)),
+          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-center"), children: entry.count }),
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-right"), children: /* @__PURE__ */ u4("input", { type: "checkbox", checked: state.value.has(entry.value), ...clickOrEnter }) })
+          ] }, entry.value)
+        )
+      )
+    ] });
+    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
+  }
 
   // packages/auxiliar/src/array.ts
   function arrayMerge(target, newData, similar = (l1, l22) => l1 === l22, onDuplicate) {
@@ -1879,6 +2447,9 @@
     get urlHome() {
       return this.data.extHomeURL;
     }
+    get images() {
+      return new IterTap(this.data.images);
+    }
     get keywords() {
       return new IterTap(this.data.keywords);
     }
@@ -1887,6 +2458,13 @@
       if (!keywords) return void 0;
       const lenient = keywords.map((k3) => k3.replaceAll(/[- ]/g, "\\s*.?\\s*"));
       return new RegExp(`\\b(${lenient.join("|")})\\b`, "i");
+    }
+    get thumbUrl() {
+      return (this.images.find(({ kind }) => kind === "logo") ?? this.images.first)?.url;
+    }
+    addImages(images) {
+      arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
+      return this;
     }
   };
   var NPlang = class _NPlang extends NBase {
@@ -1901,16 +2479,10 @@
     get extensions() {
       return new IterTap(this.data.extensions);
     }
-    get images() {
-      return new IterTap(this.data.images);
-    }
     /** Whether the language is considered popular by Github, or its Languish ranking is <= 25. */
     get isPopular() {
       const { githubPopular, languishRanking } = this.data;
       return !!githubPopular || typeof languishRanking === "number" && languishRanking <= 25;
-    }
-    get thumbUrl() {
-      return (this.images.find(({ kind }) => kind === "logo") ?? this.images.first)?.url;
     }
     get isTranspiler() {
       return this.data.isTranspiler === true;
@@ -1970,10 +2542,6 @@
     }
     addFilenames(filenames) {
       arrayMerge(this.data.filenames ??= [], filenames);
-      return this;
-    }
-    addImages(images) {
-      arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
       return this;
     }
     addReleases(releases) {
@@ -2347,581 +2915,6 @@
     }
   };
 
-  // packages/frontend/src/components/facets/misc/facet-bool.tsx
-  function FacetBool({
-    groupKey,
-    facetKey,
-    label: label2,
-    valueMapper = (checked) => new ValBool(checked)
-  }) {
-    const input = A2();
-    const main = x2(FacetsMainContext);
-    const toggle = handler((checkbox) => {
-      main.doSetValue(groupKey, facetKey, valueMapper(checkbox.checked));
-    });
-    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("block", "px-2"), children: [
-      /* @__PURE__ */ u4(
-        "input",
-        {
-          id: facetKey,
-          name: facetKey,
-          type: "checkbox",
-          class: tw("-mt-1"),
-          placeholder: label2,
-          ...onClickOnEnter(toggle),
-          checked: !!main.values.get(groupKey, facetKey)?.isPresent,
-          ref: input
-        }
-      ),
-      /* @__PURE__ */ u4("span", { class: "ml-2", children: label2 })
-    ] });
-  }
-
-  // packages/frontend/src/components/facets/misc/facet-group.tsx
-  function FacetGroup({
-    label: label2,
-    groupKey,
-    active,
-    children
-  }) {
-    const main = x2(FacetsMainContext);
-    const hasValues = main.groupHasValues(groupKey);
-    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
-      /* @__PURE__ */ u4(
-        "header",
-        {
-          class: tw(
-            "sticky top-0 z-10",
-            "shrink-0",
-            "p-2",
-            "flex flex-row",
-            "items-center justify-between",
-            "truncate",
-            "text-primary",
-            tw(BORDER, "border-b-1"),
-            BAR
-          ),
-          children: [
-            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
-            /* @__PURE__ */ u4(
-              "span",
-              {
-                tabIndex: 0,
-                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
-                ...onClickOnEnter(() => {
-                  main.doResetGroup(groupKey);
-                }),
-                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
-                ] })
-              }
-            )
-          ]
-        }
-      ),
-      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
-    ] });
-  }
-
-  // packages/frontend/src/components/facets/misc/facet-text.tsx
-  function FacetText({
-    groupKey,
-    facetKey,
-    label: label2
-  }) {
-    const main = x2(FacetsMainContext);
-    const onInput = handler((input) => {
-      main.doSetValue(groupKey, facetKey, new ValRegExp(new RegExp(`${input.value}`, "i")));
-    });
-    return /* @__PURE__ */ u4(
-      "input",
-      {
-        type: "search",
-        onInput,
-        placeholder: label2,
-        class: tw("w-full", INPUT),
-        value: main.values.get(groupKey, facetKey)?.value?.source ?? ""
-      }
-    );
-  }
-
-  // packages/frontend/src/components/icon-button/state.tsx
-  function useIconButtonState({ action, disabled, initial }) {
-    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
-    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
-    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
-    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
-    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
-    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
-    console.error(`Unknown action: ${action}`);
-  }
-  var IconButtonBaseState = class extends Dispatchable {
-    get disabled() {
-      return this.data.disabled;
-    }
-    set disabled(value) {
-      this.data.disabled = value;
-    }
-    get value() {
-      const { disabled, ...data } = this.data;
-      return data;
-    }
-  };
-  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "dark" ? "dark" : "light", disabled });
-    }
-    get isDark() {
-      return this.data.mode === "dark";
-    }
-    get icon() {
-      return this.isDark ? SUN : MOON;
-    }
-    doAction() {
-      this.data.mode = this.isDark ? "light" : "dark";
-    }
-    runEffects() {
-      document.body.classList.toggle("dark", this.isDark);
-      localStorage.setItem("lightMode", this.data.mode);
-    }
-  };
-  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
-    }
-    get hide() {
-      return this.data.mode === "hide";
-    }
-    get icon() {
-      return this.hide ? MENU : CLOSE;
-    }
-    doAction() {
-      this.data.mode = this.hide ? "show" : "hide";
-    }
-    runEffects() {
-      elem("mainNav")?.classList.toggle("hidden", this.hide);
-      localStorage.setItem("hamburguer", this.data.mode);
-    }
-  };
-  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
-    }
-    get show() {
-      return this.data.mode === "show";
-    }
-    get icon() {
-      return /* @__PURE__ */ u4(
-        "span",
-        {
-          class: tw(
-            "inline-block",
-            "mt-[6px] scale-85",
-            this.show && "stroke-[1px] stroke-foreground/50",
-            this.show ? "text-hiliteb" : "text-primary"
-            // fmt.
-          ),
-          children: FILTER_EDIT
-        }
-      );
-    }
-    doAction() {
-      this.data.mode = this.show ? "hide" : "show";
-    }
-    runEffects() {
-      const fm = elems("facetsMain");
-      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      localStorage.setItem("facets", this.data.mode);
-    }
-  };
-  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
-    static initial(initial, disabled = false) {
-      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      const disabled = this.data.disabled;
-      const shadeAll = disabled || this.mode === "any";
-      const shadeAny = disabled || this.mode === "all";
-      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
-        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
-        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
-        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
-      ] });
-    }
-    doAction() {
-      this.data.mode = this.mode === "all" ? "any" : "all";
-    }
-    runEffects() {
-    }
-  };
-  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleClearFacets({ disabled, mode: "" });
-    }
-    get icon() {
-      return this.data.mode === "clearFacets" ? DESELECT : null;
-    }
-    doAction() {
-      this.data.mode = "";
-    }
-    doToggleMode(mode) {
-      this.data.mode = mode;
-      this.dispatch();
-    }
-    runEffects() {
-      for (const el of elems("facetsMain")) el.state?.doResetAll();
-    }
-  };
-  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleGridOrder({ disabled, mode: "alpha" });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      return this.mode === "alpha" ? ABC : RANKING;
-    }
-    doAction() {
-      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
-    }
-    /** Reorder the grid on dispatch. */
-    runEffects() {
-      const grid = elem("plGrid");
-      if (!grid) return;
-      const thumbns = [...elems("plThumb")].sort(CMP[this.mode]);
-      for (const thumb of thumbns) {
-        grid.appendChild(thumb);
-      }
-    }
-  };
-  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
-  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
-  var getKey = (el) => el.dataset.nodeKey ?? "";
-  var CMP = {
-    ranking: (elA, elB) => getRank(elA) - getRank(elB),
-    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
-  };
-
-  // packages/frontend/src/components/icon-button/icon-button.tsx
-  function IconButton({ action, disabled, initial, class: cssClass2 }) {
-    const state = useIconButtonState({ action, disabled, initial });
-    const self = useRootState(state);
-    y3(() => {
-      if (!state) return;
-      const newval = disabled === void 0 ? false : disabled;
-      if (newval !== state.disabled) {
-        state.disabled = newval;
-        state.dispatch();
-      }
-    }, [disabled]);
-    const toggle = () => {
-      if (!state) return;
-      state.doAction();
-      state.runEffects();
-      state.dispatch();
-      send(self.current, customEvent("icon-button", state.value));
-    };
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        ref: self,
-        tabIndex: disabled ? void 0 : 0,
-        ...onClickOnEnter(toggle),
-        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
-        children: state?.icon
-      }
-    );
-  }
-
-  // packages/frontend/src/components/facets/multisel/state.ts
-  var FacetMultiState = class extends Dispatchable {
-    /** Actions */
-    doSetValue(val) {
-      const { main, data } = this;
-      return main.doSetValue(data.groupKey, data.facetKey, val);
-    }
-    doAdd(val) {
-      if (!val) return false;
-      const { value } = this;
-      if (value.has(val)) return false;
-      value.add(val);
-      return this.doSetValue(value) === "changed";
-    }
-    doRemove(val) {
-      if (!val) return false;
-      const { value } = this;
-      if (!value.has(val)) return false;
-      value.delete(val);
-      return this.doSetValue(value) === "changed";
-    }
-    doSetMode(mode) {
-      const { value } = this;
-      if (value.mode === mode) return;
-      this.value.mode = mode === "all" ? "all" : "any";
-      this.doSetValue(value);
-    }
-    /** Queries */
-    get main() {
-      return this.data.main;
-    }
-    get value() {
-      const { main, groupKey, facetKey } = this.data;
-      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
-    }
-  };
-
-  // packages/frontend/src/components/facets/multisel/facet-multi.tsx
-  function FacetMulti({
-    active,
-    facetKey,
-    groupKey,
-    label: label2
-  }) {
-    const self = A2();
-    const input = A2();
-    const main = x2(FacetsMainContext);
-    const state = useDispatchable(() => new FacetMultiState({ main, groupKey, facetKey }));
-    y3(() => {
-      return on(self?.current, "icon-button", (ev) => {
-        ev.stopPropagation();
-        state.doSetMode(ev.detail.mode);
-      });
-    });
-    const maybeScroll = (value) => self.current?.querySelector(`button[data-value="${value}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    const add = handler((input2, ev) => {
-      ev.stopPropagation();
-      if (ev.key !== "Enter") return;
-      const val = input2.value.startsWith(".") ? input2.value : `.${input2.value}`;
-      if (state.doAdd(val)) setTimeout(() => maybeScroll(val), 100);
-      input2.value = "";
-    });
-    const removePulse = debounce(() => {
-      for (const li of self.current?.querySelectorAll(".quick-pulse") ?? []) li.classList.remove("quick-pulse");
-    }, 150);
-    const nthButton = (n2) => self.current?.querySelector(`li:nth-child(${n2})>button`);
-    const remover = (idx) => handler((b3, ev) => {
-      ev.stopPropagation();
-      if (state.doRemove(b3.dataset.value)) {
-        setTimeout(() => {
-          const nb = nthButton(idx + 1) ?? nthButton(idx);
-          (nb ?? input.current)?.focus();
-          if (!nb) return;
-          nb.classList.add("quick-pulse");
-          setTimeout(() => removePulse(), 150);
-        }, 10);
-      }
-    });
-    function mapEntries(mapper) {
-      return [...state.value.values].entries().map(mapper).toArray();
-    }
-    const body = () => /* @__PURE__ */ u4(k, { children: [
-      /* @__PURE__ */ u4(
-        "input",
-        {
-          type: "search",
-          name: facetKey,
-          ref: input,
-          placeholder: label2,
-          class: tw(INPUT, "w-full"),
-          onKeyDown: add
-        }
-      ),
-      /* @__PURE__ */ u4("span", { class: tw(state.value.size === 0 && "hidden", state.value.size < 2 ? "text-foreground/50" : "text-foreground", "pl-2"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: "any" }) }),
-      /* @__PURE__ */ u4("ul", { children: mapEntries(([idx, value]) => /* @__PURE__ */ u4("li", { children: /* @__PURE__ */ u4(
-        "button",
-        {
-          type: "button",
-          "data-value": value,
-          class: tw("inline-flex flex-row", "p-2", "w-full text-left", "cursor-pointer", HOVER),
-          ...onClickOnEnter(remover(idx)),
-          children: [
-            /* @__PURE__ */ u4("div", { class: "-mt-[2px] inline-block scale-75 text-red-500", children: CLOSE }),
-            value
-          ]
-        }
-      ) }, value)) })
-    ] });
-    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
-  }
-
-  // packages/frontend/src/components/facets/table/entries.ts
-  function generateEntries(pg, config) {
-    if (config.kind === "noderel") {
-      const { node, edge, dir } = config;
-      const emap = dir === "direct" ? pg.edges[edge].adjTo : pg.edges[edge].adjFrom;
-      if (!emap) {
-        console.error("No edges found for:", edge, dir);
-        return [];
-      }
-      return [...emap.entries()].filter(([, edges]) => edges.size > 0).map(([key, edges]) => {
-        const anyEdge = edges.values().next().value;
-        const name = (dir === "direct" ? anyEdge.nodeTo : anyEdge.nodeFrom)?.name ?? anyEdge.key;
-        return { value: key, label: name, count: edges.size };
-      });
-    }
-    if (config.kind === "year") {
-      const years = /* @__PURE__ */ new Map();
-      for (const { year } of pg.nodes.pl.values) {
-        if (!year) continue;
-        years.set(year, (years.get(year) ?? 0) + 1);
-      }
-      return [...years.entries()].map(([year, count]) => {
-        const strYear = `${year}`;
-        return { value: year, label: strYear, count };
-      });
-    }
-    console.error("Unknown config kind", config);
-    return [];
-  }
-  function label(col, config) {
-    if (col === "facet" && config.kind === "noderel") return config.node;
-    if (col === "facet" && config.kind === "year") return `${config.node} year`;
-    return col;
-  }
-  function icon(col, order) {
-    if (col === "facet") return order === "facet-asc" && SORT_UP || order === "facet-desc" && SORT_DOWN;
-    if (col === "count") return order === "count-asc" && SORT_UP || order === "count-desc" && SORT_DOWN;
-    return order === "sel-asc" && SORT_UP || order === "sel-desc" && SORT_DOWN;
-  }
-  function opposite(col, order) {
-    if (col === "facet") return order === "facet-asc" ? "facet-desc" : "facet-asc";
-    if (col === "count") return order === "count-desc" ? "count-asc" : "count-desc";
-    return order === "sel-desc" ? "sel-asc" : "sel-desc";
-  }
-  var CMP2 = {
-    "facet-asc": (a4, b3) => a4.label.localeCompare(b3.label),
-    "facet-desc": (a4, b3) => b3.label.localeCompare(a4.label),
-    "count-asc": (a4, b3) => a4.count - b3.count,
-    "count-desc": (a4, b3) => b3.count - a4.count,
-    "sel-asc": (a4, b3, isSel) => isSel ? Number(isSel(a4)) - Number(isSel(b3)) : 0,
-    "sel-desc": (a4, b3, isSel) => isSel ? Number(isSel(b3)) - Number(isSel(a4)) : 0
-  };
-  function sortEntries(entries, order, isSel) {
-    const less = CMP2[order];
-    return entries.sort((a4, b3) => less(a4, b3, isSel));
-  }
-
-  // packages/frontend/src/components/facets/table/header.tsx
-  function Header({
-    action,
-    class: cssClass2,
-    col,
-    config,
-    order
-  }) {
-    return /* @__PURE__ */ u4(
-      "button",
-      {
-        type: "button",
-        class: tw("p-1", "italic", "underline decoration-1 decoration-dotted", "cursor-pointer", cssClass2),
-        ...onClickOnEnter(action),
-        children: /* @__PURE__ */ u4("div", { class: tw(HOVER, "inline-flex w-full", "p-1", "items-center justify-between", "gap-1"), children: [
-          /* @__PURE__ */ u4("span", { children: label(col, config) }),
-          /* @__PURE__ */ u4("span", { class: tw("scale-75", "mt-1"), children: icon(col, order) }),
-          /* @__PURE__ */ u4("span", { class: "flex-1" })
-        ] })
-      }
-    );
-  }
-
-  // packages/frontend/src/components/facets/table/state.ts
-  var FacetTableState = class extends Dispatchable {
-    /** Actions */
-    doSetValue(val) {
-      const { main, data } = this;
-      return main.doSetValue(data.groupKey, data.facetKey, val);
-    }
-    doToggle(val) {
-      const { value } = this;
-      value.has(val) ? value.delete(val) : value.add(val);
-      this.doSetValue(value);
-    }
-    doSetMode(mode) {
-      const { value } = this;
-      if (value.mode === mode) return;
-      this.value.mode = mode === "all" ? "all" : "any";
-      this.doSetValue(value);
-    }
-    // Note that this is the only place where we dispatch locally instead of through the main state.
-    doToggleOrder(col) {
-      const { order } = this.data;
-      this.data.order = opposite(col, order);
-      sortEntries(this.data.entries, this.data.order, (entry) => this.value.has(entry.value));
-      this.dispatch();
-    }
-    doResetSelection() {
-      this.value.clear();
-      this.doSetValue(this.value);
-    }
-    /** Queries */
-    get main() {
-      return this.data.main;
-    }
-    /** Selected values. */
-    get value() {
-      const { main, groupKey, facetKey } = this.data;
-      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
-    }
-    /** All entries. */
-    get entries() {
-      return this.data.entries;
-    }
-    get order() {
-      return this.data.order;
-    }
-  };
-
-  // packages/frontend/src/components/facets/table/facet-table.tsx
-  function FacetTable({
-    groupKey,
-    facetKey,
-    config,
-    active
-  }) {
-    const self = A2();
-    const main = x2(FacetsMainContext);
-    const state = useDispatchable(() => {
-      const order = config.kind === "year" ? "facet-desc" : "facet-asc";
-      const entries = sortEntries(generateEntries(main.pg, config), order);
-      return new FacetTableState({ config, entries, facetKey, groupKey, main, order });
-    });
-    y3(
-      () => on(self?.current, "icon-button", (ev) => {
-        ev.stopPropagation();
-        state.doSetMode(ev.detail.mode === "all" ? "all" : "any");
-      })
-    );
-    const SUBGRID = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
-    const ROW = tw(SUBGRID, tw("border-b-1", BORDER));
-    const CENTER_ROW = tw("items-center justify-between");
-    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
-      /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
-        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "year" && "hidden") }) }) }),
-        /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
-          /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
-        ] })
-      ] }),
-      state.entries.map(
-        (entry) => tap(
-          onClickOnEnter(() => state.doToggle(entry.value)),
-          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-center"), children: entry.count }),
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-right"), children: /* @__PURE__ */ u4("input", { type: "checkbox", checked: state.value.has(entry.value), ...clickOrEnter }) })
-          ] }, entry.value)
-        )
-      )
-    ] });
-    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
-  }
-
   // packages/frontend/src/components/facets/main/types.ts
   function bool(facetKey, label2, valueMapper) {
     return { kind: "bool", facetKey, label: label2, valueMapper };
@@ -2954,9 +2947,9 @@
     return [groupMap, groupForFacetKey];
   }
   function mapGroups(groups, currentFacetGroup, mapper) {
-    return groups.values().map(
+    return [...groups.values()].map(
       ({ groupKey, label: label2, facetKeys }) => mapper({ groupKey, label: label2, facetKeys, active: currentFacetGroup === groupKey })
-    ).toArray();
+    );
   }
 
   // packages/frontend/src/components/facets/main/plangs.tsx
@@ -3108,7 +3101,10 @@
       return this.data.currentGroupKey;
     }
     groupHasValues(groupKey) {
-      return this.values.getMap(groupKey)?.values().some((v4) => v4.isPresent) ?? false;
+      for (const v4 of this.values.getMap(groupKey)?.values() ?? []) {
+        if (v4.isPresent) return true;
+      }
+      return false;
     }
     /** Helpers */
     /** Update the clear facets button on the toolbar. */
@@ -3349,9 +3345,9 @@
       activateIconButtons();
       loadData.then(() => {
         activateFacetsMain(pg);
-        const grid = elem("plGrid");
+        const grid = elem("nodeGrid");
         if (!grid) return;
-        on(grid, "click", ({ target }) => {
+        on(grid, "pointerdown", ({ target }) => {
           const pl = getPl(pg, target);
           if (pl) renderPlInfo({ pl, tab: "plangs" });
         });
@@ -3362,7 +3358,13 @@
       });
     });
   }
-  if (false) connectLivereload();
+  if (false) {
+    try {
+      connectLivereload();
+    } catch (err) {
+      console.error(err);
+    }
+  }
   start();
 })();
 //# sourceMappingURL=app.js.map
