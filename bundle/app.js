@@ -1799,12 +1799,12 @@
     creationYear: (pl, flt) => flt.matches((year) => pl.year === year),
     dialectOf: ({ relDialectOf }, flt) => flt.matches((key) => relDialectOf.has(key)),
     extensions: ({ extensions }, flt) => flt.matches((key) => extensions.includes(key)),
+    isPopular: (pl, val) => val.value === pl.isPopular,
     hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
     hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
     implements: ({ relImplements }, flt) => flt.matches((key) => relImplements.has(key)),
     influenced: ({ relInfluenced }, flt) => flt.matches((key) => relInfluenced.has(key)),
     influencedBy: ({ relInfluencedBy }, flt) => flt.matches((key) => relInfluencedBy.has(key)),
-    isMainstream: (pl, val) => val.value === pl.isMainstream,
     isTranspiler: (pl, val) => val.value === pl.isTranspiler,
     licenses: ({ relLicenses }, flt) => flt.matches((key) => relLicenses.has(key)),
     paradigms: ({ relParadigms }, flt) => flt.matches((key) => relParadigms.has(key)),
@@ -1904,14 +1904,16 @@
     get images() {
       return new IterTap(this.data.images);
     }
+    /** Whether the language is considered popular by Github, or its Languish ranking is <= 25. */
+    get isPopular() {
+      const { githubPopular, languishRanking } = this.data;
+      return !!githubPopular || typeof languishRanking === "number" && languishRanking <= 25;
+    }
     get thumbUrl() {
       return (this.images.find(({ kind }) => kind === "logo") ?? this.images.first)?.url;
     }
     get isTranspiler() {
       return this.data.isTranspiler === true;
-    }
-    get isMainstream() {
-      return this.data.isMainstream === true;
     }
     get releases() {
       return new IterTap(this.data.releases);
@@ -2962,7 +2964,7 @@
     bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
     bool("hasLogo", "Has Logo"),
     bool("hasWikipedia", "Has Wikipedia"),
-    bool("isMainstream", "Is Mainstream"),
+    bool("isPopular", "Is Popular"),
     bool("isTranspiler", "Is Transpiler"),
     bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
     multi("extensions", "Extensions"),
@@ -2972,18 +2974,18 @@
     table("implements", "Implements", { kind: "noderel", edge: "impl", node: NPlang.kind, dir: "direct" }),
     table("influenced", "Influenced", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "inverse" }),
     table("influencedBy", "Influenced By", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "direct" }),
+    table("licenses", "Licenses", { kind: "noderel", edge: "license", node: NLicense.kind, dir: "direct" }),
     table("paradigms", "Paradigms", { kind: "noderel", edge: "paradigm", node: NParadigm.kind, dir: "direct" }),
     table("platforms", "Platforms", { kind: "noderel", edge: "plat", node: NPlatform.kind, dir: "direct" }),
     table("tags", "Tags", { kind: "noderel", edge: "tag", node: NTag.kind, dir: "direct" }),
     table("typeSystems", "Type Systems", { kind: "noderel", edge: "tsys", node: NTsys.kind, dir: "direct" }),
     table("writtenIn", "Written In", { kind: "noderel", edge: "writtenIn", node: NPlang.kind, dir: "direct" }),
-    table("licenses", "Licenses", { kind: "noderel", edge: "license", node: NLicense.kind, dir: "direct" }),
     text("plangName", "Plang Name")
   );
   var [GROUPS, GROUP_FOR_FACET_KEY] = defineGroups(
     group("creationYear", "Creation Year", ["creationYear"]),
     group("dialectOf", "Dialect Of", ["dialectOf"]),
-    group("general", "General", ["plangName", "createdRecently", "releasedRecently", "hasLogo", "hasWikipedia", "isMainstream", "extensions"]),
+    group("general", "General", ["plangName", "createdRecently", "releasedRecently", "isPopular", "hasLogo", "hasWikipedia", "extensions"]),
     group("implements", "Implements", ["implements"]),
     group("influenced", "Influenced", ["influenced"]),
     group("influencedBy", "Influenced By", ["influencedBy"]),
@@ -3284,7 +3286,7 @@
               pl.year && /* @__PURE__ */ u4(Pill, { name: `Appeared ${pl.year}`, nodeKey: "NA", kind: "firstAppeared", tab }),
               pl.lastRelease && /* @__PURE__ */ u4(Pill, { name: `Last Rel ${pl.lastRelease.date ?? pl.lastRelease.version}`, nodeKey: "NA", kind: "firstAppeared", tab }),
               pl.isTranspiler && /* @__PURE__ */ u4(Pill, { name: "Transpiler", nodeKey: "NA", kind: "transpiler", tab }),
-              pl.isMainstream && /* @__PURE__ */ u4(Pill, { name: "Mainstream", nodeKey: "NA", kind: "mainstream", tab })
+              pl.isPopular && /* @__PURE__ */ u4(Pill, { name: "Popular", nodeKey: "NA", kind: "popular", tab })
             ] }),
             /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: pl.description || "..." }),
             /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
