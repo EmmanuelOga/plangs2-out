@@ -561,9 +561,6 @@
   .top-0 {
     top: var(--spacing-0);
   }
-  .right-0 {
-    right: var(--spacing-0);
-  }
   .right-1 {
     right: var(--spacing-1);
   }
@@ -1577,6 +1574,31 @@
       @media (hover: hover) {
         --tw-shadow-color: var(--color-primary);
       }
+    }
+  }
+  .group-\[\[data-hide-ranking\=\'1\'\]\]\:hidden {
+    &:is(:where(.group):is([data-hide-ranking='1']) *) {
+      display: none;
+    }
+  }
+  .group-\[\[data-hide-ranking\=1\]\]\:hidden {
+    &:is(:where(.group):is([data-hide-ranking=1]) *) {
+      display: none;
+    }
+  }
+  .group-\[\[data-hide-ranking\]\]\:hidden {
+    &:is(:where(.group):is([data-hide-ranking]) *) {
+      display: none;
+    }
+  }
+  .group-\[\[data-hide-ranking\]\=1\]\:hidden {
+    &:is(:where(.group):is([data-hide-ranking]=1) *) {
+      display: none;
+    }
+  }
+  .group-\[data-hide-ranking\]\:hidden {
+    &:is(:where(.group):is(data-hide-ranking) *) {
+      display: none;
     }
   }
   .placeholder\:text-foreground\/50 {

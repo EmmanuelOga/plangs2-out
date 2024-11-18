@@ -756,6 +756,40 @@
 
   // packages/frontend/src/auxiliar/icons.tsx
   var css = "fill-current size-[1.5rem] sm:size-[1.75rem] lg:size-[2rem] xl:size-[2.25rem] 2xl:size-[2.5rem]";
+  var ABC = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Alphabetic" }),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M3.0805,8.3675,2.31,10.878c-.028.091-.0705.122-.154.122H.756c-.0845,0-.1125-.0455-.1-.15L3.5425,1.9285A2.51436,2.51436,0,0,0,3.669,1.107c0-.0615.028-.107.084-.107H5.7c.0705,0,.084.015.1.0915L9.0355,10.863c.0145.0915,0,.137-.084.137H7.381a.14051.14051,0,0,1-.1405-.0915L6.428,8.3675Zm2.9-1.6595c-.294-1.005-.9525-3.12-1.233-4.1855h-.014c-.224,1.02-.785,2.8-1.2045,4.1855Z"
+      }
+    ),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M9.613,17c-.0565,0-.1125-.015-.1125-.122v-1.02a.346.346,0,0,1,.042-.1825l4.861-7.032H9.711c-.0705,0-.1125-.0145-.1-.106l.21-1.4155C9.835,7.031,9.877,7,9.9465,7H16.463c.069,0,.084.031.084.0915v1.096a.3265.3265,0,0,1-.0705.213L11.7,15.3415h5.015c.069,0,.1.0455.069.137l-.2235,1.4c-.0135.091-.042.122-.126.122Z"
+      }
+    )
+  ] });
+  var RANKING = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "Ranking" }),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M9,2a.497.497,0,0,0-.3735.168l-5.5,5A.48949.48949,0,0,0,3,7.497.5.5,0,0,0,3.497,8H14.5a.5.5,0,0,0,.5-.5V7.497a.48949.48949,0,0,0-.1275-.329l-5.5-5A.5.5,0,0,0,9,2Z"
+      }
+    ),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M9,16a.5.5,0,0,0,.3735-.168l5.5-5A.48949.48949,0,0,0,15,10.503.5.5,0,0,0,14.503,10H3.5a.5.5,0,0,0-.5.5v.003a.48949.48949,0,0,0,.1275.329l5.5,5A.497.497,0,0,0,9,16Z"
+      }
+    )
+  ] });
   var FULLCIRCLE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
     /* @__PURE__ */ u4("title", { children: "Circle" }),
     /* @__PURE__ */ u4("circle", { class: "fill", cx: "9", cy: "9", r: "8" })
@@ -2417,6 +2451,7 @@
     if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
     if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
     if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
+    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
     console.error(`Unknown action: ${action}`);
   }
   var IconButtonBaseState = class extends Dispatchable {
@@ -2538,6 +2573,36 @@
     runEffects() {
       for (const el of elems("facetsMain")) el.state?.doResetAll();
     }
+  };
+  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleGridOrder({ disabled, mode: "alpha" });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      return this.mode === "alpha" ? ABC : RANKING;
+    }
+    doAction() {
+      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
+    }
+    /** Reorder the grid on dispatch. */
+    runEffects() {
+      const grid = elem("plGrid");
+      if (!grid) return;
+      const thumbns = [...elems("plThumb")].sort(CMP[this.mode]);
+      for (const thumb of thumbns) {
+        grid.appendChild(thumb);
+      }
+    }
+  };
+  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
+  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
+  var getKey = (el) => el.dataset.nodeKey ?? "";
+  var CMP = {
+    ranking: (elA, elB) => getRank(elA) - getRank(elB),
+    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
   };
 
   // packages/frontend/src/components/icon-button/icon-button.tsx
@@ -2726,7 +2791,7 @@
     if (col === "count") return order === "count-desc" ? "count-asc" : "count-desc";
     return order === "sel-desc" ? "sel-asc" : "sel-desc";
   }
-  var CMP = {
+  var CMP2 = {
     "facet-asc": (a4, b3) => a4.label.localeCompare(b3.label),
     "facet-desc": (a4, b3) => b3.label.localeCompare(a4.label),
     "count-asc": (a4, b3) => a4.count - b3.count,
@@ -2735,7 +2800,7 @@
     "sel-desc": (a4, b3, isSel) => isSel ? Number(isSel(b3)) - Number(isSel(a4)) : 0
   };
   function sortEntries(entries, order, isSel) {
-    const less = CMP[order];
+    const less = CMP2[order];
     return entries.sort((a4, b3) => less(a4, b3, isSel));
   }
 
@@ -3284,15 +3349,6 @@
         activateFacetsMain(pg);
         const grid = elem("plGrid");
         if (!grid) return;
-        const thumbns = [...elems("plThumb")];
-        thumbns.sort((a4, b3) => {
-          console.log(a4);
-          const rankA = Number.parseInt(a4.dataset.nodeRanking ?? "0", 10);
-          const rankB = Number.parseInt(b3.dataset.nodeRanking ?? "0", 10);
-          console.log("Comparing", rankA, rankB);
-          return rankA - rankB;
-        });
-        for (const thumb of thumbns) grid.appendChild(thumb);
         on(grid, "click", ({ target }) => {
           const pl = getPl(pg, target);
           if (pl) renderPlInfo({ pl, tab: "plangs" });
