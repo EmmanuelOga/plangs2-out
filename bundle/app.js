@@ -1101,7 +1101,6 @@
     constructor(data) {
       this.data = data;
     }
-    dispatcher;
     clone() {
       const Ctor = this.constructor;
       const clone = new Ctor(this.data);
@@ -2101,7 +2100,6 @@
 
   // packages/auxiliar/src/iter_tap.ts
   var IterTap = class _IterTap {
-    array;
     constructor(iterable) {
       this.array = Array.isArray(iterable) ? iterable : iterable ? [...iterable] : void 0;
     }
@@ -2161,8 +2159,8 @@
     constructor(graph, key) {
       this.graph = graph;
       this.key = key;
+      this.data = {};
     }
-    data = {};
     /** Shallow merge data. */
     merge(data) {
       Object.assign(this.data, data);
@@ -2186,8 +2184,8 @@
       this.graph = graph;
       this.from = from;
       this.to = to;
+      this.data = {};
     }
-    data = {};
     /** Shallow merge data. */
     merge(data) {
       Object.assign(this.data, data);
@@ -2244,9 +2242,9 @@
   var EdgeMap = class {
     constructor(factory) {
       this.factory = factory;
+      this.adjFrom = new Map2();
+      this.adjTo = new Map2();
     }
-    adjFrom = new Map2();
-    adjTo = new Map2();
     connect(from, to) {
       let edge = this.adjFrom.get(from, to);
       if (edge) return edge;
@@ -2394,39 +2392,44 @@
 
   // packages/plangs/src/index.ts
   var PlangsGraph = class extends BaseGraph {
-    #nodeMap = (ctor) => new NodeMap((key) => new ctor(this, key));
-    #edgeMap = (ctor) => new EdgeMap((from, to) => new ctor(this, from, to));
-    nodes = {
-      app: this.#nodeMap(NApp),
-      post: this.#nodeMap(NPost),
-      bundle: this.#nodeMap(NBundle),
-      lib: this.#nodeMap(NLibrary),
-      license: this.#nodeMap(NLicense),
-      paradigm: this.#nodeMap(NParadigm),
-      pl: this.#nodeMap(NPlang),
-      plat: this.#nodeMap(NPlatform),
-      tag: this.#nodeMap(NTag),
-      tool: this.#nodeMap(NTool),
-      tsys: this.#nodeMap(NTsys)
-    };
-    edges = {
-      app: this.#edgeMap(EApp),
-      bundle: this.#edgeMap(EBundle),
-      compilesTo: this.#edgeMap(ECompilesTo),
-      dialect: this.#edgeMap(EDialect),
-      impl: this.#edgeMap(EImpl),
-      influence: this.#edgeMap(EInfluence),
-      lib: this.#edgeMap(ELib),
-      license: this.#edgeMap(ELicense),
-      paradigm: this.#edgeMap(EParadigm),
-      plBundle: this.#edgeMap(EPlBundle),
-      plat: this.#edgeMap(EPlat),
-      post: this.#edgeMap(EPost),
-      tag: this.#edgeMap(ETag),
-      tool: this.#edgeMap(ETool),
-      tsys: this.#edgeMap(ETsys),
-      writtenIn: this.#edgeMap(EWrittenIn)
-    };
+    constructor() {
+      super(...arguments);
+      this.#nodeMap = (ctor) => new NodeMap((key) => new ctor(this, key));
+      this.#edgeMap = (ctor) => new EdgeMap((from, to) => new ctor(this, from, to));
+      this.nodes = {
+        app: this.#nodeMap(NApp),
+        post: this.#nodeMap(NPost),
+        bundle: this.#nodeMap(NBundle),
+        lib: this.#nodeMap(NLibrary),
+        license: this.#nodeMap(NLicense),
+        paradigm: this.#nodeMap(NParadigm),
+        pl: this.#nodeMap(NPlang),
+        plat: this.#nodeMap(NPlatform),
+        tag: this.#nodeMap(NTag),
+        tool: this.#nodeMap(NTool),
+        tsys: this.#nodeMap(NTsys)
+      };
+      this.edges = {
+        app: this.#edgeMap(EApp),
+        bundle: this.#edgeMap(EBundle),
+        compilesTo: this.#edgeMap(ECompilesTo),
+        dialect: this.#edgeMap(EDialect),
+        impl: this.#edgeMap(EImpl),
+        influence: this.#edgeMap(EInfluence),
+        lib: this.#edgeMap(ELib),
+        license: this.#edgeMap(ELicense),
+        paradigm: this.#edgeMap(EParadigm),
+        plBundle: this.#edgeMap(EPlBundle),
+        plat: this.#edgeMap(EPlat),
+        post: this.#edgeMap(EPost),
+        tag: this.#edgeMap(ETag),
+        tool: this.#edgeMap(ETool),
+        tsys: this.#edgeMap(ETsys),
+        writtenIn: this.#edgeMap(EWrittenIn)
+      };
+    }
+    #nodeMap;
+    #edgeMap;
     /** Find all plangs that match the given filters. */
     plangs(values, limit = -1) {
       const keys = /* @__PURE__ */ new Set();
@@ -2468,8 +2471,13 @@
     }
   };
   var NPlang = class _NPlang extends NBase {
-    static kind = "pl";
-    kind = _NPlang.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NPlang.kind;
+    }
+    static {
+      this.kind = "pl";
+    }
     get ranking() {
       return this.data.languishRanking;
     }
@@ -2669,16 +2677,26 @@
     }
   };
   var NLibrary = class _NLibrary extends NBase {
-    static kind = "lib";
-    kind = _NLibrary.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NLibrary.kind;
+    }
+    static {
+      this.kind = "lib";
+    }
     addPls(others) {
       for (const other of others) this.graph.edges.lib.connect(other, this.key);
       return this;
     }
   };
   var NLicense = class _NLicense extends NBase {
-    static kind = "license";
-    kind = _NLicense.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NLicense.kind;
+    }
+    static {
+      this.kind = "license";
+    }
     get spdx() {
       return this.data.spdx;
     }
@@ -2690,40 +2708,75 @@
     }
   };
   var NParadigm = class _NParadigm extends NBase {
-    static kind = "paradigm";
-    kind = _NParadigm.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NParadigm.kind;
+    }
+    static {
+      this.kind = "paradigm";
+    }
   };
   var NPlatform = class _NPlatform extends NBase {
-    static kind = "plat";
-    kind = _NPlatform.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NPlatform.kind;
+    }
+    static {
+      this.kind = "plat";
+    }
   };
   var NTag = class _NTag extends NBase {
-    static kind = "tag";
-    kind = _NTag.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NTag.kind;
+    }
+    static {
+      this.kind = "tag";
+    }
   };
   var NTool = class _NTool extends NBase {
-    static kind = "tool";
-    kind = _NTool.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NTool.kind;
+    }
+    static {
+      this.kind = "tool";
+    }
     addPls(others) {
       for (const other of others) this.graph.edges.tool.connect(other, this.key);
       return this;
     }
   };
   var NTsys = class _NTsys extends NBase {
-    static kind = "tsys";
-    kind = _NTsys.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NTsys.kind;
+    }
+    static {
+      this.kind = "tsys";
+    }
   };
   var NApp = class _NApp extends NBase {
-    static kind = "app";
-    kind = _NApp.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NApp.kind;
+    }
+    static {
+      this.kind = "app";
+    }
     addPls(others) {
       for (const other of others) this.graph.edges.app.connect(other, this.key);
       return this;
     }
   };
   var NBundle = class _NBundle extends NBase {
-    static kind = "bundle";
-    kind = _NBundle.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NBundle.kind;
+    }
+    static {
+      this.kind = "bundle";
+    }
     addTools(others) {
       for (const other of others) this.graph.edges.bundle.connect(this.key, other);
       return this;
@@ -2740,8 +2793,13 @@
     }
   };
   var NPost = class _NPost extends NBase {
-    static kind = "post";
-    kind = _NPost.kind;
+    constructor() {
+      super(...arguments);
+      this.kind = _NPost.kind;
+    }
+    static {
+      this.kind = "post";
+    }
     set path(path) {
       this.data.path = path;
     }
@@ -2771,7 +2829,10 @@
   var EBase = class extends Edge {
   };
   var EApp = class extends EBase {
-    kind = "app";
+    constructor() {
+      super(...arguments);
+      this.kind = "app";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2780,7 +2841,10 @@
     }
   };
   var EBundle = class extends EBase {
-    kind = "bundle";
+    constructor() {
+      super(...arguments);
+      this.kind = "bundle";
+    }
     get nodeFrom() {
       return this.graph.nodes.bundle.get(this.from);
     }
@@ -2789,7 +2853,10 @@
     }
   };
   var ECompilesTo = class extends EBase {
-    kind = "compilesTo";
+    constructor() {
+      super(...arguments);
+      this.kind = "compilesTo";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2798,7 +2865,10 @@
     }
   };
   var EDialect = class extends EBase {
-    kind = "dialect";
+    constructor() {
+      super(...arguments);
+      this.kind = "dialect";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2807,7 +2877,10 @@
     }
   };
   var ELicense = class extends EBase {
-    kind = "license";
+    constructor() {
+      super(...arguments);
+      this.kind = "license";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2816,7 +2889,10 @@
     }
   };
   var EImpl = class extends EBase {
-    kind = "impl";
+    constructor() {
+      super(...arguments);
+      this.kind = "impl";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2825,7 +2901,10 @@
     }
   };
   var EInfluence = class extends EBase {
-    kind = "influence";
+    constructor() {
+      super(...arguments);
+      this.kind = "influence";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2834,7 +2913,10 @@
     }
   };
   var EParadigm = class extends EBase {
-    kind = "paradigm";
+    constructor() {
+      super(...arguments);
+      this.kind = "paradigm";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2843,7 +2925,10 @@
     }
   };
   var ETsys = class extends EBase {
-    kind = "tsys";
+    constructor() {
+      super(...arguments);
+      this.kind = "tsys";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2852,7 +2937,10 @@
     }
   };
   var EPlBundle = class extends EBase {
-    kind = "plBundle";
+    constructor() {
+      super(...arguments);
+      this.kind = "plBundle";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2861,7 +2949,10 @@
     }
   };
   var EPlat = class extends EBase {
-    kind = "plat";
+    constructor() {
+      super(...arguments);
+      this.kind = "plat";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2870,7 +2961,10 @@
     }
   };
   var EPost = class extends EBase {
-    kind = "post";
+    constructor() {
+      super(...arguments);
+      this.kind = "post";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2879,7 +2973,10 @@
     }
   };
   var ELib = class extends EBase {
-    kind = "lib";
+    constructor() {
+      super(...arguments);
+      this.kind = "lib";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2888,7 +2985,10 @@
     }
   };
   var ETag = class extends EBase {
-    kind = "tag";
+    constructor() {
+      super(...arguments);
+      this.kind = "tag";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2897,7 +2997,10 @@
     }
   };
   var ETool = class extends EBase {
-    kind = "tool";
+    constructor() {
+      super(...arguments);
+      this.kind = "tool";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
@@ -2906,7 +3009,10 @@
     }
   };
   var EWrittenIn = class extends EBase {
-    kind = "writtenIn";
+    constructor() {
+      super(...arguments);
+      this.kind = "writtenIn";
+    }
     get nodeFrom() {
       return this.graph.nodes.pl.get(this.from);
     }
