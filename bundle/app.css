@@ -564,9 +564,6 @@
   .right-1 {
     right: var(--spacing-1);
   }
-  .bottom-0 {
-    bottom: var(--spacing-0);
-  }
   .bottom-1 {
     bottom: var(--spacing-1);
   }
@@ -1045,6 +1042,9 @@
   .mt-1 {
     margin-top: var(--spacing-1);
   }
+  .mt-2 {
+    margin-top: var(--spacing-2);
+  }
   .mt-4 {
     margin-top: var(--spacing-4);
   }
@@ -1511,10 +1511,6 @@
   .shadow-secondary {
     --tw-shadow-color: var(--color-secondary);
   }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
-  }
   .outline-2 {
     outline-style: var(--tw-outline-style);
     outline-width: 2px;
@@ -1578,26 +1574,6 @@
   }
   .group-\[\[data-hide-ranking\=\'1\'\]\]\:hidden {
     &:is(:where(.group):is([data-hide-ranking='1']) *) {
-      display: none;
-    }
-  }
-  .group-\[\[data-hide-ranking\=1\]\]\:hidden {
-    &:is(:where(.group):is([data-hide-ranking=1]) *) {
-      display: none;
-    }
-  }
-  .group-\[\[data-hide-ranking\]\]\:hidden {
-    &:is(:where(.group):is([data-hide-ranking]) *) {
-      display: none;
-    }
-  }
-  .group-\[\[data-hide-ranking\]\=1\]\:hidden {
-    &:is(:where(.group):is([data-hide-ranking]=1) *) {
-      display: none;
-    }
-  }
-  .group-\[data-hide-ranking\]\:hidden {
-    &:is(:where(.group):is(data-hide-ranking) *) {
       display: none;
     }
   }
@@ -1845,6 +1821,11 @@
       :where(.prose-sm > :last-child):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
         margin-bottom: 0;
       }
+    }
+  }
+  .sm\:mt-4 {
+    @media (width >= 40rem) {
+      margin-top: var(--spacing-4);
     }
   }
   .sm\:mb-1 {
