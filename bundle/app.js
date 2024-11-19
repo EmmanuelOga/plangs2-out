@@ -3443,30 +3443,6 @@
     }
   }
 
-  // packages/frontend/src/components/misc/pill.tsx
-  function Pill({ name, nodeKey, kind, tab }) {
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        "data-node-key": nodeKey ?? "NONE",
-        class: tw(
-          "inline-block text-center",
-          // NOTE: this approximately solves a mistmatch between rendering as a web component and as a Preact component,
-          // but it's not perfect. This bug makes no sense so far and I need to find the root cause.
-          tab === "plangs" ? "mr-4 mb-4" : "mr-[10.65px] mb-4",
-          tab === "plangs" ? "min-w-8 p-1.5" : "min-w-8 px-[6.025px] py-1.5",
-          "font-bold text-sm",
-          "rounded",
-          kind === "pl" ? "bg-primary text-background" : "bg-secondary text-foreground",
-          "shadow-lg shadow-secondary",
-          "outline-2 outline-secondary",
-          kind === "pl" && HOVER
-        ),
-        children: name
-      }
-    );
-  }
-
   // packages/frontend/src/components/node-info/node-info.tsx
   function NodeInfo({ node: pl, open, tab }) {
     const forGrid = tab === "plangs";
@@ -3484,27 +3460,30 @@
           tw(BORDER, forGrid && "border-b-1")
         ),
         children: [
-          /* @__PURE__ */ u4("h1", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${pl?.plainKey}`, children: pl?.name ?? "Plang" }) }),
+          /* @__PURE__ */ u4("h2", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${pl?.plainKey}`, children: pl?.name ?? "Plang" }) }),
           pl && /* @__PURE__ */ u4(k, { children: [
-            /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash sm:hidden" : "hidden"), children: "\u2014" }),
+            /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
             /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
-              pl.year && /* @__PURE__ */ u4(Pill, { name: `Appeared ${pl.year}`, nodeKey: "NA", kind: "firstAppeared", tab }),
-              pl.lastRelease && /* @__PURE__ */ u4(Pill, { name: `Last Rel ${pl.lastRelease.date ?? pl.lastRelease.version}`, nodeKey: "NA", kind: "firstAppeared", tab }),
-              pl.isTranspiler && /* @__PURE__ */ u4(Pill, { name: "Transpiler", nodeKey: "NA", kind: "transpiler", tab }),
-              pl.isPopular && /* @__PURE__ */ u4(Pill, { name: "Popular", nodeKey: "NA", kind: "popular", tab })
+              pl.year && /* @__PURE__ */ u4(Pill, { children: `Appeared ${pl.year}` }),
+              pl.lastRelease && /* @__PURE__ */ u4(Pill, { children: `Last Rel ${pl.lastRelease.date ?? pl.lastRelease.version}` }),
+              pl.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
+              pl.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
             ] }),
             /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: pl.description || "..." }),
             /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
               /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-xl", children: "Details" }),
               relations(pl).map(([title, iterTap]) => /* @__PURE__ */ u4("div", { children: [
-                /* @__PURE__ */ u4("h2", { class: "mt-4 text-xl", children: title }),
-                iterTap.existing.map(({ name, key, kind }) => /* @__PURE__ */ u4(Pill, { name, nodeKey: key, kind, tab }, key))
+                /* @__PURE__ */ u4("h3", { class: "mt-4 text-xl", children: title }),
+                iterTap.existing.map(({ name, key, kind }) => /* @__PURE__ */ u4(Pill, { children: name }, key))
               ] }, title))
             ] })
           ] })
         ]
       }
     );
+  }
+  function Pill({ children }) {
+    return /* @__PURE__ */ u4("span", { class: tw("inline-block", "mr-2 mb-2 px-1", "border-2 border-secondary", "bg-secondary/50"), children });
   }
   function relations(pl) {
     const all = [
