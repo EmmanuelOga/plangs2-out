@@ -3488,7 +3488,6 @@
   function relations(pl) {
     const all = [
       ["Type Systems", pl.relTsys.values.map(({ nodeTo }) => nodeTo)],
-      ["Tags", pl.relTags.values.map(({ nodeTo }) => nodeTo)],
       ["Platforms", pl.relPlatforms.values.map(({ nodeTo }) => nodeTo)],
       ["Influenced By", pl.relInfluencedBy.values.map(({ nodeTo }) => nodeTo)],
       ["Influenced", pl.relInfluenced.values.map(({ nodeFrom }) => nodeFrom)],
@@ -3496,6 +3495,7 @@
       ["Implements", pl.relImplements.values.map(({ nodeTo }) => nodeTo)],
       ["Compiles To", pl.relCompilesTo.values.map(({ nodeTo }) => nodeTo)],
       ["Licenses", pl.relLicenses.values.map(({ nodeTo }) => nodeTo)],
+      ["Tags", pl.relTags.values.map(({ nodeTo }) => nodeTo)],
       ["Extensions", pl.extensions.map((name) => ({ key: name, name, kind: "ext" }))]
     ];
     return all.filter(([_2, iterTap]) => iterTap.isEmpty === false);
