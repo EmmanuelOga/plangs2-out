@@ -1218,91 +1218,6 @@
     /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
   ] });
 
-  // packages/auxiliar/src/map2.ts
-  var Map2 = class {
-    #map = /* @__PURE__ */ new Map();
-    has(k1, k22) {
-      return this.#map.get(k1)?.has(k22) ?? false;
-    }
-    set(k1, k22, v4) {
-      let m22 = this.#map.get(k1);
-      if (!m22) {
-        m22 = /* @__PURE__ */ new Map();
-        this.#map.set(k1, m22);
-      }
-      m22.set(k22, v4);
-      return this;
-    }
-    getOrSet(k1, k22, whenMissing) {
-      let v4 = this.get(k1, k22);
-      if (v4 === void 0) this.set(k1, k22, v4 = whenMissing());
-      return v4;
-    }
-    delete(k1, k22) {
-      return this.#map.get(k1)?.delete(k22) ?? false;
-    }
-    // Delete all keys [k1, *] from the map.
-    delete1(k1) {
-      const map = this.#map.get(k1);
-      if (map) {
-        this.#map.delete(k1);
-        return map.size > 0;
-      }
-      return false;
-    }
-    clear() {
-      this.#map.clear();
-    }
-    get(k1, k22) {
-      return this.#map.get(k1)?.get(k22);
-    }
-    getMap(k1) {
-      return this.#map.get(k1);
-    }
-    /** Get a consolidated map of all keys in the second dimension. */
-    getMap2() {
-      const res = /* @__PURE__ */ new Map();
-      for (const [_k1, map2] of this.#map) {
-        for (const [k22, v4] of map2) res.set(k22, v4);
-      }
-      return res;
-    }
-    get size() {
-      let size = 0;
-      for (const map of this.#map.values()) size += map.size;
-      return size;
-    }
-    get isEmpty() {
-      for (const map of this.#map.values()) if (map.size > 0) return false;
-      return true;
-    }
-    /** Returns the size of the second dimension for a given key in the first dimension. */
-    size2(k1) {
-      return this.#map.get(k1)?.size ?? 0;
-    }
-    /** Returns an iterator of the keys in the first dimension. */
-    keys() {
-      return [...this.#map.keys()].filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
-    }
-    entries() {
-      return [...this.#map.entries()].filter(([_k1, map2]) => map2.size > 0);
-    }
-    flatEntries() {
-      const results = [];
-      for (const [k1, map2] of this.#map) {
-        for (const [k22, v4] of map2) results.push([k1, k22, v4]);
-      }
-      return results;
-    }
-    values() {
-      return [...this.#map.values()].flatMap((map) => [...map.values()]);
-    }
-    toString() {
-      const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
-      return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
-    }
-  };
-
   // packages/auxiliar/src/filters.ts
   var Filter = class _Filter {
     constructor(mode = "any", values = /* @__PURE__ */ new Set()) {
@@ -1480,603 +1395,6 @@
     }
   }
 
-  // packages/frontend/src/components/facets/main/grid.ts
-  function doUpdateThumbns(nodeKeys) {
-    for (const div of elems("nodeThumbn")) {
-      const plKey = div.dataset.nodeKey;
-      const visible = nodeKeys.has(plKey);
-      div.classList.toggle("hidden", !visible);
-    }
-    adjustGrid();
-  }
-  var updateThumbns = debounce(doUpdateThumbns, 30);
-  function doAdjustGrid() {
-    const widthRow = 0;
-    const widthThumb = 0;
-    const visibleThumbs = 0;
-    const numCols = Math.min(Math.floor(widthRow / widthThumb), visibleThumbs);
-    const maxCols = Math.floor(widthRow / (5 * 16));
-    if (numCols < maxCols && visibleThumbs < maxCols && minWidthBP("48rem")) {
-    } else {
-    }
-  }
-  var adjustGrid = debounce(doAdjustGrid, 30);
-
-  // packages/frontend/src/components/facets/misc/facet-bool.tsx
-  function FacetBool({
-    groupKey,
-    facetKey,
-    label: label2,
-    valueMapper = (checked) => new ValBool(checked)
-  }) {
-    const input = A2();
-    const main = x2(FacetsMainContext);
-    const toggle = handler((checkbox) => {
-      main.doSetValue(groupKey, facetKey, valueMapper(checkbox.checked));
-    });
-    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("block", "px-2"), children: [
-      /* @__PURE__ */ u4(
-        "input",
-        {
-          id: facetKey,
-          name: facetKey,
-          type: "checkbox",
-          class: tw("-mt-1"),
-          placeholder: label2,
-          ...onClickOnEnter(toggle),
-          checked: !!main.values.get(groupKey, facetKey)?.isPresent,
-          ref: input
-        }
-      ),
-      /* @__PURE__ */ u4("span", { class: "ml-2", children: label2 })
-    ] });
-  }
-
-  // packages/frontend/src/components/facets/misc/facet-group.tsx
-  function FacetGroup({
-    label: label2,
-    groupKey,
-    active,
-    children
-  }) {
-    const main = x2(FacetsMainContext);
-    const hasValues = main.groupHasValues(groupKey);
-    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
-      /* @__PURE__ */ u4(
-        "header",
-        {
-          class: tw(
-            "sticky top-0 z-10",
-            "shrink-0",
-            "p-2",
-            "flex flex-row",
-            "items-center justify-between",
-            "truncate",
-            "text-primary",
-            tw(BORDER, "border-b-1"),
-            BAR
-          ),
-          children: [
-            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
-            /* @__PURE__ */ u4(
-              "span",
-              {
-                tabIndex: 0,
-                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
-                ...onClickOnEnter(() => {
-                  main.doResetGroup(groupKey);
-                }),
-                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
-                ] })
-              }
-            )
-          ]
-        }
-      ),
-      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
-    ] });
-  }
-
-  // packages/frontend/src/components/facets/misc/facet-text.tsx
-  function FacetText({
-    groupKey,
-    facetKey,
-    label: label2
-  }) {
-    const main = x2(FacetsMainContext);
-    const onInput = handler((input) => {
-      main.doSetValue(groupKey, facetKey, new ValRegExp(new RegExp(`${input.value}`, "i")));
-    });
-    return /* @__PURE__ */ u4(
-      "input",
-      {
-        type: "search",
-        onInput,
-        placeholder: label2,
-        class: tw("w-full", INPUT),
-        value: main.values.get(groupKey, facetKey)?.value?.source ?? ""
-      }
-    );
-  }
-
-  // packages/frontend/src/components/icon-button/state.tsx
-  function useIconButtonState({ action, disabled, initial }) {
-    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
-    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
-    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
-    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
-    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
-    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
-    console.error(`Unknown action: ${action}`);
-  }
-  var IconButtonBaseState = class extends Dispatchable {
-    get disabled() {
-      return this.data.disabled;
-    }
-    set disabled(value) {
-      this.data.disabled = value;
-    }
-    get value() {
-      const { disabled, ...data } = this.data;
-      return data;
-    }
-  };
-  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "light" ? "light" : "dark", disabled });
-    }
-    get isDark() {
-      return this.data.mode === "dark";
-    }
-    get icon() {
-      return this.isDark ? SUN : MOON;
-    }
-    doAction() {
-      this.data.mode = this.isDark ? "light" : "dark";
-    }
-    runEffects() {
-      document.body.classList.toggle("dark", this.isDark);
-      localStorage.setItem("lightMode", this.data.mode);
-    }
-  };
-  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
-    }
-    get hide() {
-      return this.data.mode === "hide";
-    }
-    get icon() {
-      return this.hide ? MENU : CLOSE;
-    }
-    doAction() {
-      this.data.mode = this.hide ? "show" : "hide";
-    }
-    runEffects() {
-      elem("mainNav")?.classList.toggle("hidden", this.hide);
-      localStorage.setItem("hamburguer", this.data.mode);
-    }
-  };
-  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
-    }
-    get show() {
-      return this.data.mode === "show";
-    }
-    get icon() {
-      return /* @__PURE__ */ u4(
-        "span",
-        {
-          class: tw(
-            "inline-block",
-            "mt-[6px] scale-85",
-            this.show && "stroke-[1px] stroke-foreground/50",
-            this.show ? "text-hiliteb" : "text-primary"
-            // fmt.
-          ),
-          children: FILTER_EDIT
-        }
-      );
-    }
-    doAction() {
-      this.data.mode = this.show ? "hide" : "show";
-    }
-    runEffects() {
-      const fm = elems("facetsMain");
-      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      localStorage.setItem("facets", this.data.mode);
-    }
-  };
-  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
-    static initial(initial, disabled = false) {
-      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      const disabled = this.data.disabled;
-      const shadeAll = disabled || this.mode === "any";
-      const shadeAny = disabled || this.mode === "all";
-      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
-        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
-        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
-        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
-      ] });
-    }
-    doAction() {
-      this.data.mode = this.mode === "all" ? "any" : "all";
-    }
-    runEffects() {
-    }
-  };
-  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleClearFacets({ disabled, mode: "" });
-    }
-    get icon() {
-      return this.data.mode === "clearFacets" ? DESELECT : null;
-    }
-    doAction() {
-      this.data.mode = "";
-    }
-    doToggleMode(mode) {
-      this.data.mode = mode;
-      this.dispatch();
-    }
-    runEffects() {
-      for (const el of elems("facetsMain")) el.state?.doResetAll();
-    }
-  };
-  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleGridOrder({ disabled, mode: "alpha" });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      return this.mode === "alpha" ? ABC : RANKING;
-    }
-    doAction() {
-      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
-    }
-    /** Reorder the grid on dispatch. */
-    runEffects() {
-      const grid = elem("nodeGrid");
-      if (!grid) return;
-      const thumbns = [...elems("nodeThumbn")].sort(CMP[this.mode]);
-      for (const thumb of thumbns) {
-        grid.appendChild(thumb);
-      }
-    }
-  };
-  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
-  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
-  var getKey = (el) => el.dataset.nodeKey ?? "";
-  var CMP = {
-    ranking: (elA, elB) => getRank(elA) - getRank(elB),
-    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
-  };
-
-  // packages/frontend/src/components/icon-button/icon-button.tsx
-  function IconButton({ action, disabled, initial, class: cssClass2 }) {
-    const state = useIconButtonState({ action, disabled, initial });
-    const self = useRootState(state);
-    y3(() => {
-      if (!state) return;
-      const newval = disabled === void 0 ? false : disabled;
-      if (newval !== state.disabled) {
-        state.disabled = newval;
-        state.dispatch();
-      }
-    }, [disabled]);
-    const toggle = () => {
-      if (!state) return;
-      state.doAction();
-      state.runEffects();
-      state.dispatch();
-      send(self.current, customEvent("icon-button", state.value));
-    };
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        ref: self,
-        tabIndex: disabled ? void 0 : 0,
-        ...onClickOnEnter(toggle),
-        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
-        children: state?.icon
-      }
-    );
-  }
-
-  // packages/frontend/src/components/facets/multisel/state.ts
-  var FacetMultiState = class extends Dispatchable {
-    /** Actions */
-    doSetValue(val) {
-      const { main, data } = this;
-      return main.doSetValue(data.groupKey, data.facetKey, val);
-    }
-    doAdd(val) {
-      if (!val) return false;
-      const { value } = this;
-      if (value.has(val)) return false;
-      value.add(val);
-      return this.doSetValue(value) === "changed";
-    }
-    doRemove(val) {
-      if (!val) return false;
-      const { value } = this;
-      if (!value.has(val)) return false;
-      value.delete(val);
-      return this.doSetValue(value) === "changed";
-    }
-    doSetMode(mode) {
-      const { value } = this;
-      if (value.mode === mode) return;
-      this.value.mode = mode === "all" ? "all" : "any";
-      this.doSetValue(value);
-    }
-    /** Queries */
-    get main() {
-      return this.data.main;
-    }
-    get value() {
-      const { main, groupKey, facetKey } = this.data;
-      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
-    }
-  };
-
-  // packages/frontend/src/components/facets/multisel/facet-multi.tsx
-  function FacetMulti({
-    active,
-    facetKey,
-    groupKey,
-    label: label2
-  }) {
-    const self = A2();
-    const input = A2();
-    const main = x2(FacetsMainContext);
-    const state = useDispatchable(() => new FacetMultiState({ main, groupKey, facetKey }));
-    y3(() => {
-      return on(self?.current, "icon-button", (ev) => {
-        ev.stopPropagation();
-        state.doSetMode(ev.detail.mode);
-      });
-    });
-    const maybeScroll = (value) => self.current?.querySelector(`button[data-value="${value}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    const add = handler((input2, ev) => {
-      ev.stopPropagation();
-      if (ev.key !== "Enter") return;
-      const val = input2.value.startsWith(".") ? input2.value : `.${input2.value}`;
-      if (state.doAdd(val)) setTimeout(() => maybeScroll(val), 100);
-      input2.value = "";
-    });
-    const removePulse = debounce(() => {
-      for (const li of self.current?.querySelectorAll(".quick-pulse") ?? []) li.classList.remove("quick-pulse");
-    }, 150);
-    const nthButton = (n2) => self.current?.querySelector(`li:nth-child(${n2})>button`);
-    const remover = (idx) => handler((b3, ev) => {
-      ev.stopPropagation();
-      if (state.doRemove(b3.dataset.value)) {
-        setTimeout(() => {
-          const nb = nthButton(idx + 1) ?? nthButton(idx);
-          (nb ?? input.current)?.focus();
-          if (!nb) return;
-          nb.classList.add("quick-pulse");
-          setTimeout(() => removePulse(), 150);
-        }, 10);
-      }
-    });
-    function mapEntries(mapper) {
-      return Array.from([...state.value.values].entries()).map(mapper);
-    }
-    const body = () => /* @__PURE__ */ u4(k, { children: [
-      /* @__PURE__ */ u4(
-        "input",
-        {
-          type: "search",
-          name: facetKey,
-          ref: input,
-          placeholder: label2,
-          class: tw(INPUT, "w-full"),
-          onKeyDown: add
-        }
-      ),
-      /* @__PURE__ */ u4("span", { class: tw(state.value.size === 0 && "hidden", state.value.size < 2 ? "text-foreground/50" : "text-foreground", "pl-2"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: "any" }) }),
-      /* @__PURE__ */ u4("ul", { children: mapEntries(([idx, value]) => /* @__PURE__ */ u4("li", { children: /* @__PURE__ */ u4(
-        "button",
-        {
-          type: "button",
-          "data-value": value,
-          class: tw("inline-flex flex-row", "p-2", "w-full text-left", "cursor-pointer", HOVER),
-          ...onClickOnEnter(remover(idx)),
-          children: [
-            /* @__PURE__ */ u4("div", { class: "-mt-[2px] inline-block scale-75 text-red-500", children: CLOSE }),
-            value
-          ]
-        }
-      ) }, value)) })
-    ] });
-    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
-  }
-
-  // packages/frontend/src/components/facets/table/entries.ts
-  function generateEntries(pg, config) {
-    if (config.kind === "noderel") {
-      const { node, edge, dir } = config;
-      const emap = dir === "direct" ? pg.edges[edge].adjTo : pg.edges[edge].adjFrom;
-      if (!emap) {
-        console.error("No edges found for:", edge, dir);
-        return [];
-      }
-      return [...emap.entries()].filter(([, edges]) => edges.size > 0).map(([key, edges]) => {
-        const anyEdge = edges.values().next().value;
-        const name = (dir === "direct" ? anyEdge.nodeTo : anyEdge.nodeFrom)?.name ?? anyEdge.key;
-        return { value: key, label: name, count: edges.size };
-      });
-    }
-    if (config.kind === "year") {
-      const years = /* @__PURE__ */ new Map();
-      for (const { year } of pg.nodes.pl.values) {
-        if (!year) continue;
-        years.set(year, (years.get(year) ?? 0) + 1);
-      }
-      return [...years.entries()].map(([year, count]) => {
-        const strYear = `${year}`;
-        return { value: year, label: strYear, count };
-      });
-    }
-    console.error("Unknown config kind", config);
-    return [];
-  }
-  function label(col, config) {
-    if (col === "facet" && config.kind === "noderel") return config.node;
-    if (col === "facet" && config.kind === "year") return `${config.node} year`;
-    return col;
-  }
-  function icon(col, order) {
-    if (col === "facet") return order === "facet-asc" && SORT_UP || order === "facet-desc" && SORT_DOWN;
-    if (col === "count") return order === "count-asc" && SORT_UP || order === "count-desc" && SORT_DOWN;
-    return order === "sel-asc" && SORT_UP || order === "sel-desc" && SORT_DOWN;
-  }
-  function opposite(col, order) {
-    if (col === "facet") return order === "facet-asc" ? "facet-desc" : "facet-asc";
-    if (col === "count") return order === "count-desc" ? "count-asc" : "count-desc";
-    return order === "sel-desc" ? "sel-asc" : "sel-desc";
-  }
-  var CMP2 = {
-    "facet-asc": (a4, b3) => a4.label.localeCompare(b3.label),
-    "facet-desc": (a4, b3) => b3.label.localeCompare(a4.label),
-    "count-asc": (a4, b3) => a4.count - b3.count,
-    "count-desc": (a4, b3) => b3.count - a4.count,
-    "sel-asc": (a4, b3, isSel) => isSel ? Number(isSel(a4)) - Number(isSel(b3)) : 0,
-    "sel-desc": (a4, b3, isSel) => isSel ? Number(isSel(b3)) - Number(isSel(a4)) : 0
-  };
-  function sortEntries(entries, order, isSel) {
-    const less = CMP2[order];
-    return entries.sort((a4, b3) => less(a4, b3, isSel));
-  }
-
-  // packages/frontend/src/components/facets/table/header.tsx
-  function Header({
-    action,
-    class: cssClass2,
-    col,
-    config,
-    order
-  }) {
-    return /* @__PURE__ */ u4(
-      "button",
-      {
-        type: "button",
-        class: tw("p-1", "italic", "underline decoration-1 decoration-dotted", "cursor-pointer", cssClass2),
-        ...onClickOnEnter(action),
-        children: /* @__PURE__ */ u4("div", { class: tw(HOVER, "inline-flex w-full", "p-1", "items-center justify-between", "gap-1"), children: [
-          /* @__PURE__ */ u4("span", { children: label(col, config) }),
-          /* @__PURE__ */ u4("span", { class: tw("scale-75", "mt-1"), children: icon(col, order) }),
-          /* @__PURE__ */ u4("span", { class: "flex-1" })
-        ] })
-      }
-    );
-  }
-
-  // packages/frontend/src/components/facets/table/state.ts
-  var FacetTableState = class extends Dispatchable {
-    /** Actions */
-    doSetValue(val) {
-      const { main, data } = this;
-      return main.doSetValue(data.groupKey, data.facetKey, val);
-    }
-    doToggle(val) {
-      const { value } = this;
-      value.has(val) ? value.delete(val) : value.add(val);
-      this.doSetValue(value);
-    }
-    doSetMode(mode) {
-      const { value } = this;
-      if (value.mode === mode) return;
-      this.value.mode = mode === "all" ? "all" : "any";
-      this.doSetValue(value);
-    }
-    // Note that this is the only place where we dispatch locally instead of through the main state.
-    doToggleOrder(col) {
-      const { order } = this.data;
-      this.data.order = opposite(col, order);
-      sortEntries(this.data.entries, this.data.order, (entry) => this.value.has(entry.value));
-      this.dispatch();
-    }
-    doResetSelection() {
-      this.value.clear();
-      this.doSetValue(this.value);
-    }
-    /** Queries */
-    get main() {
-      return this.data.main;
-    }
-    /** Selected values. */
-    get value() {
-      const { main, groupKey, facetKey } = this.data;
-      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
-    }
-    /** All entries. */
-    get entries() {
-      return this.data.entries;
-    }
-    get order() {
-      return this.data.order;
-    }
-  };
-
-  // packages/frontend/src/components/facets/table/facet-table.tsx
-  function FacetTable({
-    groupKey,
-    facetKey,
-    config,
-    active
-  }) {
-    const self = A2();
-    const main = x2(FacetsMainContext);
-    const state = useDispatchable(() => {
-      const order = config.kind === "year" ? "facet-desc" : "facet-asc";
-      const entries = sortEntries(generateEntries(main.pg, config), order);
-      return new FacetTableState({ config, entries, facetKey, groupKey, main, order });
-    });
-    y3(
-      () => on(self?.current, "icon-button", (ev) => {
-        ev.stopPropagation();
-        state.doSetMode(ev.detail.mode === "all" ? "all" : "any");
-      })
-    );
-    const SUBGRID = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
-    const ROW = tw(SUBGRID, tw("border-b-1", BORDER));
-    const CENTER_ROW = tw("items-center justify-between");
-    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
-      /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
-        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "year" && "hidden") }) }) }),
-        /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
-          /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
-        ] })
-      ] }),
-      state.entries.map(
-        (entry) => tap(
-          onClickOnEnter(() => state.doToggle(entry.value)),
-          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-center"), children: entry.count }),
-            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-right"), children: /* @__PURE__ */ u4("input", { type: "checkbox", checked: state.value.has(entry.value), ...clickOrEnter }) })
-          ] }, entry.value)
-        )
-      )
-    ] });
-    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
-  }
-
   // packages/auxiliar/src/array.ts
   function arrayMerge(target, newData, similar = (l1, l22) => l1 === l22, onDuplicate) {
     for (const newElem of newData) {
@@ -2142,6 +1460,91 @@
     }
     [Symbol.iterator]() {
       return this.array ? this.array[Symbol.iterator]() : [].values();
+    }
+  };
+
+  // packages/auxiliar/src/map2.ts
+  var Map2 = class {
+    #map = /* @__PURE__ */ new Map();
+    has(k1, k22) {
+      return this.#map.get(k1)?.has(k22) ?? false;
+    }
+    set(k1, k22, v4) {
+      let m22 = this.#map.get(k1);
+      if (!m22) {
+        m22 = /* @__PURE__ */ new Map();
+        this.#map.set(k1, m22);
+      }
+      m22.set(k22, v4);
+      return this;
+    }
+    getOrSet(k1, k22, whenMissing) {
+      let v4 = this.get(k1, k22);
+      if (v4 === void 0) this.set(k1, k22, v4 = whenMissing());
+      return v4;
+    }
+    delete(k1, k22) {
+      return this.#map.get(k1)?.delete(k22) ?? false;
+    }
+    // Delete all keys [k1, *] from the map.
+    delete1(k1) {
+      const map = this.#map.get(k1);
+      if (map) {
+        this.#map.delete(k1);
+        return map.size > 0;
+      }
+      return false;
+    }
+    clear() {
+      this.#map.clear();
+    }
+    get(k1, k22) {
+      return this.#map.get(k1)?.get(k22);
+    }
+    getMap(k1) {
+      return this.#map.get(k1);
+    }
+    /** Get a consolidated map of all keys in the second dimension. */
+    getMap2() {
+      const res = /* @__PURE__ */ new Map();
+      for (const [_k1, map2] of this.#map) {
+        for (const [k22, v4] of map2) res.set(k22, v4);
+      }
+      return res;
+    }
+    get size() {
+      let size = 0;
+      for (const map of this.#map.values()) size += map.size;
+      return size;
+    }
+    get isEmpty() {
+      for (const map of this.#map.values()) if (map.size > 0) return false;
+      return true;
+    }
+    /** Returns the size of the second dimension for a given key in the first dimension. */
+    size2(k1) {
+      return this.#map.get(k1)?.size ?? 0;
+    }
+    /** Returns an iterator of the keys in the first dimension. */
+    keys() {
+      return [...this.#map.keys()].filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
+    }
+    entries() {
+      return [...this.#map.entries()].filter(([_k1, map2]) => map2.size > 0);
+    }
+    flatEntries() {
+      const results = [];
+      for (const [k1, map2] of this.#map) {
+        for (const [k22, v4] of map2) results.push([k1, k22, v4]);
+      }
+      return results;
+    }
+    values() {
+      return [...this.#map.values()].flatMap((map) => [...map.values()]);
+    }
+    toString() {
+      const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
+      return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
     }
   };
 
@@ -3124,110 +2527,624 @@
     }
   };
 
-  // packages/frontend/src/components/facets/main/types.ts
-  function bool(facetKey, label2, valueMapper) {
-    return { kind: "bool", facetKey, label: label2, valueMapper };
+  // packages/frontend/src/components/facets/misc/facet-bool.tsx
+  function FacetBool({
+    groupKey,
+    facetKey,
+    label: label2,
+    valueMapper = (checked) => new ValBool(checked)
+  }) {
+    const input = A2();
+    const main = x2(FacetsMainContext);
+    const toggle = handler((checkbox) => {
+      main.doSetValue(groupKey, facetKey, valueMapper(checkbox.checked));
+    });
+    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("block", "px-2"), children: [
+      /* @__PURE__ */ u4(
+        "input",
+        {
+          id: facetKey,
+          name: facetKey,
+          type: "checkbox",
+          class: tw("-mt-1"),
+          placeholder: label2,
+          ...onClickOnEnter(toggle),
+          checked: !!main.values.get(groupKey, facetKey)?.isPresent,
+          ref: input
+        }
+      ),
+      /* @__PURE__ */ u4("span", { class: "ml-2", children: label2 })
+    ] });
   }
-  function multi(facetKey, label2) {
-    return { kind: "multi", facetKey, label: label2 };
+
+  // packages/frontend/src/components/facets/misc/facet-group.tsx
+  function FacetGroup({
+    label: label2,
+    groupKey,
+    active,
+    children
+  }) {
+    const main = x2(FacetsMainContext);
+    const hasValues = main.groupHasValues(groupKey);
+    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
+      /* @__PURE__ */ u4(
+        "header",
+        {
+          class: tw(
+            "sticky top-0 z-10",
+            "shrink-0",
+            "p-2",
+            "flex flex-row",
+            "items-center justify-between",
+            "truncate",
+            "text-primary",
+            tw(BORDER, "border-b-1"),
+            BAR
+          ),
+          children: [
+            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
+            /* @__PURE__ */ u4(
+              "span",
+              {
+                tabIndex: 0,
+                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
+                ...onClickOnEnter(() => {
+                  main.doResetGroup(groupKey);
+                }),
+                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
+                ] })
+              }
+            )
+          ]
+        }
+      ),
+      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
+    ] });
   }
-  function table(facetKey, label2, config) {
-    return { kind: "table", facetKey, label: label2, config };
-  }
-  function text(facetKey, label2) {
-    return { kind: "text", facetKey, label: label2 };
-  }
-  function defineFacets(...facets) {
-    return facets.reduce((map, facet) => {
-      map.set(facet.facetKey, facet);
-      return map;
-    }, /* @__PURE__ */ new Map());
-  }
-  function group(groupKey, label2, facetKeys) {
-    return { groupKey, label: label2, facetKeys };
-  }
-  function defineGroups(...groups) {
-    const groupMap = /* @__PURE__ */ new Map();
-    const groupForFacetKey = /* @__PURE__ */ new Map();
-    for (const group2 of groups) {
-      groupMap.set(group2.groupKey, group2);
-      for (const facetKey of group2.facetKeys) groupForFacetKey.set(facetKey, group2.groupKey);
-    }
-    return [groupMap, groupForFacetKey];
-  }
-  function mapGroups(groups, currentFacetGroup, mapper) {
-    return [...groups.values()].map(
-      ({ groupKey, label: label2, facetKeys }) => mapper({ groupKey, label: label2, facetKeys, active: currentFacetGroup === groupKey })
+
+  // packages/frontend/src/components/facets/misc/facet-text.tsx
+  function FacetText({
+    groupKey,
+    facetKey,
+    label: label2
+  }) {
+    const main = x2(FacetsMainContext);
+    const onInput = handler((input) => {
+      main.doSetValue(groupKey, facetKey, new ValRegExp(new RegExp(`${input.value}`, "i")));
+    });
+    return /* @__PURE__ */ u4(
+      "input",
+      {
+        type: "search",
+        onInput,
+        placeholder: label2,
+        class: tw("w-full", INPUT),
+        value: main.values.get(groupKey, facetKey)?.value?.source ?? ""
+      }
     );
   }
 
-  // packages/frontend/src/components/facets/main/plangs.tsx
-  var FACETS = defineFacets(
-    bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
-    bool("hasLogo", "Has Logo"),
-    bool("hasWikipedia", "Has Wikipedia"),
-    bool("isPopular", "Is Popular"),
-    bool("isTranspiler", "Is Transpiler"),
-    bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
-    multi("extensions", "Extensions"),
-    table("compilesTo", "Compiles To", { kind: "noderel", edge: "compilesTo", node: NPlang.kind, dir: "direct" }),
-    table("creationYear", "Creation Year", { kind: "year", node: NPlang.kind }),
-    table("dialectOf", "Dialect Of", { kind: "noderel", edge: "dialect", node: NPlang.kind, dir: "direct" }),
-    table("implements", "Implements", { kind: "noderel", edge: "impl", node: NPlang.kind, dir: "direct" }),
-    table("influenced", "Influenced", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "inverse" }),
-    table("influencedBy", "Influenced By", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "direct" }),
-    table("licenses", "Licenses", { kind: "noderel", edge: "license", node: NLicense.kind, dir: "direct" }),
-    table("paradigms", "Paradigms", { kind: "noderel", edge: "paradigm", node: NParadigm.kind, dir: "direct" }),
-    table("platforms", "Platforms", { kind: "noderel", edge: "plat", node: NPlatform.kind, dir: "direct" }),
-    table("tags", "Tags", { kind: "noderel", edge: "tag", node: NTag.kind, dir: "direct" }),
-    table("typeSystems", "Type Systems", { kind: "noderel", edge: "tsys", node: NTsys.kind, dir: "direct" }),
-    table("writtenIn", "Written In", { kind: "noderel", edge: "writtenIn", node: NPlang.kind, dir: "direct" }),
-    text("plangName", "Plang Name")
-  );
-  var [GROUPS, GROUP_FOR_FACET_KEY] = defineGroups(
-    group("creationYear", "Creation Year", ["creationYear"]),
-    group("dialectOf", "Dialect Of", ["dialectOf"]),
-    group("general", "General", ["plangName", "createdRecently", "releasedRecently", "isPopular", "hasLogo", "hasWikipedia", "extensions"]),
-    group("implements", "Implements", ["implements"]),
-    group("influenced", "Influenced", ["influenced"]),
-    group("influencedBy", "Influenced By", ["influencedBy"]),
-    group("licenses", "Licenses", ["licenses"]),
-    group("paradigms", "Paradigms", ["paradigms"]),
-    group("platforms", "Platforms", ["platforms"]),
-    group("tags", "Tags", ["tags"]),
-    group("transpiler", "Transpiler", ["isTranspiler", "compilesTo"]),
-    group("typeSystems", "Type Systems", ["typeSystems"]),
-    group("writtenIn", "Written In", ["writtenIn"])
-  );
-  var NAV = [
-    ["general"],
-    ["platforms", "paradigms", "typeSystems"],
-    ["writtenIn", "transpiler", "dialectOf", "implements", "influencedBy", "influenced"],
-    ["tags", "creationYear", "licenses"]
-  ];
-  var DEFAULT_GROUP = "general";
-  var PlangsFacetGroups = ({ currentFacetGroup }) => /* @__PURE__ */ u4(k, { children: mapGroups(GROUPS, currentFacetGroup, ({ groupKey, active, label: label2, facetKeys }) => /* @__PURE__ */ u4(FacetGroup, { groupKey, label: label2, active, children: facetKeys.map((facetKey) => {
-    const facet = FACETS.get(facetKey);
-    const props = (f5) => ({ groupKey, facetKey, label: f5.label, active });
-    switch (facet?.kind) {
-      case "bool":
-        return /* @__PURE__ */ u4(FacetBool, { ...props(facet), valueMapper: facet.valueMapper });
-      case "multi":
-        return /* @__PURE__ */ u4(FacetMulti, { ...props(facet) });
-      case "table":
-        return /* @__PURE__ */ u4(FacetTable, { ...props(facet), config: facet.config });
-      case "text":
-        return /* @__PURE__ */ u4(FacetText, { ...props(facet) });
-      default:
-        console.error("Facet not found", facetKey);
+  // packages/frontend/src/components/icon-button/state.tsx
+  function useIconButtonState({ action, disabled, initial }) {
+    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
+    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
+    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
+    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
+    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
+    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
+    console.error(`Unknown action: ${action}`);
+  }
+  var IconButtonBaseState = class extends Dispatchable {
+    get disabled() {
+      return this.data.disabled;
     }
-  }) }, groupKey)) });
+    set disabled(value) {
+      this.data.disabled = value;
+    }
+    get value() {
+      const { disabled, ...data } = this.data;
+      return data;
+    }
+  };
+  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "light" ? "light" : "dark", disabled });
+    }
+    get isDark() {
+      return this.data.mode === "dark";
+    }
+    get icon() {
+      return this.isDark ? SUN : MOON;
+    }
+    doAction() {
+      this.data.mode = this.isDark ? "light" : "dark";
+    }
+    runEffects() {
+      document.body.classList.toggle("dark", this.isDark);
+      localStorage.setItem("lightMode", this.data.mode);
+    }
+  };
+  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
+    }
+    get hide() {
+      return this.data.mode === "hide";
+    }
+    get icon() {
+      return this.hide ? MENU : CLOSE;
+    }
+    doAction() {
+      this.data.mode = this.hide ? "show" : "hide";
+    }
+    runEffects() {
+      elem("mainNav")?.classList.toggle("hidden", this.hide);
+      localStorage.setItem("hamburguer", this.data.mode);
+    }
+  };
+  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
+    }
+    get show() {
+      return this.data.mode === "show";
+    }
+    get icon() {
+      return /* @__PURE__ */ u4(
+        "span",
+        {
+          class: tw(
+            "inline-block",
+            "mt-[6px] scale-85",
+            this.show && "stroke-[1px] stroke-foreground/50",
+            this.show ? "text-hiliteb" : "text-primary"
+            // fmt.
+          ),
+          children: FILTER_EDIT
+        }
+      );
+    }
+    doAction() {
+      this.data.mode = this.show ? "hide" : "show";
+    }
+    runEffects() {
+      const fm = elems("facetsMain");
+      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
+      localStorage.setItem("facets", this.data.mode);
+    }
+  };
+  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
+    static initial(initial, disabled = false) {
+      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      const disabled = this.data.disabled;
+      const shadeAll = disabled || this.mode === "any";
+      const shadeAny = disabled || this.mode === "all";
+      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
+        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
+        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
+        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
+      ] });
+    }
+    doAction() {
+      this.data.mode = this.mode === "all" ? "any" : "all";
+    }
+    runEffects() {
+    }
+  };
+  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleClearFacets({ disabled, mode: "" });
+    }
+    get icon() {
+      return this.data.mode === "clearFacets" ? DESELECT : null;
+    }
+    doAction() {
+      this.data.mode = "";
+    }
+    doToggleMode(mode) {
+      this.data.mode = mode;
+      this.dispatch();
+    }
+    runEffects() {
+      for (const el of elems("facetsMain")) el.state?.doResetAll();
+    }
+  };
+  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleGridOrder({ disabled, mode: "alpha" });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      return this.mode === "alpha" ? ABC : RANKING;
+    }
+    doAction() {
+      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
+    }
+    /** Reorder the grid on dispatch. */
+    runEffects() {
+      const grid = elem("nodeGrid");
+      if (!grid) return;
+      const thumbns = [...elems("nodeThumbn")].sort(CMP[this.mode]);
+      for (const thumb of thumbns) {
+        grid.appendChild(thumb);
+      }
+    }
+  };
+  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
+  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
+  var getKey = (el) => el.dataset.nodeKey ?? "";
+  var CMP = {
+    ranking: (elA, elB) => getRank(elA) - getRank(elB),
+    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
+  };
+
+  // packages/frontend/src/components/icon-button/icon-button.tsx
+  function IconButton({ action, disabled, initial, class: cssClass2 }) {
+    const state = useIconButtonState({ action, disabled, initial });
+    const self = useRootState(state);
+    y3(() => {
+      if (!state) return;
+      const newval = disabled === void 0 ? false : disabled;
+      if (newval !== state.disabled) {
+        state.disabled = newval;
+        state.dispatch();
+      }
+    }, [disabled]);
+    const toggle = () => {
+      if (!state) return;
+      state.doAction();
+      state.runEffects();
+      state.dispatch();
+      send(self.current, customEvent("icon-button", state.value));
+    };
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        ref: self,
+        tabIndex: disabled ? void 0 : 0,
+        ...onClickOnEnter(toggle),
+        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
+        children: state?.icon
+      }
+    );
+  }
+
+  // packages/frontend/src/components/facets/multisel/state.ts
+  var FacetMultiState = class extends Dispatchable {
+    /** Actions */
+    doSetValue(val) {
+      const { main, data } = this;
+      return main.doSetValue(data.groupKey, data.facetKey, val);
+    }
+    doAdd(val) {
+      if (!val) return false;
+      const { value } = this;
+      if (value.has(val)) return false;
+      value.add(val);
+      return this.doSetValue(value) === "changed";
+    }
+    doRemove(val) {
+      if (!val) return false;
+      const { value } = this;
+      if (!value.has(val)) return false;
+      value.delete(val);
+      return this.doSetValue(value) === "changed";
+    }
+    doSetMode(mode) {
+      const { value } = this;
+      if (value.mode === mode) return;
+      this.value.mode = mode === "all" ? "all" : "any";
+      this.doSetValue(value);
+    }
+    /** Queries */
+    get main() {
+      return this.data.main;
+    }
+    get value() {
+      const { main, groupKey, facetKey } = this.data;
+      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
+    }
+  };
+
+  // packages/frontend/src/components/facets/multisel/facet-multi.tsx
+  function FacetMulti({
+    active,
+    facetKey,
+    groupKey,
+    label: label2
+  }) {
+    const self = A2();
+    const input = A2();
+    const main = x2(FacetsMainContext);
+    const state = useDispatchable(() => new FacetMultiState({ main, groupKey, facetKey }));
+    y3(() => {
+      return on(self?.current, "icon-button", (ev) => {
+        ev.stopPropagation();
+        state.doSetMode(ev.detail.mode);
+      });
+    });
+    const maybeScroll = (value) => self.current?.querySelector(`button[data-value="${value}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const add = handler((input2, ev) => {
+      ev.stopPropagation();
+      if (ev.key !== "Enter") return;
+      const val = input2.value.startsWith(".") ? input2.value : `.${input2.value}`;
+      if (state.doAdd(val)) setTimeout(() => maybeScroll(val), 100);
+      input2.value = "";
+    });
+    const removePulse = debounce(() => {
+      for (const li of self.current?.querySelectorAll(".quick-pulse") ?? []) li.classList.remove("quick-pulse");
+    }, 150);
+    const nthButton = (n2) => self.current?.querySelector(`li:nth-child(${n2})>button`);
+    const remover = (idx) => handler((b3, ev) => {
+      ev.stopPropagation();
+      if (state.doRemove(b3.dataset.value)) {
+        setTimeout(() => {
+          const nb = nthButton(idx + 1) ?? nthButton(idx);
+          (nb ?? input.current)?.focus();
+          if (!nb) return;
+          nb.classList.add("quick-pulse");
+          setTimeout(() => removePulse(), 150);
+        }, 10);
+      }
+    });
+    function mapEntries(mapper) {
+      return Array.from([...state.value.values].entries()).map(mapper);
+    }
+    const body = () => /* @__PURE__ */ u4(k, { children: [
+      /* @__PURE__ */ u4(
+        "input",
+        {
+          type: "search",
+          name: facetKey,
+          ref: input,
+          placeholder: label2,
+          class: tw(INPUT, "w-full"),
+          onKeyDown: add
+        }
+      ),
+      /* @__PURE__ */ u4("span", { class: tw(state.value.size === 0 && "hidden", state.value.size < 2 ? "text-foreground/50" : "text-foreground", "pl-2"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: "any" }) }),
+      /* @__PURE__ */ u4("ul", { children: mapEntries(([idx, value]) => /* @__PURE__ */ u4("li", { children: /* @__PURE__ */ u4(
+        "button",
+        {
+          type: "button",
+          "data-value": value,
+          class: tw("inline-flex flex-row", "p-2", "w-full text-left", "cursor-pointer", HOVER),
+          ...onClickOnEnter(remover(idx)),
+          children: [
+            /* @__PURE__ */ u4("div", { class: "-mt-[2px] inline-block scale-75 text-red-500", children: CLOSE }),
+            value
+          ]
+        }
+      ) }, value)) })
+    ] });
+    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
+  }
+
+  // packages/frontend/src/components/facets/table/entries.ts
+  function generateEntries(pg, config) {
+    if (config.kind === "noderel") {
+      const { node, edge, dir } = config;
+      const emap = dir === "direct" ? pg.edges[edge].adjTo : pg.edges[edge].adjFrom;
+      if (!emap) {
+        console.error("No edges found for:", edge, dir);
+        return [];
+      }
+      return [...emap.entries()].filter(([, edges]) => edges.size > 0).map(([key, edges]) => {
+        const anyEdge = edges.values().next().value;
+        const name = (dir === "direct" ? anyEdge.nodeTo : anyEdge.nodeFrom)?.name ?? anyEdge.key;
+        return { value: key, label: name, count: edges.size };
+      });
+    }
+    if (config.kind === "year") {
+      const years = /* @__PURE__ */ new Map();
+      for (const { year } of pg.nodes.pl.values) {
+        if (!year) continue;
+        years.set(year, (years.get(year) ?? 0) + 1);
+      }
+      return [...years.entries()].map(([year, count]) => {
+        const strYear = `${year}`;
+        return { value: year, label: strYear, count };
+      });
+    }
+    console.error("Unknown config kind", config);
+    return [];
+  }
+  function label(col, config) {
+    if (col === "facet" && config.kind === "noderel") return config.node;
+    if (col === "facet" && config.kind === "year") return `${config.node} year`;
+    return col;
+  }
+  function icon(col, order) {
+    if (col === "facet") return order === "facet-asc" && SORT_UP || order === "facet-desc" && SORT_DOWN;
+    if (col === "count") return order === "count-asc" && SORT_UP || order === "count-desc" && SORT_DOWN;
+    return order === "sel-asc" && SORT_UP || order === "sel-desc" && SORT_DOWN;
+  }
+  function opposite(col, order) {
+    if (col === "facet") return order === "facet-asc" ? "facet-desc" : "facet-asc";
+    if (col === "count") return order === "count-desc" ? "count-asc" : "count-desc";
+    return order === "sel-desc" ? "sel-asc" : "sel-desc";
+  }
+  var CMP2 = {
+    "facet-asc": (a4, b3) => a4.label.localeCompare(b3.label),
+    "facet-desc": (a4, b3) => b3.label.localeCompare(a4.label),
+    "count-asc": (a4, b3) => a4.count - b3.count,
+    "count-desc": (a4, b3) => b3.count - a4.count,
+    "sel-asc": (a4, b3, isSel) => isSel ? Number(isSel(a4)) - Number(isSel(b3)) : 0,
+    "sel-desc": (a4, b3, isSel) => isSel ? Number(isSel(b3)) - Number(isSel(a4)) : 0
+  };
+  function sortEntries(entries, order, isSel) {
+    const less = CMP2[order];
+    return entries.sort((a4, b3) => less(a4, b3, isSel));
+  }
+
+  // packages/frontend/src/components/facets/table/header.tsx
+  function Header({
+    action,
+    class: cssClass2,
+    col,
+    config,
+    order
+  }) {
+    return /* @__PURE__ */ u4(
+      "button",
+      {
+        type: "button",
+        class: tw("p-1", "italic", "underline decoration-1 decoration-dotted", "cursor-pointer", cssClass2),
+        ...onClickOnEnter(action),
+        children: /* @__PURE__ */ u4("div", { class: tw(HOVER, "inline-flex w-full", "p-1", "items-center justify-between", "gap-1"), children: [
+          /* @__PURE__ */ u4("span", { children: label(col, config) }),
+          /* @__PURE__ */ u4("span", { class: tw("scale-75", "mt-1"), children: icon(col, order) }),
+          /* @__PURE__ */ u4("span", { class: "flex-1" })
+        ] })
+      }
+    );
+  }
+
+  // packages/frontend/src/components/facets/table/state.ts
+  var FacetTableState = class extends Dispatchable {
+    /** Actions */
+    doSetValue(val) {
+      const { main, data } = this;
+      return main.doSetValue(data.groupKey, data.facetKey, val);
+    }
+    doToggle(val) {
+      const { value } = this;
+      value.has(val) ? value.delete(val) : value.add(val);
+      this.doSetValue(value);
+    }
+    doSetMode(mode) {
+      const { value } = this;
+      if (value.mode === mode) return;
+      this.value.mode = mode === "all" ? "all" : "any";
+      this.doSetValue(value);
+    }
+    // Note that this is the only place where we dispatch locally instead of through the main state.
+    doToggleOrder(col) {
+      const { order } = this.data;
+      this.data.order = opposite(col, order);
+      sortEntries(this.data.entries, this.data.order, (entry) => this.value.has(entry.value));
+      this.dispatch();
+    }
+    doResetSelection() {
+      this.value.clear();
+      this.doSetValue(this.value);
+    }
+    /** Queries */
+    get main() {
+      return this.data.main;
+    }
+    /** Selected values. */
+    get value() {
+      const { main, groupKey, facetKey } = this.data;
+      return main.values.getOrSet(groupKey, facetKey, () => new Filter("any"));
+    }
+    /** All entries. */
+    get entries() {
+      return this.data.entries;
+    }
+    get order() {
+      return this.data.order;
+    }
+  };
+
+  // packages/frontend/src/components/facets/table/facet-table.tsx
+  function FacetTable({
+    groupKey,
+    facetKey,
+    config,
+    active
+  }) {
+    const self = A2();
+    const main = x2(FacetsMainContext);
+    const state = useDispatchable(() => {
+      const order = config.kind === "year" ? "facet-desc" : "facet-asc";
+      const entries = sortEntries(generateEntries(main.pg, config), order);
+      return new FacetTableState({ config, entries, facetKey, groupKey, main, order });
+    });
+    y3(
+      () => on(self?.current, "icon-button", (ev) => {
+        ev.stopPropagation();
+        state.doSetMode(ev.detail.mode === "all" ? "all" : "any");
+      })
+    );
+    const SUBGRID = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
+    const ROW = tw(SUBGRID, tw("border-b-1", BORDER));
+    const CENTER_ROW = tw("items-center justify-between");
+    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
+      /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
+        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "year" && "hidden") }) }) }),
+        /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
+          /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
+          /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
+          /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
+        ] })
+      ] }),
+      state.entries.map(
+        (entry) => tap(
+          onClickOnEnter(() => state.doToggle(entry.value)),
+          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-center"), children: entry.count }),
+            /* @__PURE__ */ u4("div", { class: tw("p-2", "text-right"), children: /* @__PURE__ */ u4("input", { type: "checkbox", checked: state.value.has(entry.value), ...clickOrEnter }) })
+          ] }, entry.value)
+        )
+      )
+    ] });
+    return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
+  }
+
+  // packages/frontend/src/components/facets/main/groups-util.tsx
+  function createFacetGroups(groups, facets) {
+    return ({ currentFacetGroup }) => /* @__PURE__ */ u4(k, { children: [...groups.values()].map(({ groupKey, label: label2, facetKeys }) => /* @__PURE__ */ u4(FacetGroup, { groupKey, label: label2, active: currentFacetGroup === groupKey, children: facetKeys.map((facetKey) => {
+      const facet = facets.get(facetKey);
+      const props = { groupKey, facetKey, label: facet.label, active: currentFacetGroup === groupKey };
+      switch (facet?.kind) {
+        case "bool":
+          return /* @__PURE__ */ u4(FacetBool, { ...props, valueMapper: facet.valueMapper });
+        case "multi":
+          return /* @__PURE__ */ u4(FacetMulti, { ...props });
+        case "table":
+          return /* @__PURE__ */ u4(FacetTable, { ...props, config: facet.config });
+        case "text":
+          return /* @__PURE__ */ u4(FacetText, { ...props });
+        default:
+          console.error("Facet not found", facetKey);
+      }
+    }) }, groupKey)) });
+  }
+
+  // packages/frontend/src/components/facets/main/grid.ts
+  function doUpdateThumbns(nodeKeys) {
+    for (const div of elems("nodeThumbn")) {
+      const plKey = div.dataset.nodeKey;
+      const visible = nodeKeys.has(plKey);
+      div.classList.toggle("hidden", !visible);
+    }
+    adjustGrid();
+  }
+  var updateThumbns = debounce(doUpdateThumbns, 30);
+  function doAdjustGrid() {
+    const widthRow = 0;
+    const widthThumb = 0;
+    const visibleThumbs = 0;
+    const numCols = Math.min(Math.floor(widthRow / widthThumb), visibleThumbs);
+    const maxCols = Math.floor(widthRow / (5 * 16));
+    if (numCols < maxCols && visibleThumbs < maxCols && minWidthBP("48rem")) {
+    } else {
+    }
+  }
+  var adjustGrid = debounce(doAdjustGrid, 30);
 
   // packages/frontend/src/components/facets/main/state.ts
-  function useFacetState(tab, pg) {
-    if (tab === "plangs") return useDispatchable(() => PlangsFacetsState.initial(pg));
-    console.error("Unknown tab", tab);
-  }
   var FacetsMainState = class _FacetsMainState extends Dispatchable {
     /** Attempt to reconstruct a structured "form value" from generic data. */
     // biome-ignore lint/suspicious/noExplicitAny: this data is the result of a de/serialization process and is not typed.
@@ -3333,6 +3250,88 @@
       return this;
     }
   };
+
+  // packages/frontend/src/components/facets/main/types.ts
+  function bool(facetKey, label2, valueMapper) {
+    return { kind: "bool", facetKey, label: label2, valueMapper };
+  }
+  function multi(facetKey, label2) {
+    return { kind: "multi", facetKey, label: label2 };
+  }
+  function table(facetKey, label2, config) {
+    return { kind: "table", facetKey, label: label2, config };
+  }
+  function text(facetKey, label2) {
+    return { kind: "text", facetKey, label: label2 };
+  }
+  function defineFacets(...facets) {
+    return facets.reduce(
+      (map, facet) => {
+        map.set(facet.facetKey, facet);
+        return map;
+      },
+      /* @__PURE__ */ new Map()
+    );
+  }
+  function group(groupKey, label2, facetKeys) {
+    return { groupKey, label: label2, facetKeys };
+  }
+  function defineGroups(...groups) {
+    const groupMap = /* @__PURE__ */ new Map();
+    const groupForFacetKey = /* @__PURE__ */ new Map();
+    for (const group2 of groups) {
+      groupMap.set(group2.groupKey, group2);
+      for (const facetKey of group2.facetKeys) groupForFacetKey.set(facetKey, group2.groupKey);
+    }
+    return [groupMap, groupForFacetKey];
+  }
+
+  // packages/frontend/src/components/facets/main/plangs.tsx
+  var FACETS = defineFacets(
+    bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
+    bool("hasLogo", "Has Logo"),
+    bool("hasWikipedia", "Has Wikipedia"),
+    bool("isPopular", "Is Popular"),
+    bool("isTranspiler", "Is Transpiler"),
+    bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
+    multi("extensions", "Extensions"),
+    table("compilesTo", "Compiles To", { kind: "noderel", edge: "compilesTo", node: NPlang.kind, dir: "direct" }),
+    table("creationYear", "Creation Year", { kind: "year", node: NPlang.kind }),
+    table("dialectOf", "Dialect Of", { kind: "noderel", edge: "dialect", node: NPlang.kind, dir: "direct" }),
+    table("implements", "Implements", { kind: "noderel", edge: "impl", node: NPlang.kind, dir: "direct" }),
+    table("influenced", "Influenced", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "inverse" }),
+    table("influencedBy", "Influenced By", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "direct" }),
+    table("licenses", "Licenses", { kind: "noderel", edge: "license", node: NLicense.kind, dir: "direct" }),
+    table("paradigms", "Paradigms", { kind: "noderel", edge: "paradigm", node: NParadigm.kind, dir: "direct" }),
+    table("platforms", "Platforms", { kind: "noderel", edge: "plat", node: NPlatform.kind, dir: "direct" }),
+    table("tags", "Tags", { kind: "noderel", edge: "tag", node: NTag.kind, dir: "direct" }),
+    table("typeSystems", "Type Systems", { kind: "noderel", edge: "tsys", node: NTsys.kind, dir: "direct" }),
+    table("writtenIn", "Written In", { kind: "noderel", edge: "writtenIn", node: NPlang.kind, dir: "direct" }),
+    text("plangName", "Plang Name")
+  );
+  var [GROUPS, GROUP_FOR_FACET_KEY] = defineGroups(
+    group("creationYear", "Creation Year", ["creationYear"]),
+    group("dialectOf", "Dialect Of", ["dialectOf"]),
+    group("general", "General", ["plangName", "createdRecently", "releasedRecently", "isPopular", "hasLogo", "hasWikipedia", "extensions"]),
+    group("implements", "Implements", ["implements"]),
+    group("influenced", "Influenced", ["influenced"]),
+    group("influencedBy", "Influenced By", ["influencedBy"]),
+    group("licenses", "Licenses", ["licenses"]),
+    group("paradigms", "Paradigms", ["paradigms"]),
+    group("platforms", "Platforms", ["platforms"]),
+    group("tags", "Tags", ["tags"]),
+    group("transpiler", "Transpiler", ["isTranspiler", "compilesTo"]),
+    group("typeSystems", "Type Systems", ["typeSystems"]),
+    group("writtenIn", "Written In", ["writtenIn"])
+  );
+  var NAV = [
+    ["general"],
+    ["platforms", "paradigms", "typeSystems"],
+    ["writtenIn", "transpiler", "dialectOf", "implements", "influencedBy", "influenced"],
+    ["tags", "creationYear", "licenses"]
+  ];
+  var PlangsFacetGroups = createFacetGroups(GROUPS, FACETS);
+  var DEFAULT_GROUP = "general";
   var PlangsFacetsState = class _PlangsFacetsState extends FacetsMainState {
     static initial(pg) {
       const tab = "plangs";
@@ -3361,6 +3360,10 @@
 
   // packages/frontend/src/components/facets/main/facets-main.tsx
   var FacetsMainContext = G(void 0);
+  function useFacetState(tab, pg) {
+    if (tab === "plangs") return useDispatchable(() => PlangsFacetsState.initial(pg));
+    console.error("Unknown tab", tab);
+  }
   function FacetsMain({ tab, pg }) {
     const state = useFacetState(tab, pg);
     const self = useRootState(state);
