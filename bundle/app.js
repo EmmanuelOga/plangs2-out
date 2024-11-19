@@ -1282,29 +1282,20 @@
     }
     /** Returns an iterator of the keys in the first dimension. */
     keys() {
-      return this.#map.keys().filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
+      return [...this.#map.keys()].filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
     }
     entries() {
       return [...this.#map.entries()].filter(([_k1, map2]) => map2.size > 0);
     }
-    *flatEntries() {
+    flatEntries() {
+      const results = [];
       for (const [k1, map2] of this.#map) {
-        for (const [k22, v4] of map2) yield [k1, k22, v4];
+        for (const [k22, v4] of map2) results.push([k1, k22, v4]);
       }
+      return results;
     }
     values() {
       return [...this.#map.values()].flatMap((map) => [...map.values()]);
-    }
-    /**
-     * NOTE: This will work best if the keys are strings, symbols or numbers.
-     * Otherwise JavaScript will convert them to strings, which may not be what you want.
-     */
-    toObject(mapper) {
-      const object = {};
-      for (const [k1, k22, v4] of this.flatEntries()) {
-        (object[k1] = object[k1] ?? {})[k22] = mapper(v4);
-      }
-      return object;
     }
     toString() {
       const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
@@ -1491,7 +1482,7 @@
 
   // packages/frontend/src/components/facets/main/grid.ts
   function doUpdateThumbns(nodeKeys) {
-    for (const div of elems("plThumb")) {
+    for (const div of elems("nodeThumbn")) {
       const plKey = div.dataset.nodeKey;
       const visible = nodeKeys.has(plKey);
       div.classList.toggle("hidden", !visible);
@@ -1757,7 +1748,7 @@
     runEffects() {
       const grid = elem("nodeGrid");
       if (!grid) return;
-      const thumbns = [...elems("plThumb")].sort(CMP[this.mode]);
+      const thumbns = [...elems("nodeThumbn")].sort(CMP[this.mode]);
       for (const thumb of thumbns) {
         grid.appendChild(thumb);
       }
@@ -2203,6 +2194,9 @@
       this.factory = factory;
     }
     #map = /* @__PURE__ */ new Map();
+    entries() {
+      return this.#map.entries();
+    }
     get(key) {
       return key ? this.#map.get(key) : void 0;
     }
@@ -2210,7 +2204,7 @@
       return this.#map.size;
     }
     keys() {
-      return this.#map.keys();
+      return [...this.#map.keys()];
     }
     set(key, data = {}) {
       let n2 = this.#map.get(key);
@@ -2226,11 +2220,8 @@
     get values() {
       return new IterTap(this.#map.values());
     }
-    *findAll(predicate) {
-      for (const node of this.#map.values()) if (predicate(node)) yield node;
-    }
-    [Symbol.iterator](n2) {
-      return this.#map[Symbol.iterator]();
+    findAll(predicate) {
+      return [...this.#map.values()].filter(predicate);
     }
     batch(maxEntries, start2 = 0) {
       return Array.from(this.#map).slice(start2, maxEntries);
@@ -2292,7 +2283,7 @@
       const data = { nodes: {}, edges: {} };
       for (const [name, nodeMap] of this.nodeEntries) {
         const m3 = {};
-        for (const [key, { data: data2 }] of nodeMap) m3[key] = data2;
+        for (const [key, { data: data2 }] of nodeMap.entries()) m3[key] = data2;
         data.nodes[name] = m3;
       }
       for (const [name, edgeMap] of this.edgeEntries) {
@@ -2398,13 +2389,15 @@
       this.#edgeMap = (ctor) => new EdgeMap((from, to) => new ctor(this, from, to));
       this.nodes = {
         app: this.#nodeMap(NApp),
-        post: this.#nodeMap(NPost),
         bundle: this.#nodeMap(NBundle),
+        community: this.#nodeMap(NCommunity),
+        learning: this.#nodeMap(NLearning),
         lib: this.#nodeMap(NLibrary),
         license: this.#nodeMap(NLicense),
         paradigm: this.#nodeMap(NParadigm),
         pl: this.#nodeMap(NPlang),
         plat: this.#nodeMap(NPlatform),
+        post: this.#nodeMap(NPost),
         tag: this.#nodeMap(NTag),
         tool: this.#nodeMap(NTool),
         tsys: this.#nodeMap(NTsys)
@@ -2412,10 +2405,15 @@
       this.edges = {
         app: this.#edgeMap(EApp),
         bundle: this.#edgeMap(EBundle),
+        commPl: this.#edgeMap(ECommPl),
+        commTag: this.#edgeMap(ECommTag),
         compilesTo: this.#edgeMap(ECompilesTo),
         dialect: this.#edgeMap(EDialect),
         impl: this.#edgeMap(EImpl),
         influence: this.#edgeMap(EInfluence),
+        learningPl: this.#edgeMap(ELearningPl),
+        learningTag: this.#edgeMap(ELearningTag),
+        learningComm: this.#edgeMap(ELearningComm),
         lib: this.#edgeMap(ELib),
         license: this.#edgeMap(ELicense),
         paradigm: this.#edgeMap(EParadigm),
@@ -2450,6 +2448,9 @@
     get urlHome() {
       return this.data.extHomeURL;
     }
+    get links() {
+      return new IterTap(this.data.links);
+    }
     get images() {
       return new IterTap(this.data.images);
     }
@@ -2467,6 +2468,10 @@
     }
     addImages(images) {
       arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
+      return this;
+    }
+    addLinks(links) {
+      arrayMerge(this.data.links ??= [], links, (l1, l22) => l1.url === l22.url);
       return this;
     }
   };
@@ -2676,6 +2681,44 @@
       return new MapTap(this.graph.edges.post.adjFrom.getMap(this.key));
     }
   };
+  var NCommunity = class _NCommunity extends NBase {
+    constructor() {
+      super(...arguments);
+      this.kind = _NCommunity.kind;
+    }
+    static {
+      this.kind = "community";
+    }
+    addPlangs(others) {
+      for (const other of others) this.graph.edges.commPl.connect(other, this.key);
+      return this;
+    }
+    addTags(others) {
+      for (const other of others) this.graph.edges.commTag.connect(this.key, other);
+      return this;
+    }
+  };
+  var NLearning = class _NLearning extends NBase {
+    constructor() {
+      super(...arguments);
+      this.kind = _NLearning.kind;
+    }
+    static {
+      this.kind = "learning";
+    }
+    addPlangs(others) {
+      for (const other of others) this.graph.edges.learningPl.connect(other, this.key);
+      return this;
+    }
+    addTags(others) {
+      for (const other of others) this.graph.edges.learningTag.connect(this.key, other);
+      return this;
+    }
+    addCommunities(others) {
+      for (const other of others) this.graph.edges.learningComm.connect(this.key, other);
+      return this;
+    }
+  };
   var NLibrary = class _NLibrary extends NBase {
     constructor() {
       super(...arguments);
@@ -2684,7 +2727,7 @@
     static {
       this.kind = "lib";
     }
-    addPls(others) {
+    addPlangs(others) {
       for (const other of others) this.graph.edges.lib.connect(other, this.key);
       return this;
     }
@@ -2742,7 +2785,7 @@
     static {
       this.kind = "tool";
     }
-    addPls(others) {
+    addPlangs(others) {
       for (const other of others) this.graph.edges.tool.connect(other, this.key);
       return this;
     }
@@ -2764,7 +2807,7 @@
     static {
       this.kind = "app";
     }
-    addPls(others) {
+    addPlangs(others) {
       for (const other of others) this.graph.edges.app.connect(other, this.key);
       return this;
     }
@@ -2781,7 +2824,7 @@
       for (const other of others) this.graph.edges.bundle.connect(this.key, other);
       return this;
     }
-    addPls(others) {
+    addPlangs(others) {
       for (const other of others) this.graph.edges.plBundle.connect(other, this.key);
       return this;
     }
@@ -2818,7 +2861,7 @@
     get href() {
       return `/blog/${this.plainKey}`;
     }
-    addPls(others) {
+    addPlangs(others) {
       for (const other of others) this.graph.edges.post.connect(other, this.key);
       return this;
     }
@@ -3018,6 +3061,66 @@
     }
     get nodeTo() {
       return this.graph.nodes.pl.get(this.to);
+    }
+  };
+  var ECommPl = class extends EBase {
+    constructor() {
+      super(...arguments);
+      this.kind = "commPl";
+    }
+    get nodeFrom() {
+      return this.graph.nodes.pl.get(this.from);
+    }
+    get nodeTo() {
+      return this.graph.nodes.community.get(this.to);
+    }
+  };
+  var ECommTag = class extends EBase {
+    constructor() {
+      super(...arguments);
+      this.kind = "commTag";
+    }
+    get nodeFrom() {
+      return this.graph.nodes.community.get(this.from);
+    }
+    get nodeTo() {
+      return this.graph.nodes.tag.get(this.to);
+    }
+  };
+  var ELearningPl = class extends EBase {
+    constructor() {
+      super(...arguments);
+      this.kind = "learningPl";
+    }
+    get nodeFrom() {
+      return this.graph.nodes.pl.get(this.from);
+    }
+    get nodeTo() {
+      return this.graph.nodes.learning.get(this.to);
+    }
+  };
+  var ELearningTag = class extends EBase {
+    constructor() {
+      super(...arguments);
+      this.kind = "learningTag";
+    }
+    get nodeFrom() {
+      return this.graph.nodes.learning.get(this.from);
+    }
+    get nodeTo() {
+      return this.graph.nodes.tag.get(this.to);
+    }
+  };
+  var ELearningComm = class extends EBase {
+    constructor() {
+      super(...arguments);
+      this.kind = "learningTag";
+    }
+    get nodeFrom() {
+      return this.graph.nodes.learning.get(this.from);
+    }
+    get nodeTo() {
+      return this.graph.nodes.community.get(this.to);
     }
   };
 
@@ -3347,7 +3450,6 @@
       {
         "data-node-key": nodeKey ?? "NONE",
         class: tw(
-          cssClass("pill"),
           "inline-block text-center",
           // NOTE: this approximately solves a mistmatch between rendering as a web component and as a Preact component,
           // but it's not perfect. This bug makes no sense so far and I need to find the root cause.
@@ -3365,8 +3467,8 @@
     );
   }
 
-  // packages/frontend/src/components/pl-info/pl-info.tsx
-  function PlInfo({ pl, open, tab }) {
+  // packages/frontend/src/components/node-info/node-info.tsx
+  function NodeInfo({ node: pl, open, tab }) {
     const forGrid = tab === "plangs";
     return /* @__PURE__ */ u4(
       "div",
@@ -3376,12 +3478,13 @@
           "px-2 pt-2 sm:p-4",
           !forGrid && "-mx-4",
           // Compensate for padding so it aligns with the rest of the content.
-          "prose prose-green dark:prose-invert sm:prose-sm lg:prose-lg xl:prose-xl max-w-[unset]",
+          "prose prose-green dark:prose-invert",
+          "max-w-[unset]",
           forGrid && "bg-linear-to-b to-secondary/50",
           tw(BORDER, forGrid && "border-b-1")
         ),
         children: [
-          /* @__PURE__ */ u4("h1", { class: tw(!forGrid && "text-4xl", forGrid && "inline text-lg sm:block sm:text-4xl"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${pl?.plainKey}`, children: pl?.name ?? "Plang" }) }),
+          /* @__PURE__ */ u4("h1", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${pl?.plainKey}`, children: pl?.name ?? "Plang" }) }),
           pl && /* @__PURE__ */ u4(k, { children: [
             /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash sm:hidden" : "hidden"), children: "\u2014" }),
             /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
@@ -3419,23 +3522,19 @@
     return all.filter(([_2, iterTap]) => iterTap.isEmpty === false);
   }
 
-  // packages/frontend/src/components/pl-info/index.tsx
-  function renderPlInfo({ pl, tab, open }) {
-    const plInfo = elem("plInfo");
-    if (!plInfo) {
-      console.log("No plInfo wrapper found.");
+  // packages/frontend/src/components/node-info/index.tsx
+  function renderNodeInfo({ node, tab, open }) {
+    if (!node || !tab) {
+      console.log("Missing props to render nodeInfo.", { node, tab });
       return;
     }
-    if (!pl || !tab) {
-      console.log("Missing props to render plInfo.");
-      return;
+    for (const elem2 of elems("nodeInfo")) {
+      B(/* @__PURE__ */ u4(NodeInfo, { node, tab, open }), elem2);
     }
-    B(/* @__PURE__ */ u4(PlInfo, { pl, tab, open }), plInfo);
   }
-  function renderLastPlInfo(pg) {
-    const plInfo = elem("plInfo");
-    const pl = lastPlang(pg);
-    if (plInfo && pl) renderPlInfo({ pl, tab: "plangs" });
+  function renderLastNodeInfo(pg) {
+    const node = lastPlang(pg);
+    if (node) renderNodeInfo({ node, tab: "plangs" });
   }
 
   // packages/frontend/src/app/index.tsx
@@ -3446,7 +3545,7 @@
     window.restoreFilters = () => ToggleFacetsMenu.initial().runEffects();
     window.restoreHamburguer = () => ToggleHamburguer.initial().runEffects();
     window.restoreLightMode = () => ToggleLights.initial().runEffects();
-    window.restorePlInfo = () => renderLastPlInfo(pg);
+    window.restoreNodeInfo = () => renderLastNodeInfo(pg);
     document.addEventListener("DOMContentLoaded", () => {
       activateIconButtons();
       loadData.then(() => {
@@ -3455,7 +3554,7 @@
         if (!grid) return;
         on(grid, "pointerdown", ({ target }) => {
           const pl = getPl(pg, target);
-          if (pl) renderPlInfo({ pl, tab: "plangs" });
+          if (pl) renderNodeInfo({ node: pl, tab: "plangs" });
         });
         on(grid, "dblclick", ({ target }) => {
           const pl = getPl(pg, target);

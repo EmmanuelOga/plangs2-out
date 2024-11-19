@@ -561,11 +561,11 @@
   .top-0 {
     top: var(--spacing-0);
   }
-  .right-1 {
-    right: var(--spacing-1);
+  .right-0 {
+    right: var(--spacing-0);
   }
-  .bottom-1 {
-    bottom: var(--spacing-1);
+  .bottom-0 {
+    bottom: var(--spacing-0);
   }
   .-left-5 {
     left: calc(var(--spacing-5) * -1);
@@ -1066,9 +1066,6 @@
   .mb-1 {
     margin-bottom: var(--spacing-1);
   }
-  .mb-2 {
-    margin-bottom: var(--spacing-2);
-  }
   .mb-4 {
     margin-bottom: var(--spacing-4);
   }
@@ -1517,6 +1514,10 @@
   .shadow-secondary {
     --tw-shadow-color: var(--color-secondary);
   }
+  .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+  }
   .outline-2 {
     outline-style: var(--tw-outline-style);
     outline-width: 2px;
@@ -1853,11 +1854,6 @@
       margin-bottom: var(--spacing-1);
     }
   }
-  .sm\:mb-3 {
-    @media (width >= 40rem) {
-      margin-bottom: var(--spacing-3);
-    }
-  }
   .sm\:mb-4 {
     @media (width >= 40rem) {
       margin-bottom: var(--spacing-4);
@@ -2121,11 +2117,6 @@
       }
     }
   }
-  .lg\:mb-4 {
-    @media (width >= 64rem) {
-      margin-bottom: var(--spacing-4);
-    }
-  }
   .lg\:size-\[2rem\] {
     @media (width >= 64rem) {
       width: 2rem;
@@ -2336,11 +2327,6 @@
       :where(.prose-xl > :last-child):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
         margin-bottom: 0;
       }
-    }
-  }
-  .xl\:mb-5 {
-    @media (width >= 80rem) {
-      margin-bottom: var(--spacing-5);
     }
   }
   .xl\:size-\[2\.25rem\] {
@@ -2560,20 +2546,10 @@
       }
     }
   }
-  .\32 xl\:mb-6 {
-    @media (width >= 96rem) {
-      margin-bottom: var(--spacing-6);
-    }
-  }
   .\32 xl\:size-\[2\.5rem\] {
     @media (width >= 96rem) {
       width: 2.5rem;
       height: 2.5rem;
-    }
-  }
-  .\32 xl\:h-28 {
-    @media (width >= 96rem) {
-      height: var(--spacing-28);
     }
   }
   .\32 xl\:max-h-\[unset\] {
