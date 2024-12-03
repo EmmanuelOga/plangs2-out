@@ -1,4 +1,4 @@
-/*! tailwindcss v4.0.0-alpha.34 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.0.0-beta.4 | MIT License | https://tailwindcss.com */
 @layer theme, base, components, utilities;
 @layer theme {
   :root {
@@ -1293,7 +1293,7 @@
     border-color: var(--color-primary);
   }
   .border-primary\/85 {
-    border-color: color-mix(in oklch, var(--color-primary) 85%, transparent);
+    border-color: color-mix(in oklab, var(--color-primary) 85%, transparent);
   }
   .border-secondary {
     border-color: var(--color-secondary);
@@ -1308,23 +1308,23 @@
     background-color: var(--color-primary);
   }
   .bg-primary\/20 {
-    background-color: color-mix(in oklch, var(--color-primary) 20%, transparent);
+    background-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
   }
   .bg-primary\/85 {
-    background-color: color-mix(in oklch, var(--color-primary) 85%, transparent);
+    background-color: color-mix(in oklab, var(--color-primary) 85%, transparent);
   }
   .bg-secondary\/50 {
-    background-color: color-mix(in oklch, var(--color-secondary) 50%, transparent);
+    background-color: color-mix(in oklab, var(--color-secondary) 50%, transparent);
   }
   .bg-thumbnails {
     background-color: var(--color-thumbnails);
   }
   .bg-linear-to-b {
-    --tw-gradient-position: to bottom in oklch,;
+    --tw-gradient-position: to bottom in oklab,;
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
   .bg-linear-to-t {
-    --tw-gradient-position: to top in oklch,;
+    --tw-gradient-position: to top in oklab,;
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
   .bg-\[url\(\'\/images\/plangs-light\.svg\'\)\] {
@@ -1339,7 +1339,7 @@
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .to-secondary\/50 {
-    --tw-gradient-to: color-mix(in oklch, var(--color-secondary) 50%, transparent);
+    --tw-gradient-to: color-mix(in oklab, var(--color-secondary) 50%, transparent);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .bg-contain {
@@ -1355,7 +1355,7 @@
     fill: currentColor;
   }
   .stroke-foreground\/50 {
-    stroke: color-mix(in oklch, var(--color-foreground) 50%, transparent);
+    stroke: color-mix(in oklab, var(--color-foreground) 50%, transparent);
   }
   .stroke-\[1px\] {
     stroke-width: 1px;
@@ -1439,19 +1439,19 @@
     color: var(--color-background);
   }
   .text-background\/80 {
-    color: color-mix(in oklch, var(--color-background) 80%, transparent);
+    color: color-mix(in oklab, var(--color-background) 80%, transparent);
   }
   .text-foreground {
     color: var(--color-foreground);
   }
   .text-foreground\/20 {
-    color: color-mix(in oklch, var(--color-foreground) 20%, transparent);
+    color: color-mix(in oklab, var(--color-foreground) 20%, transparent);
   }
   .text-foreground\/50 {
-    color: color-mix(in oklch, var(--color-foreground) 50%, transparent);
+    color: color-mix(in oklab, var(--color-foreground) 50%, transparent);
   }
   .text-foreground\/85 {
-    color: color-mix(in oklch, var(--color-foreground) 85%, transparent);
+    color: color-mix(in oklab, var(--color-foreground) 85%, transparent);
   }
   .text-hiliteb {
     color: var(--color-hiliteb);
@@ -1467,6 +1467,9 @@
   }
   .text-transparent {
     color: transparent;
+  }
+  .capitalize {
+    text-transform: capitalize;
   }
   .lowercase {
     text-transform: lowercase;
@@ -1504,11 +1507,7 @@
     --tw-shadow-color: var(--color-background);
   }
   .shadow-primary\/20 {
-    --tw-shadow-color: color-mix(in oklch, var(--color-primary) 20%, transparent);
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
+    --tw-shadow-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
   }
   .blur {
     --tw-blur: blur(var(--blur));
@@ -1516,6 +1515,10 @@
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .backdrop-filter {
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
   .prose-green {
     --tw-prose-links: #16a34a;
@@ -1578,7 +1581,7 @@
   }
   .placeholder\:text-foreground\/50 {
     &::placeholder {
-      color: color-mix(in oklch, var(--color-foreground) 50%, transparent);
+      color: color-mix(in oklab, var(--color-foreground) 50%, transparent);
     }
   }
   .hover\:bg-hiliteb {
@@ -1591,7 +1594,7 @@
   .hover\:bg-primary\/25 {
     &:hover {
       @media (hover: hover) {
-        background-color: color-mix(in oklch, var(--color-primary) 25%, transparent);
+        background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
       }
     }
   }
@@ -2823,7 +2826,6 @@
       --tw-ring-offset-width: 0px;
       --tw-ring-offset-color: #fff;
       --tw-ring-offset-shadow: 0 0 #0000;
-      --tw-outline-style: solid;
       --tw-blur: initial;
       --tw-brightness: initial;
       --tw-contrast: initial;
@@ -2833,6 +2835,15 @@
       --tw-opacity: initial;
       --tw-saturate: initial;
       --tw-sepia: initial;
+      --tw-backdrop-blur: initial;
+      --tw-backdrop-brightness: initial;
+      --tw-backdrop-contrast: initial;
+      --tw-backdrop-grayscale: initial;
+      --tw-backdrop-hue-rotate: initial;
+      --tw-backdrop-invert: initial;
+      --tw-backdrop-opacity: initial;
+      --tw-backdrop-saturate: initial;
+      --tw-backdrop-sepia: initial;
     }
   }
 }
@@ -2863,47 +2874,47 @@
   }
 }
 @property --tw-scale-x {
-  syntax: "<number> | <percentage>";
+  syntax: "*";
   inherits: false;
   initial-value: 1;
 }
 @property --tw-scale-y {
-  syntax: "<number> | <percentage>";
+  syntax: "*";
   inherits: false;
   initial-value: 1;
 }
 @property --tw-scale-z {
-  syntax: "<number> | <percentage>";
+  syntax: "*";
   inherits: false;
   initial-value: 1;
 }
 @property --tw-rotate-x {
-  syntax: "<transform-function>";
+  syntax: "*";
   inherits: false;
   initial-value: rotateX(0);
 }
 @property --tw-rotate-y {
-  syntax: "<transform-function>";
+  syntax: "*";
   inherits: false;
   initial-value: rotateY(0);
 }
 @property --tw-rotate-z {
-  syntax: "<transform-function>";
+  syntax: "*";
   inherits: false;
   initial-value: rotateZ(0);
 }
 @property --tw-skew-x {
-  syntax: "<transform-function>";
+  syntax: "*";
   inherits: false;
   initial-value: skewX(0);
 }
 @property --tw-skew-y {
-  syntax: "<transform-function>";
+  syntax: "*";
   inherits: false;
   initial-value: skewY(0);
 }
 @property --tw-border-style {
-  syntax: "<custom-ident>";
+  syntax: "*";
   inherits: false;
   initial-value: solid;
 }
@@ -2935,17 +2946,17 @@
   inherits: false;
 }
 @property --tw-gradient-from-position {
-  syntax: "<length> | <percentage>";
+  syntax: "<length-percentage>";
   inherits: false;
   initial-value: 0%;
 }
 @property --tw-gradient-via-position {
-  syntax: "<length> | <percentage>";
+  syntax: "<length-percentage>";
   inherits: false;
   initial-value: 50%;
 }
 @property --tw-gradient-to-position {
-  syntax: "<length> | <percentage>";
+  syntax: "<length-percentage>";
   inherits: false;
   initial-value: 100%;
 }
@@ -3004,11 +3015,6 @@
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-outline-style {
-  syntax: "<custom-ident>";
-  inherits: false;
-  initial-value: solid;
-}
 @property --tw-blur {
   syntax: "*";
   inherits: false;
@@ -3042,6 +3048,42 @@
   inherits: false;
 }
 @property --tw-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-sepia {
   syntax: "*";
   inherits: false;
 }

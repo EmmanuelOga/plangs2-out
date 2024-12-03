@@ -795,29 +795,11 @@
   var parse2 = RISON.parse;
   var stringify2 = RISON.stringify;
 
-  // packages/plangs/src/util.ts
-  function getStrDateYear(strDate) {
-    if (!strDate) return void 0;
-    try {
-      const year = Number.parseInt(strDate?.slice(0, 4));
-      if (year >= 1900 && year <= 2100) return year;
-    } catch (e3) {
-      return void 0;
-    }
-  }
-
-  // packages/frontend/src/auxiliar/utils.ts
-  function debounce(callback, millies) {
-    let timeout;
-    return (...args) => {
-      if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => callback(...args), millies);
-    };
-  }
-  var tap = (item, action) => action(item);
+  // packages/auxiliar/src/misc.ts
+  var ret = (item, action) => action(item);
   function isEmpty(obj) {
-    for (const prop in obj) {
-      if (Object.hasOwn(obj, prop)) return false;
+    for (const prop2 in obj) {
+      if (Object.hasOwn(obj, prop2)) return false;
     }
     return true;
   }
@@ -938,6 +920,38 @@
       return previous ? FragmentTracker.deserialize(previous) : void 0;
     }
   };
+
+  // packages/frontend/src/auxiliar/livereload.ts
+  var pingTimer;
+  var INITIAL_TIMEOUT_MS = 500;
+  var PING_FREQ_MS = 10;
+  var RELOAD_LATENCY_MS = 10;
+  function connectLivereload(timeout = INITIAL_TIMEOUT_MS, lifecycle = "start") {
+    if (pingTimer) {
+      clearInterval(pingTimer);
+      pingTimer = void 0;
+    }
+    const reconnect = () => {
+      console.info("attempting livereload reconnect in", timeout, "ms");
+      setTimeout(() => connectLivereload(timeout * 1.5, "error"), timeout);
+    };
+    const reload = () => {
+      setTimeout(() => window.location.reload(), RELOAD_LATENCY_MS);
+    };
+    const socket = new WebSocket("/livereload");
+    socket.addEventListener("open", () => {
+      if (lifecycle === "error") return reload();
+      socket.send("CONNECT");
+      pingTimer = setInterval(() => socket.readyState === WebSocket.OPEN && socket.send("PING"), PING_FREQ_MS);
+    });
+    socket.addEventListener("message", (event) => {
+      if (event.data === "ACK") console.info("livereload connected", /* @__PURE__ */ new Date());
+      if (event.data === "RELOAD") reload();
+    });
+    socket.addEventListener("close", (event) => {
+      reconnect();
+    });
+  }
 
   // packages/frontend/src/auxiliar/styles.ts
   var BAR = "bg-linear-to-b from-secondary to-background";
@@ -1218,6 +1232,1638 @@
     /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
   ] });
 
+  // packages/frontend/src/components/icon-button/state.tsx
+  function useIconButtonState({ action, disabled, initial }) {
+    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
+    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
+    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
+    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
+    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
+    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
+    console.error(`Unknown action: ${action}`);
+  }
+  var IconButtonBaseState = class extends Dispatchable {
+    get disabled() {
+      return this.data.disabled;
+    }
+    set disabled(value) {
+      this.data.disabled = value;
+    }
+    get value() {
+      const { disabled, ...data } = this.data;
+      return data;
+    }
+  };
+  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "light" ? "light" : "dark", disabled });
+    }
+    get isDark() {
+      return this.data.mode === "dark";
+    }
+    get icon() {
+      return this.isDark ? SUN : MOON;
+    }
+    doAction() {
+      this.data.mode = this.isDark ? "light" : "dark";
+    }
+    runEffects() {
+      document.body.classList.toggle("dark", this.isDark);
+      localStorage.setItem("lightMode", this.data.mode);
+    }
+  };
+  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
+    }
+    get hide() {
+      return this.data.mode === "hide";
+    }
+    get icon() {
+      return this.hide ? MENU : CLOSE;
+    }
+    doAction() {
+      this.data.mode = this.hide ? "show" : "hide";
+    }
+    runEffects() {
+      elem("mainNav")?.classList.toggle("hidden", this.hide);
+      localStorage.setItem("hamburguer", this.data.mode);
+    }
+  };
+  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
+    }
+    get show() {
+      return this.data.mode === "show";
+    }
+    get icon() {
+      return /* @__PURE__ */ u4(
+        "span",
+        {
+          class: tw(
+            "inline-block",
+            "mt-[6px] scale-85",
+            this.show && "stroke-[1px] stroke-foreground/50",
+            this.show ? "text-hiliteb" : "text-primary"
+            // fmt.
+          ),
+          children: FILTER_EDIT
+        }
+      );
+    }
+    doAction() {
+      this.data.mode = this.show ? "hide" : "show";
+    }
+    runEffects() {
+      const fm = elems("facetsMain");
+      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
+      localStorage.setItem("facets", this.data.mode);
+    }
+  };
+  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
+    static initial(initial, disabled = false) {
+      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      const disabled = this.data.disabled;
+      const shadeAll = disabled || this.mode === "any";
+      const shadeAny = disabled || this.mode === "all";
+      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
+        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
+        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
+        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
+      ] });
+    }
+    doAction() {
+      this.data.mode = this.mode === "all" ? "any" : "all";
+    }
+    runEffects() {
+    }
+  };
+  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleClearFacets({ disabled, mode: "" });
+    }
+    get icon() {
+      return this.data.mode === "clearFacets" ? DESELECT : null;
+    }
+    doAction() {
+      this.data.mode = "";
+    }
+    doToggleMode(mode) {
+      this.data.mode = mode;
+      this.dispatch();
+    }
+    runEffects() {
+      for (const el of elems("facetsMain")) el.state?.doResetAll();
+    }
+  };
+  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
+    static initial(disabled = false) {
+      return new _ToggleGridOrder({ disabled, mode: "alpha" });
+    }
+    get mode() {
+      return this.data.mode;
+    }
+    get icon() {
+      return this.mode === "alpha" ? ABC : RANKING;
+    }
+    doAction() {
+      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
+    }
+    /** Reorder the grid on dispatch. */
+    runEffects() {
+      const grid = elem("vertexGrid");
+      if (!grid) return;
+      const thumbns = [...elems("vertexThumbn")].sort(CMP[this.mode]);
+      for (const thumb of thumbns) {
+        grid.appendChild(thumb);
+      }
+    }
+  };
+  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
+  var getRank = (el) => el.dataset.vertexRanking ? Number.parseInt(el.dataset.vertexRanking, 10) : RANKED_LAST;
+  var getKey = (el) => el.dataset.vertexKey ?? "";
+  var CMP = {
+    ranking: (elA, elB) => getRank(elA) - getRank(elB),
+    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
+  };
+
+  // packages/frontend/src/components/icon-button/icon-button.tsx
+  function IconButton({ action, disabled, initial, class: cssClass2 }) {
+    const state = useIconButtonState({ action, disabled, initial });
+    const self = useRootState(state);
+    y3(() => {
+      if (!state) return;
+      const newval = disabled === void 0 ? false : disabled;
+      if (newval !== state.disabled) {
+        state.disabled = newval;
+        state.dispatch();
+      }
+    }, [disabled]);
+    const toggle = () => {
+      if (!state) return;
+      state.doAction();
+      state.runEffects();
+      state.dispatch();
+      send(self.current, customEvent("icon-button", state.value));
+    };
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        ref: self,
+        tabIndex: disabled ? void 0 : 0,
+        ...onClickOnEnter(toggle),
+        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
+        children: state?.icon
+      }
+    );
+  }
+
+  // packages/frontend/src/components/icon-button/index.tsx
+  function activateIconButtons() {
+    for (const elem2 of elems("iconButton")) {
+      if (elem2.dataset.action) {
+        const props = {
+          action: elem2.dataset.action,
+          class: classesExcept(elem2, cssClass("iconButton"))
+        };
+        B(/* @__PURE__ */ u4(IconButton, { ...props }), elem2);
+      } else {
+        console.error("Missing prop for IconButton component.");
+      }
+    }
+  }
+
+  // packages/auxiliar/src/array.ts
+  function arrayMerge(target, newData, similar = (l1, l22) => l1 === l22, onDuplicate) {
+    for (const newElem of newData) {
+      const prevElem = target.find((elem2) => similar(elem2, newElem));
+      if (prevElem) {
+        onDuplicate?.(prevElem, newElem);
+      } else {
+        target.push(newElem);
+      }
+    }
+  }
+
+  // packages/auxiliar/src/iter_tap.ts
+  var IterTap = class _IterTap {
+    constructor(iterable) {
+      this.array = Array.isArray(iterable) ? iterable : iterable ? [...iterable] : void 0;
+    }
+    filter(callback) {
+      return this.array ? this.array.filter(callback) : [];
+    }
+    map(callback) {
+      return new _IterTap(this.array ? this.array.map(callback) : []);
+    }
+    reduce(callback, init) {
+      return this.array ? this.array.reduce(callback, init) : init;
+    }
+    sort(cmp) {
+      return this.array ? [...this.array].sort(cmp) : [];
+    }
+    join(str) {
+      return this.array ? this.array.join(str) : "";
+    }
+    includes(val) {
+      return this.array ? this.array.includes(val) : false;
+    }
+    some(predicate) {
+      return this.array ? this.array.some(predicate) : false;
+    }
+    find(predicate) {
+      return this.array?.find(predicate);
+    }
+    tap(callback) {
+      if (this.array && this.array.length > 0) return callback(this.array);
+    }
+    get(index) {
+      return this.array ? this.array[index] : void 0;
+    }
+    get isEmpty() {
+      return this.array ? this.array.length === 0 : true;
+    }
+    get size() {
+      return this.array ? this.array.length : 0;
+    }
+    get length() {
+      return this.size;
+    }
+    /** Return all non-null and non-undefined values (if strings, returns the ones with length > 0). */
+    get existing() {
+      return this.filter((v4) => v4 !== void 0 && v4 !== null && (typeof v4 !== "string" || v4.length > 0));
+    }
+    get reverse() {
+      return new _IterTap(this.array ? [...this.array].reverse() : void 0);
+    }
+    get first() {
+      return this.array && this.array.length > 0 ? this.array[0] : void 0;
+    }
+    get last() {
+      return this.array && this.array.length > 0 ? this.array[this.array.length - 1] : void 0;
+    }
+    [Symbol.iterator]() {
+      return this.array ? this.array[Symbol.iterator]() : [].values();
+    }
+  };
+
+  // packages/graphgen/src/library.ts
+  var Vertex = class {
+    constructor(key) {
+      this.key = key;
+      /** Serializable data. */
+      this.data = {};
+    }
+    /** Shallow merge data. */
+    merge(data) {
+      Object.assign(this.data, data);
+      return this;
+    }
+    /** The key without the `${kind}+` prefix. */
+    get plainKey() {
+      return this.key.replace(/^[a-z]+\+/, "");
+    }
+    /**
+     * Lower-case first letter of the {@link plainKey}, or {@link NON_AZ} if it starts with a non-letter.
+     * Useful when doing things like organizing the data in a folder structure.
+     */
+    get classifier() {
+      const pk = this.plainKey;
+      return /^[a-z]/i.test(pk) ? pk[0].toLowerCase() : NON_AZ;
+    }
+    /** {@link merge} can be used to load serialized data into an instance. */
+    toJSON() {
+      return this.data;
+    }
+    toString() {
+      return this.key;
+    }
+  };
+  var NON_AZ = "-";
+  var Vertices = class {
+    constructor(name, kind, factory) {
+      this.name = name;
+      this.kind = kind;
+      this.factory = factory;
+      this.map = /* @__PURE__ */ new Map();
+    }
+    set(key, data = {}) {
+      const vertex = this.factory(key).merge(data);
+      this.map.set(key, vertex);
+      return vertex;
+    }
+    get(key) {
+      return this.map.get(key);
+    }
+    has(key) {
+      return this.map.has(key);
+    }
+    delete(key) {
+      return this.map.delete(key);
+    }
+    clear() {
+      this.map.clear();
+    }
+    get keys() {
+      return this.map.keys();
+    }
+    get values() {
+      return this.map.values();
+    }
+    get entries() {
+      return this.map.entries();
+    }
+    toJSON() {
+      return Object.fromEntries([...this.map].map(([key, vertex]) => [key, vertex.toJSON()]));
+    }
+  };
+  var Edges = class {
+    /**
+     * We keep track of the from and to sources {@link Vertices} containers,
+     * so we can easily retrieve the actual vertex from its key when needed.
+     */
+    constructor(fromSource, toSource, descDirect, descInverse) {
+      this.fromSource = fromSource;
+      this.toSource = toSource;
+      this.descDirect = descDirect;
+      this.descInverse = descInverse;
+    }
+    #forward = /* @__PURE__ */ new Map();
+    #backward = /* @__PURE__ */ new Map();
+    /**
+     * Track a relationship between two vertices.
+     * **Note**: the user is responsible of ensuring the vertices exist.
+     */
+    add(fromKey, ...toKeys) {
+      let forward = this.#forward.get(fromKey);
+      if (!forward) this.#forward.set(fromKey, forward = /* @__PURE__ */ new Set());
+      for (const toKey of toKeys) {
+        forward.add(toKey);
+        let backward = this.#backward.get(toKey);
+        if (!backward) this.#backward.set(toKey, backward = /* @__PURE__ */ new Set());
+        backward.add(fromKey);
+      }
+      return this;
+    }
+    /** Get the vertices from the keys. */
+    get(fromKey, toKey) {
+      return [this.fromSource.get(fromKey), this.toSource.get(toKey)];
+    }
+    /** Shortcut: add a relationship and return the target vertices. */
+    addGet(fromKey, toKey) {
+      return this.add(fromKey, toKey).get(fromKey, toKey);
+    }
+    delete(fromKey, toKey) {
+      const f5 = this.#forward.get(fromKey)?.delete(toKey) ?? false;
+      const b3 = this.#backward.get(toKey)?.delete(fromKey) ?? false;
+      return f5 || b3;
+    }
+    forward(fromKey) {
+      return this.#forward.get(fromKey) ?? /* @__PURE__ */ new Set();
+    }
+    backward(toKey) {
+      return this.#backward.get(toKey) ?? /* @__PURE__ */ new Set();
+    }
+    has(fromKey, toKey) {
+      return this.#forward.get(fromKey)?.has(toKey) ?? false;
+    }
+    /** Return all keys `[fromKey, Set<toKey>]`. */
+    get entriesForward() {
+      return [...this.#forward].map(([key, set]) => [key, set]);
+    }
+    /** Return all keys `[toKey, Set<fromKey>]`. */
+    get entriesBackward() {
+      return [...this.#backward].map(([key, set]) => [key, set]);
+    }
+    /** Map all Vertex keys to their respective Vertices or undefined if missing. */
+    get vertices() {
+      const result = [];
+      for (const [fromKey, toKeys] of this.entriesForward) {
+        const from = this.fromSource.get(fromKey);
+        for (const toKey of toKeys) result.push([fromKey, from, toKey, this.toSource.get(toKey)]);
+      }
+      return result;
+    }
+    /* Number of relationships. */
+    get size() {
+      return this.#forward.values().reduce((acc, set) => acc + set.size, 0);
+    }
+    /* {@link addMany} can be used to load back the result of the serialization. */
+    toJSON() {
+      return Object.fromEntries(this.entriesForward.map(([fromKey, setToKeys]) => [fromKey, [...setToKeys]]));
+    }
+  };
+  var RelFrom = class {
+    constructor(from, edges) {
+      this.from = from;
+      this.edges = edges;
+    }
+    add(...toKeys) {
+      this.edges.add(this.from.key, ...toKeys);
+      return this.from;
+    }
+    remove(...toKeys) {
+      for (const toKey of toKeys) this.edges.delete(this.from.key, toKey);
+      return this.from;
+    }
+    has(toKey) {
+      return this.edges.has(this.from.key, toKey);
+    }
+    get keys() {
+      return this.edges.forward(this.from.key);
+    }
+    get values() {
+      return [...this.keys].map((k3) => this.edges.toSource.get(k3)).filter((v4) => v4);
+    }
+    get size() {
+      return this.keys.size;
+    }
+  };
+  var RelTo = class {
+    constructor(to, edges) {
+      this.to = to;
+      this.edges = edges;
+    }
+    add(...fromKeys) {
+      for (const fromKey of fromKeys) this.edges.add(fromKey, this.to.key);
+      return this.to;
+    }
+    remove(...fromKeys) {
+      for (const fromKey of fromKeys) this.edges.delete(fromKey, this.to.key);
+      return this.to;
+    }
+    has(fromKey) {
+      return this.edges.has(fromKey, this.to.key);
+    }
+    get keys() {
+      return this.edges.backward(this.to.key);
+    }
+    get values() {
+      return [...this.keys].map((k3) => this.edges.fromSource.get(k3)).filter((v4) => v4);
+    }
+    get size() {
+      return this.keys.size;
+    }
+  };
+
+  // packages/plangs/src/auxiliar/str_date.ts
+  var validYear = (year) => year >= 1940 && year <= 2100;
+  var validMonth = (month) => month >= 1 && month <= 12;
+  function parseYear(val) {
+    if (!val || val.length < 4 || val.length > 10) return;
+    const year = Number.parseInt(val.split(/\D/, 3)[0], 10);
+    if (validYear(year)) return year;
+  }
+  function parseMonth(val) {
+    if (!val || val.length < 4 || val.length > 10) return;
+    const month = Number.parseInt(val.split(/\D/, 3)[1], 10);
+    if (validMonth(month)) return month;
+  }
+  function strDateCompare(a4, b3) {
+    if (a4 === b3) return 0;
+    if (!a4) return -1;
+    if (!b3) return 1;
+    return a4.localeCompare(b3);
+  }
+  function isRecent(date, referenceDate) {
+    if (!date) return false;
+    return date >= referenceDate;
+  }
+
+  // packages/plangs/src/graph/vertex_data_fields.ts
+  var ReleaseWrapper = class {
+    constructor(release) {
+      this.release = release;
+    }
+    get version() {
+      return this.release.version;
+    }
+    get date() {
+      return this.release.date;
+    }
+    get year() {
+      return parseYear(this.release.date);
+    }
+    get month() {
+      return parseMonth(this.release.date);
+    }
+    isRecent(referenceDate) {
+      return isRecent(this.date, referenceDate);
+    }
+    compareDate(other) {
+      return strDateCompare(this.date, other.date);
+    }
+  };
+  var FieldReleases = class {
+    constructor(vertex) {
+      this.vertex = vertex;
+    }
+    get all() {
+      return new IterTap(this.vertex.data.releases).map((rel2) => new ReleaseWrapper(rel2));
+    }
+    get last() {
+      const all = this.all;
+      if (all.size === 0) return void 0;
+      if (all.size === 1) return all.get(0);
+      return all.sort((r1, r22) => r1.compareDate(r22))[0];
+    }
+  };
+  var FieldStrDate = class {
+    constructor(key, vertex) {
+      this.key = key;
+      this.vertex = vertex;
+    }
+    get value() {
+      return this.vertex.data[this.key];
+    }
+    get year() {
+      return parseYear(this.value);
+    }
+    get strYear() {
+      return this.value?.slice(0, 4);
+    }
+    get month() {
+      return parseMonth(this.value);
+    }
+    isRecent(referenceDate) {
+      return isRecent(this.value, referenceDate);
+    }
+  };
+  var FieldGithub = class {
+    constructor(vertex) {
+      this.vertex = vertex;
+    }
+    /** Returns -1 if the number of stars is unknown. */
+    get stars() {
+      return this.vertex.data.githubStars ?? -1;
+    }
+    get path() {
+      return this.vertex.data.extGithubPath;
+    }
+    get url() {
+      return this.path ? `https://github.com/${this.path}` : void 0;
+    }
+  };
+
+  // packages/plangs/src/graph/vertex_base.ts
+  var PlangsVertex = class extends Vertex {
+    constructor(graph, key) {
+      super(key);
+      this.graph = graph;
+    }
+    get name() {
+      return this.data.name ? this.data.name : this.plainKey;
+    }
+    #lcName;
+    /** Lower case Name, used to compare agasint user search string. */
+    get lcName() {
+      if (!this.#lcName) this.#lcName = this.name.toLowerCase();
+      return this.#lcName;
+    }
+    get created() {
+      return new FieldStrDate("created", this);
+    }
+    get description() {
+      return this.data.description || this.name;
+    }
+    get urlHome() {
+      return this.data.extHomeURL;
+    }
+    get links() {
+      return new IterTap(this.data.links);
+    }
+    get images() {
+      return new IterTap(this.data.images);
+    }
+    get keywords() {
+      return new IterTap(this.data.keywords);
+    }
+    get keywordsRegexp() {
+      const { keywords } = this.data;
+      if (!keywords) return void 0;
+      const lenient = keywords.map((k3) => k3.replaceAll(/[- ]/g, "\\s*.?\\s*"));
+      return new RegExp(`\\b(${lenient.join("|")})\\b`, "i");
+    }
+    get thumbUrl() {
+      return (this.images.find(({ kind }) => kind === "logo") ?? this.images.first)?.url;
+    }
+    addImages(images) {
+      arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
+      return this;
+    }
+    addLinks(links) {
+      arrayMerge(this.data.links ??= [], links, (l1, l22) => l1.url === l22.url);
+      return this;
+    }
+  };
+
+  // packages/plangs/src/graph/generated.ts
+  var PlangsGraphBase = class _PlangsGraphBase {
+    constructor() {
+      // Create a Vertices instances for each vertex.
+      this.app = new Vertices("app", "app", (key) => new VApp(this, key));
+      this.bundle = new Vertices("bundle", "bun", (key) => new VBundle(this, key));
+      this.community = new Vertices("community", "comm", (key) => new VCommunity(this, key));
+      this.learning = new Vertices("learning", "learn", (key) => new VLearning(this, key));
+      this.library = new Vertices("library", "lib", (key) => new VLibrary(this, key));
+      this.license = new Vertices("license", "lic", (key) => new VLicense(this, key));
+      this.paradigm = new Vertices("paradigm", "para", (key) => new VParadigm(this, key));
+      this.plang = new Vertices("plang", "pl", (key) => new VPlang(this, key));
+      this.platform = new Vertices("platform", "plat", (key) => new VPlatform(this, key));
+      this.post = new Vertices("post", "post", (key) => new VPost(this, key));
+      this.tag = new Vertices("tag", "tag", (key) => new VTag(this, key));
+      this.tool = new Vertices("tool", "tool", (key) => new VTool(this, key));
+      this.typeSystem = new Vertices("typeSystem", "tsys", (key) => new VTypeSystem(this, key));
+      /** All vertex collections. */
+      this.vertices = {
+        app: this.app,
+        bundle: this.bundle,
+        community: this.community,
+        learning: this.learning,
+        library: this.library,
+        license: this.license,
+        paradigm: this.paradigm,
+        plang: this.plang,
+        platform: this.platform,
+        post: this.post,
+        tag: this.tag,
+        tool: this.tool,
+        typeSystem: this.typeSystem
+      };
+      /** All edge collections. */
+      this.edges = {
+        appRelPlatforms: new Edges(this.app, this.platform, "Platforms supported", "Apps supporting this"),
+        appRelWrittenWith: new Edges(this.app, this.plang, "Plangs used to implement this", "Apps implemented with this"),
+        bundleRelPlangs: new Edges(this.bundle, this.plang, "Plangs this Bundle is for", "Bundles of Tools for this"),
+        bundleRelTools: new Edges(this.bundle, this.tool, "Tools in this", "Bundles including this"),
+        communityRelApps: new Edges(this.community, this.app, "Apps supported", "Communities suporting this"),
+        communityRelLibraries: new Edges(this.community, this.library, "Libraries supported", "Communities suporting this"),
+        communityRelPlangs: new Edges(this.community, this.plang, "Plangs supported", "Communities suporting this"),
+        communityRelTools: new Edges(this.community, this.tool, "Tools supported", "Communities suporting this"),
+        learningRelApps: new Edges(this.learning, this.app, "Apps supported", "Learning resources"),
+        learningRelCommunities: new Edges(this.learning, this.community, "Communities supporting this", "Learning resources"),
+        learningRelLibraries: new Edges(this.learning, this.library, "Libraries supported", "Learning resources"),
+        learningRelPlangs: new Edges(this.learning, this.plang, "Plangs covered", "Learning resources"),
+        learningRelTools: new Edges(this.learning, this.tool, "Tools supported", "Learning resources"),
+        libraryRelPlangs: new Edges(this.library, this.plang, "Plangs supported", "Software Libraries"),
+        libraryRelPlatforms: new Edges(this.library, this.platform, "Platforms supported", "Libraries supporting this"),
+        libraryRelWrittenWith: new Edges(this.library, this.plang, "Plangs used", "Libraries made with this"),
+        licenseRelApps: new Edges(this.license, this.app, "Apps using this", "Licenses"),
+        licenseRelLibraries: new Edges(this.license, this.library, "Libraries using this", "Licenses"),
+        licenseRelPlangs: new Edges(this.license, this.plang, "Plangs using this", "Licenses"),
+        licenseRelTools: new Edges(this.license, this.tool, "Tools using this", "Licenses"),
+        plangRelCompilesTo: new Edges(this.plang, this.plang, "Transpiling targets", "Plangs compiling to this"),
+        plangRelDialectOf: new Edges(this.plang, this.plang, "Plangs this is a Dialect of", "Dialects"),
+        plangRelImplements: new Edges(this.plang, this.plang, "Plangs this Implements", "Plangs implementing this"),
+        plangRelInfluencedBy: new Edges(this.plang, this.plang, "Plangs that influenced this", "Plangs this influenced"),
+        plangRelParadigms: new Edges(this.plang, this.paradigm, "Paradigms implemented", "Plangs implementing this"),
+        plangRelPlatforms: new Edges(this.plang, this.platform, "Platforms supported", "Plangs supporting this"),
+        plangRelTools: new Edges(this.plang, this.tool, "Tools for this", "Plangs supported"),
+        plangRelTypeSystems: new Edges(this.plang, this.typeSystem, "Type Systems implemented", "Plangs implementing this"),
+        plangRelWrittenWith: new Edges(this.plang, this.plang, "Plangs used to implement this", "Plangs implemented with this"),
+        postRelPlangs: new Edges(this.post, this.plang, "Plangs covered", "Posts talking about this"),
+        tagRelApps: new Edges(this.tag, this.app, "Apps tagged", "Tags"),
+        tagRelCommunities: new Edges(this.tag, this.community, "Communities tagged", "Tags"),
+        tagRelLearning: new Edges(this.tag, this.learning, "Learning resources tagged", "Tags"),
+        tagRelLibraries: new Edges(this.tag, this.library, "Libraries tagged", "Tags"),
+        tagRelPlangs: new Edges(this.tag, this.plang, "Plangs tagged", "Tags"),
+        tagRelTools: new Edges(this.tag, this.tool, "Tools tagged", "Tags"),
+        toolRelPlatforms: new Edges(this.tool, this.platform, "Platforms supported", "Tools supporting this"),
+        toolRelWrittenWith: new Edges(this.tool, this.plang, "Plangs used to implement this", "Tools implemented with this")
+      };
+    }
+    /** Return a type checked object identifying a relationship of a specific kind of Vertex. */
+    static relConfig(vertexName, vertexRel) {
+      const klass = _PlangsGraphBase.vertexClass(vertexName);
+      const rel2 = klass.relations[vertexRel];
+      return { kind: "rel", edgeName: rel2.edgeName, direction: rel2.direction };
+    }
+    /** Return a type checked object identifying a property of the class that is "readable" (a prop returning a String, Boolean or Nunber). */
+    static propConfig(vertexName, vertexProp) {
+      return { kind: "prop", vertexName, vertexProp };
+    }
+    /** Get a Vertex class by its Vertex name. */
+    static vertexClass(vertexName) {
+      if (vertexName === "app") return VApp;
+      if (vertexName === "bundle") return VBundle;
+      if (vertexName === "community") return VCommunity;
+      if (vertexName === "learning") return VLearning;
+      if (vertexName === "library") return VLibrary;
+      if (vertexName === "license") return VLicense;
+      if (vertexName === "paradigm") return VParadigm;
+      if (vertexName === "plang") return VPlang;
+      if (vertexName === "platform") return VPlatform;
+      if (vertexName === "post") return VPost;
+      if (vertexName === "tag") return VTag;
+      if (vertexName === "tool") return VTool;
+      if (vertexName === "typeSystem") return VTypeSystem;
+    }
+    toJSON() {
+      return {
+        vertices: Object.fromEntries(Object.entries(this.vertices).map(([k3, v4]) => [k3, v4.toJSON()])),
+        edges: Object.fromEntries(Object.entries(this.edges).map(([k3, e3]) => [k3, e3.toJSON()]))
+      };
+    }
+    loadJSON(data) {
+      for (const [vertexName, vertices] of Object.entries(data.vertices)) {
+        const map = this.vertices[vertexName];
+        for (const [vertexKey, vertexData] of Object.entries(vertices)) {
+          map.set(vertexKey, vertexData);
+        }
+      }
+      for (const [edgeName, edges] of Object.entries(data.edges)) {
+        const map = this.edges[edgeName];
+        for (const [fromKey, toKeys] of Object.entries(edges)) {
+          map.add(fromKey, ...toKeys);
+        }
+      }
+      return this;
+    }
+  };
+  var VAppBase = class _VAppBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VAppBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "app";
+    }
+    static {
+      this.vertexName = "app";
+    }
+    static {
+      this.vertexDesc = "Software Application";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relCommunities: { edgeName: "communityRelApps", direction: "inverse" },
+        relLearning: { edgeName: "learningRelApps", direction: "inverse" },
+        relLicenses: { edgeName: "licenseRelApps", direction: "inverse" },
+        relPlatforms: { edgeName: "appRelPlatforms", direction: "direct" },
+        relTags: { edgeName: "tagRelApps", direction: "inverse" },
+        relWrittenWith: { edgeName: "appRelWrittenWith", direction: "direct" }
+      };
+    }
+    /** Communities suporting this `VCommunity-[relApps]->(this:VApp)`. Inverse: {@link VCommunity.relApps}. */
+    get relCommunities() {
+      return new RelTo(this, this.graph.edges.communityRelApps);
+    }
+    /** Learning resources `VLearning-[relApps]->(this:VApp)`. Inverse: {@link VLearning.relApps}. */
+    get relLearning() {
+      return new RelTo(this, this.graph.edges.learningRelApps);
+    }
+    /** Licenses `VLicense-[relApps]->(this:VApp)`. Inverse: {@link VLicense.relApps}. */
+    get relLicenses() {
+      return new RelTo(this, this.graph.edges.licenseRelApps);
+    }
+    /** Platforms supported `(this:VApp)-[relPlatforms]->VPlatform`. Inverse: {@link VPlatform.relApps}. */
+    get relPlatforms() {
+      return new RelFrom(this, this.graph.edges.appRelPlatforms);
+    }
+    /** Tags `VTag-[relApps]->(this:VApp)`. Inverse: {@link VTag.relApps}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelApps);
+    }
+    /** Plangs used to implement this `(this:VApp)-[relWrittenWith]->VPlang`. Inverse: {@link VPlang.relApps}. */
+    get relWrittenWith() {
+      return new RelFrom(this, this.graph.edges.appRelWrittenWith);
+    }
+  };
+  var VBundleBase = class _VBundleBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VBundleBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "bun";
+    }
+    static {
+      this.vertexName = "bundle";
+    }
+    static {
+      this.vertexDesc = "Bundle of Tools";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relPlangs: { edgeName: "bundleRelPlangs", direction: "direct" },
+        relTools: { edgeName: "bundleRelTools", direction: "direct" }
+      };
+    }
+    /** Plangs this Bundle is for `(this:VBundle)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relBundles}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.bundleRelPlangs);
+    }
+    /** Tools in this `(this:VBundle)-[relTools]->VTool`. Inverse: {@link VTool.relBundles}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.bundleRelTools);
+    }
+  };
+  var VCommunityBase = class _VCommunityBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VCommunityBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "comm";
+    }
+    static {
+      this.vertexName = "community";
+    }
+    static {
+      this.vertexDesc = "Community";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "communityRelApps", direction: "direct" },
+        relLearning: { edgeName: "learningRelCommunities", direction: "inverse" },
+        relLibraries: { edgeName: "communityRelLibraries", direction: "direct" },
+        relPlangs: { edgeName: "communityRelPlangs", direction: "direct" },
+        relTags: { edgeName: "tagRelCommunities", direction: "inverse" },
+        relTools: { edgeName: "communityRelTools", direction: "direct" }
+      };
+    }
+    /** Apps supported `(this:VCommunity)-[relApps]->VApp`. Inverse: {@link VApp.relCommunities}. */
+    get relApps() {
+      return new RelFrom(this, this.graph.edges.communityRelApps);
+    }
+    /** Learning resources `VLearning-[relCommunities]->(this:VCommunity)`. Inverse: {@link VLearning.relCommunities}. */
+    get relLearning() {
+      return new RelTo(this, this.graph.edges.learningRelCommunities);
+    }
+    /** Libraries supported `(this:VCommunity)-[relLibraries]->VLibrary`. Inverse: {@link VLibrary.relCommunities}. */
+    get relLibraries() {
+      return new RelFrom(this, this.graph.edges.communityRelLibraries);
+    }
+    /** Plangs supported `(this:VCommunity)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relCommunities}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.communityRelPlangs);
+    }
+    /** Tags `VTag-[relCommunities]->(this:VCommunity)`. Inverse: {@link VTag.relCommunities}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelCommunities);
+    }
+    /** Tools supported `(this:VCommunity)-[relTools]->VTool`. Inverse: {@link VTool.relCommunities}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.communityRelTools);
+    }
+  };
+  var VLearningBase = class _VLearningBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VLearningBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "learn";
+    }
+    static {
+      this.vertexName = "learning";
+    }
+    static {
+      this.vertexDesc = "Learning Resource";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "learningRelApps", direction: "direct" },
+        relCommunities: { edgeName: "learningRelCommunities", direction: "direct" },
+        relLibraries: { edgeName: "learningRelLibraries", direction: "direct" },
+        relPlangs: { edgeName: "learningRelPlangs", direction: "direct" },
+        relTags: { edgeName: "tagRelLearning", direction: "inverse" },
+        relTools: { edgeName: "learningRelTools", direction: "direct" }
+      };
+    }
+    /** Apps supported `(this:VLearning)-[relApps]->VApp`. Inverse: {@link VApp.relLearning}. */
+    get relApps() {
+      return new RelFrom(this, this.graph.edges.learningRelApps);
+    }
+    /** Communities supporting this `(this:VLearning)-[relCommunities]->VCommunity`. Inverse: {@link VCommunity.relLearning}. */
+    get relCommunities() {
+      return new RelFrom(this, this.graph.edges.learningRelCommunities);
+    }
+    /** Libraries supported `(this:VLearning)-[relLibraries]->VLibrary`. Inverse: {@link VLibrary.relLearning}. */
+    get relLibraries() {
+      return new RelFrom(this, this.graph.edges.learningRelLibraries);
+    }
+    /** Plangs covered `(this:VLearning)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relLearning}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.learningRelPlangs);
+    }
+    /** Tags `VTag-[relLearning]->(this:VLearning)`. Inverse: {@link VTag.relLearning}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelLearning);
+    }
+    /** Tools supported `(this:VLearning)-[relTools]->VTool`. Inverse: {@link VTool.relLearning}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.learningRelTools);
+    }
+  };
+  var VLibraryBase = class _VLibraryBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VLibraryBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "lib";
+    }
+    static {
+      this.vertexName = "library";
+    }
+    static {
+      this.vertexDesc = "Software Library";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relCommunities: { edgeName: "communityRelLibraries", direction: "inverse" },
+        relLearning: { edgeName: "learningRelLibraries", direction: "inverse" },
+        relLicenses: { edgeName: "licenseRelLibraries", direction: "inverse" },
+        relPlangs: { edgeName: "libraryRelPlangs", direction: "direct" },
+        relPlatforms: { edgeName: "libraryRelPlatforms", direction: "direct" },
+        relTags: { edgeName: "tagRelLibraries", direction: "inverse" },
+        relWrittenWith: { edgeName: "libraryRelWrittenWith", direction: "direct" }
+      };
+    }
+    /** Communities suporting this `VCommunity-[relLibraries]->(this:VLibrary)`. Inverse: {@link VCommunity.relLibraries}. */
+    get relCommunities() {
+      return new RelTo(this, this.graph.edges.communityRelLibraries);
+    }
+    /** Learning resources `VLearning-[relLibraries]->(this:VLibrary)`. Inverse: {@link VLearning.relLibraries}. */
+    get relLearning() {
+      return new RelTo(this, this.graph.edges.learningRelLibraries);
+    }
+    /** Licenses `VLicense-[relLibraries]->(this:VLibrary)`. Inverse: {@link VLicense.relLibraries}. */
+    get relLicenses() {
+      return new RelTo(this, this.graph.edges.licenseRelLibraries);
+    }
+    /** Plangs supported `(this:VLibrary)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relLibraries}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.libraryRelPlangs);
+    }
+    /** Platforms supported `(this:VLibrary)-[relPlatforms]->VPlatform`. Inverse: {@link VPlatform.relLibraries}. */
+    get relPlatforms() {
+      return new RelFrom(this, this.graph.edges.libraryRelPlatforms);
+    }
+    /** Tags `VTag-[relLibraries]->(this:VLibrary)`. Inverse: {@link VTag.relLibraries}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelLibraries);
+    }
+    /** Plangs used `(this:VLibrary)-[relWrittenWith]->VPlang`. Inverse: {@link VPlang.relUsedInLibrary}. */
+    get relWrittenWith() {
+      return new RelFrom(this, this.graph.edges.libraryRelWrittenWith);
+    }
+  };
+  var VLicenseBase = class _VLicenseBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VLicenseBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "lic";
+    }
+    static {
+      this.vertexName = "license";
+    }
+    static {
+      this.vertexDesc = "Software License";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "licenseRelApps", direction: "direct" },
+        relLibraries: { edgeName: "licenseRelLibraries", direction: "direct" },
+        relPlangs: { edgeName: "licenseRelPlangs", direction: "direct" },
+        relTools: { edgeName: "licenseRelTools", direction: "direct" }
+      };
+    }
+    /** Apps using this `(this:VLicense)-[relApps]->VApp`. Inverse: {@link VApp.relLicenses}. */
+    get relApps() {
+      return new RelFrom(this, this.graph.edges.licenseRelApps);
+    }
+    /** Libraries using this `(this:VLicense)-[relLibraries]->VLibrary`. Inverse: {@link VLibrary.relLicenses}. */
+    get relLibraries() {
+      return new RelFrom(this, this.graph.edges.licenseRelLibraries);
+    }
+    /** Plangs using this `(this:VLicense)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relLicenses}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.licenseRelPlangs);
+    }
+    /** Tools using this `(this:VLicense)-[relTools]->VTool`. Inverse: {@link VTool.relLicenses}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.licenseRelTools);
+    }
+  };
+  var VParadigmBase = class _VParadigmBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VParadigmBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "para";
+    }
+    static {
+      this.vertexName = "paradigm";
+    }
+    static {
+      this.vertexDesc = "Programming Language Paradigm";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = { relPlangs: { edgeName: "plangRelParadigms", direction: "inverse" } };
+    }
+    /** Plangs implementing this `VPlang-[relParadigms]->(this:VParadigm)`. Inverse: {@link VPlang.relParadigms}. */
+    get relPlangs() {
+      return new RelTo(this, this.graph.edges.plangRelParadigms);
+    }
+  };
+  var VPlangBase = class _VPlangBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VPlangBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "pl";
+    }
+    static {
+      this.vertexName = "plang";
+    }
+    static {
+      this.vertexDesc = "Programming Language";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "appRelWrittenWith", direction: "inverse" },
+        relBundles: { edgeName: "bundleRelPlangs", direction: "inverse" },
+        relCommunities: { edgeName: "communityRelPlangs", direction: "inverse" },
+        relCompilesTo: { edgeName: "plangRelCompilesTo", direction: "direct" },
+        relDialectOf: { edgeName: "plangRelDialectOf", direction: "direct" },
+        relDialects: { edgeName: "plangRelDialectOf", direction: "inverse" },
+        relImplementedBy: { edgeName: "plangRelImplements", direction: "inverse" },
+        relImplements: { edgeName: "plangRelImplements", direction: "direct" },
+        relInfluenced: { edgeName: "plangRelInfluencedBy", direction: "inverse" },
+        relInfluencedBy: { edgeName: "plangRelInfluencedBy", direction: "direct" },
+        relLearning: { edgeName: "learningRelPlangs", direction: "inverse" },
+        relLibraries: { edgeName: "libraryRelPlangs", direction: "inverse" },
+        relLicenses: { edgeName: "licenseRelPlangs", direction: "inverse" },
+        relParadigms: { edgeName: "plangRelParadigms", direction: "direct" },
+        relPlatforms: { edgeName: "plangRelPlatforms", direction: "direct" },
+        relPosts: { edgeName: "postRelPlangs", direction: "inverse" },
+        relTags: { edgeName: "tagRelPlangs", direction: "inverse" },
+        relTargetOf: { edgeName: "plangRelCompilesTo", direction: "inverse" },
+        relTools: { edgeName: "plangRelTools", direction: "direct" },
+        relToolsUsing: { edgeName: "toolRelWrittenWith", direction: "inverse" },
+        relTypeSystems: { edgeName: "plangRelTypeSystems", direction: "direct" },
+        relUsedInLibrary: { edgeName: "libraryRelWrittenWith", direction: "inverse" },
+        relUsedToWrite: { edgeName: "plangRelWrittenWith", direction: "inverse" },
+        relWrittenWith: { edgeName: "plangRelWrittenWith", direction: "direct" }
+      };
+    }
+    /** Apps implemented with this `VApp-[relWrittenWith]->(this:VPlang)`. Inverse: {@link VApp.relWrittenWith}. */
+    get relApps() {
+      return new RelTo(this, this.graph.edges.appRelWrittenWith);
+    }
+    /** Bundles of Tools for this `VBundle-[relPlangs]->(this:VPlang)`. Inverse: {@link VBundle.relPlangs}. */
+    get relBundles() {
+      return new RelTo(this, this.graph.edges.bundleRelPlangs);
+    }
+    /** Communities suporting this `VCommunity-[relPlangs]->(this:VPlang)`. Inverse: {@link VCommunity.relPlangs}. */
+    get relCommunities() {
+      return new RelTo(this, this.graph.edges.communityRelPlangs);
+    }
+    /** Transpiling targets `(this:VPlang)-[relCompilesTo]->VPlang`. Inverse: {@link VPlang.relTargetOf}. */
+    get relCompilesTo() {
+      return new RelFrom(this, this.graph.edges.plangRelCompilesTo);
+    }
+    /** Plangs this is a Dialect of `(this:VPlang)-[relDialectOf]->VPlang`. Inverse: {@link VPlang.relDialects}. */
+    get relDialectOf() {
+      return new RelFrom(this, this.graph.edges.plangRelDialectOf);
+    }
+    /** Dialects `VPlang-[relDialectOf]->(this:VPlang)`. Inverse: {@link VPlang.relDialectOf}. */
+    get relDialects() {
+      return new RelTo(this, this.graph.edges.plangRelDialectOf);
+    }
+    /** Plangs implementing this `VPlang-[relImplements]->(this:VPlang)`. Inverse: {@link VPlang.relImplements}. */
+    get relImplementedBy() {
+      return new RelTo(this, this.graph.edges.plangRelImplements);
+    }
+    /** Plangs this Implements `(this:VPlang)-[relImplements]->VPlang`. Inverse: {@link VPlang.relImplementedBy}. */
+    get relImplements() {
+      return new RelFrom(this, this.graph.edges.plangRelImplements);
+    }
+    /** Plangs this influenced `VPlang-[relInfluencedBy]->(this:VPlang)`. Inverse: {@link VPlang.relInfluencedBy}. */
+    get relInfluenced() {
+      return new RelTo(this, this.graph.edges.plangRelInfluencedBy);
+    }
+    /** Plangs that influenced this `(this:VPlang)-[relInfluencedBy]->VPlang`. Inverse: {@link VPlang.relInfluenced}. */
+    get relInfluencedBy() {
+      return new RelFrom(this, this.graph.edges.plangRelInfluencedBy);
+    }
+    /** Learning resources `VLearning-[relPlangs]->(this:VPlang)`. Inverse: {@link VLearning.relPlangs}. */
+    get relLearning() {
+      return new RelTo(this, this.graph.edges.learningRelPlangs);
+    }
+    /** Software Libraries `VLibrary-[relPlangs]->(this:VPlang)`. Inverse: {@link VLibrary.relPlangs}. */
+    get relLibraries() {
+      return new RelTo(this, this.graph.edges.libraryRelPlangs);
+    }
+    /** Licenses `VLicense-[relPlangs]->(this:VPlang)`. Inverse: {@link VLicense.relPlangs}. */
+    get relLicenses() {
+      return new RelTo(this, this.graph.edges.licenseRelPlangs);
+    }
+    /** Paradigms implemented `(this:VPlang)-[relParadigms]->VParadigm`. Inverse: {@link VParadigm.relPlangs}. */
+    get relParadigms() {
+      return new RelFrom(this, this.graph.edges.plangRelParadigms);
+    }
+    /** Platforms supported `(this:VPlang)-[relPlatforms]->VPlatform`. Inverse: {@link VPlatform.relPlangs}. */
+    get relPlatforms() {
+      return new RelFrom(this, this.graph.edges.plangRelPlatforms);
+    }
+    /** Posts talking about this `VPost-[relPlangs]->(this:VPlang)`. Inverse: {@link VPost.relPlangs}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelPlangs);
+    }
+    /** Tags `VTag-[relPlangs]->(this:VPlang)`. Inverse: {@link VTag.relPlangs}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelPlangs);
+    }
+    /** Plangs compiling to this `VPlang-[relCompilesTo]->(this:VPlang)`. Inverse: {@link VPlang.relCompilesTo}. */
+    get relTargetOf() {
+      return new RelTo(this, this.graph.edges.plangRelCompilesTo);
+    }
+    /** Tools for this `(this:VPlang)-[relTools]->VTool`. Inverse: {@link VTool.relPlangs}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.plangRelTools);
+    }
+    /** Tools implemented with this `VTool-[relWrittenWith]->(this:VPlang)`. Inverse: {@link VTool.relWrittenWith}. */
+    get relToolsUsing() {
+      return new RelTo(this, this.graph.edges.toolRelWrittenWith);
+    }
+    /** Type Systems implemented `(this:VPlang)-[relTypeSystems]->VTypeSystem`. Inverse: {@link VTypeSystem.relPlangs}. */
+    get relTypeSystems() {
+      return new RelFrom(this, this.graph.edges.plangRelTypeSystems);
+    }
+    /** Libraries made with this `VLibrary-[relWrittenWith]->(this:VPlang)`. Inverse: {@link VLibrary.relWrittenWith}. */
+    get relUsedInLibrary() {
+      return new RelTo(this, this.graph.edges.libraryRelWrittenWith);
+    }
+    /** Plangs implemented with this `VPlang-[relWrittenWith]->(this:VPlang)`. Inverse: {@link VPlang.relWrittenWith}. */
+    get relUsedToWrite() {
+      return new RelTo(this, this.graph.edges.plangRelWrittenWith);
+    }
+    /** Plangs used to implement this `(this:VPlang)-[relWrittenWith]->VPlang`. Inverse: {@link VPlang.relUsedToWrite}. */
+    get relWrittenWith() {
+      return new RelFrom(this, this.graph.edges.plangRelWrittenWith);
+    }
+  };
+  var VPlatformBase = class _VPlatformBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VPlatformBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "plat";
+    }
+    static {
+      this.vertexName = "platform";
+    }
+    static {
+      this.vertexDesc = "Platform where Software runs";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "appRelPlatforms", direction: "inverse" },
+        relLibraries: { edgeName: "libraryRelPlatforms", direction: "inverse" },
+        relPlangs: { edgeName: "plangRelPlatforms", direction: "inverse" },
+        relTools: { edgeName: "toolRelPlatforms", direction: "inverse" }
+      };
+    }
+    /** Apps supporting this `VApp-[relPlatforms]->(this:VPlatform)`. Inverse: {@link VApp.relPlatforms}. */
+    get relApps() {
+      return new RelTo(this, this.graph.edges.appRelPlatforms);
+    }
+    /** Libraries supporting this `VLibrary-[relPlatforms]->(this:VPlatform)`. Inverse: {@link VLibrary.relPlatforms}. */
+    get relLibraries() {
+      return new RelTo(this, this.graph.edges.libraryRelPlatforms);
+    }
+    /** Plangs supporting this `VPlang-[relPlatforms]->(this:VPlatform)`. Inverse: {@link VPlang.relPlatforms}. */
+    get relPlangs() {
+      return new RelTo(this, this.graph.edges.plangRelPlatforms);
+    }
+    /** Tools supporting this `VTool-[relPlatforms]->(this:VPlatform)`. Inverse: {@link VTool.relPlatforms}. */
+    get relTools() {
+      return new RelTo(this, this.graph.edges.toolRelPlatforms);
+    }
+  };
+  var VPostBase = class _VPostBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VPostBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "post";
+    }
+    static {
+      this.vertexName = "post";
+    }
+    static {
+      this.vertexDesc = "Blog Post";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = { relPlangs: { edgeName: "postRelPlangs", direction: "direct" } };
+    }
+    /** Plangs covered `(this:VPost)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relPosts}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.postRelPlangs);
+    }
+  };
+  var VTagBase = class _VTagBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VTagBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "tag";
+    }
+    static {
+      this.vertexName = "tag";
+    }
+    static {
+      this.vertexDesc = "Tag";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relApps: { edgeName: "tagRelApps", direction: "direct" },
+        relCommunities: { edgeName: "tagRelCommunities", direction: "direct" },
+        relLearning: { edgeName: "tagRelLearning", direction: "direct" },
+        relLibraries: { edgeName: "tagRelLibraries", direction: "direct" },
+        relPlangs: { edgeName: "tagRelPlangs", direction: "direct" },
+        relTools: { edgeName: "tagRelTools", direction: "direct" }
+      };
+    }
+    /** Apps tagged `(this:VTag)-[relApps]->VApp`. Inverse: {@link VApp.relTags}. */
+    get relApps() {
+      return new RelFrom(this, this.graph.edges.tagRelApps);
+    }
+    /** Communities tagged `(this:VTag)-[relCommunities]->VCommunity`. Inverse: {@link VCommunity.relTags}. */
+    get relCommunities() {
+      return new RelFrom(this, this.graph.edges.tagRelCommunities);
+    }
+    /** Learning resources tagged `(this:VTag)-[relLearning]->VLearning`. Inverse: {@link VLearning.relTags}. */
+    get relLearning() {
+      return new RelFrom(this, this.graph.edges.tagRelLearning);
+    }
+    /** Libraries tagged `(this:VTag)-[relLibraries]->VLibrary`. Inverse: {@link VLibrary.relTags}. */
+    get relLibraries() {
+      return new RelFrom(this, this.graph.edges.tagRelLibraries);
+    }
+    /** Plangs tagged `(this:VTag)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relTags}. */
+    get relPlangs() {
+      return new RelFrom(this, this.graph.edges.tagRelPlangs);
+    }
+    /** Tools tagged `(this:VTag)-[relTools]->VTool`. Inverse: {@link VTool.relTags}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.tagRelTools);
+    }
+  };
+  var VToolBase = class _VToolBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VToolBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "tool";
+    }
+    static {
+      this.vertexName = "tool";
+    }
+    static {
+      this.vertexDesc = "Programming Tool";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = {
+        relBundles: { edgeName: "bundleRelTools", direction: "inverse" },
+        relCommunities: { edgeName: "communityRelTools", direction: "inverse" },
+        relLearning: { edgeName: "learningRelTools", direction: "inverse" },
+        relLicenses: { edgeName: "licenseRelTools", direction: "inverse" },
+        relPlangs: { edgeName: "plangRelTools", direction: "inverse" },
+        relPlatforms: { edgeName: "toolRelPlatforms", direction: "direct" },
+        relTags: { edgeName: "tagRelTools", direction: "inverse" },
+        relWrittenWith: { edgeName: "toolRelWrittenWith", direction: "direct" }
+      };
+    }
+    /** Bundles including this `VBundle-[relTools]->(this:VTool)`. Inverse: {@link VBundle.relTools}. */
+    get relBundles() {
+      return new RelTo(this, this.graph.edges.bundleRelTools);
+    }
+    /** Communities suporting this `VCommunity-[relTools]->(this:VTool)`. Inverse: {@link VCommunity.relTools}. */
+    get relCommunities() {
+      return new RelTo(this, this.graph.edges.communityRelTools);
+    }
+    /** Learning resources `VLearning-[relTools]->(this:VTool)`. Inverse: {@link VLearning.relTools}. */
+    get relLearning() {
+      return new RelTo(this, this.graph.edges.learningRelTools);
+    }
+    /** Licenses `VLicense-[relTools]->(this:VTool)`. Inverse: {@link VLicense.relTools}. */
+    get relLicenses() {
+      return new RelTo(this, this.graph.edges.licenseRelTools);
+    }
+    /** Plangs supported `VPlang-[relTools]->(this:VTool)`. Inverse: {@link VPlang.relTools}. */
+    get relPlangs() {
+      return new RelTo(this, this.graph.edges.plangRelTools);
+    }
+    /** Platforms supported `(this:VTool)-[relPlatforms]->VPlatform`. Inverse: {@link VPlatform.relTools}. */
+    get relPlatforms() {
+      return new RelFrom(this, this.graph.edges.toolRelPlatforms);
+    }
+    /** Tags `VTag-[relTools]->(this:VTool)`. Inverse: {@link VTag.relTools}. */
+    get relTags() {
+      return new RelTo(this, this.graph.edges.tagRelTools);
+    }
+    /** Plangs used to implement this `(this:VTool)-[relWrittenWith]->VPlang`. Inverse: {@link VPlang.relToolsUsing}. */
+    get relWrittenWith() {
+      return new RelFrom(this, this.graph.edges.toolRelWrittenWith);
+    }
+  };
+  var VTypeSystemBase = class _VTypeSystemBase extends PlangsVertex {
+    constructor() {
+      super(...arguments);
+      this.vertexDesc = _VTypeSystemBase.vertexDesc;
+    }
+    static {
+      this.keyPrefix = "tsys";
+    }
+    static {
+      this.vertexName = "typeSystem";
+    }
+    static {
+      this.vertexDesc = "Type System";
+    }
+    static {
+      /** Describes the edges and direction used for every relationship in this Vertex. */
+      this.relations = { relPlangs: { edgeName: "plangRelTypeSystems", direction: "inverse" } };
+    }
+    /** Plangs implementing this `VPlang-[relTypeSystems]->(this:VTypeSystem)`. Inverse: {@link VPlang.relTypeSystems}. */
+    get relPlangs() {
+      return new RelTo(this, this.graph.edges.plangRelTypeSystems);
+    }
+  };
+
+  // packages/plangs/src/graph/index.ts
+  var rel = PlangsGraphBase.relConfig;
+  var prop = PlangsGraphBase.propConfig;
+  var PlangsGraph = class extends PlangsGraphBase {
+    /**
+     * We can derive / infer some data from the existing data.
+     * We may implement some sort of inference engine in the future,
+     * but for now we can just materialize some simple rules.
+     */
+    materialize() {
+      for (const pl of this.plang.values) pl.relImplements.add(pl.key);
+      for (const bundle of this.bundle.values) {
+        for (const tool of bundle.relTools.values) {
+          bundle.relPlangs.add(...tool.relPlangs.keys);
+        }
+      }
+      return this;
+    }
+  };
+  var VApp = class extends VAppBase {
+    get github() {
+      return new FieldGithub(this);
+    }
+    get releases() {
+      return new FieldReleases(this);
+    }
+  };
+  var VPlang = class extends VPlangBase {
+    addExtensions(exts) {
+      arrayMerge(this.data.extensions ??= [], exts);
+      return this;
+    }
+    addFilenames(filenames) {
+      arrayMerge(this.data.filenames ??= [], filenames);
+      return this;
+    }
+    addReleases(releases) {
+      arrayMerge(this.data.releases ??= [], releases, (r1, r22) => r1.version === r22.version);
+      return this;
+    }
+    addStackovTags(stackovTags) {
+      arrayMerge(this.data.stackovTags ??= [], stackovTags);
+      return this;
+    }
+    get extensions() {
+      return new IterTap(this.data.extensions);
+    }
+    get github() {
+      return new FieldGithub(this);
+    }
+    get href() {
+      return `/${this.plainKey}`;
+    }
+    get isPopular() {
+      const { githubPopular, languishRanking } = this.data;
+      return !!githubPopular || typeof languishRanking === "number" && languishRanking <= 25;
+    }
+    get isTranspiler() {
+      return this.data.isTranspiler === true;
+    }
+    get ranking() {
+      return this.data.languishRanking;
+    }
+    get releases() {
+      return new FieldReleases(this);
+    }
+    get stackovTags() {
+      return new IterTap(this.data.stackovTags);
+    }
+    get urlReddit() {
+      return this.data.extRedditPath ? `https://reddit.com/${this.data.extRedditPath}` : void 0;
+    }
+    get urlRepository() {
+      return this.data.extRepositoryURL;
+    }
+    get urlStackov() {
+      return this.stackovTags ? `https://stackoverflow.com/questions/tagged/${this.stackovTags.join("+")}` : void 0;
+    }
+    get urlWikipedia() {
+      return this.data.extWikipediaPath ? `https://github.com/${this.data.extGithubPath}` : void 0;
+    }
+    /**
+     * Builds (non-recursively) a set of all languages that this language is related to, not including self.
+     * A language is related if it is compiled to, is a dialect of, or implements this language.
+     */
+    family(opt = { compilesTo: true, dialectOf: true, implements: true }) {
+      const set = /* @__PURE__ */ new Set([]);
+      if (opt.compilesTo) for (const pl of this.relCompilesTo.values) set.add(pl);
+      if (opt.dialectOf) for (const pl of this.relDialectOf.values) set.add(pl);
+      if (opt.implements) for (const pl of this.relImplements.values) set.add(pl);
+      return set;
+    }
+  };
+  var VCommunity = class extends VCommunityBase {
+  };
+  var VLearning = class extends VLearningBase {
+  };
+  var VLibrary = class extends VLibraryBase {
+    get github() {
+      return new FieldGithub(this);
+    }
+    get releases() {
+      return new FieldReleases(this);
+    }
+  };
+  var VLicense = class extends VLicenseBase {
+    get spdx() {
+      return this.data.spdx;
+    }
+    get isFSFLibre() {
+      return this.data.isFSFLibre === true;
+    }
+    get isOSIApproved() {
+      return this.data.isOSIApproved === true;
+    }
+  };
+  var VParadigm = class extends VParadigmBase {
+  };
+  var VPlatform = class extends VPlatformBase {
+  };
+  var VTag = class extends VTagBase {
+  };
+  var VTool = class extends VToolBase {
+    get github() {
+      return new FieldGithub(this);
+    }
+    get releases() {
+      return new FieldReleases(this);
+    }
+  };
+  var VTypeSystem = class extends VTypeSystemBase {
+  };
+  var VBundle = class extends VBundleBase {
+  };
+  var VPost = class extends VPostBase {
+    set path(path) {
+      this.data.path = path;
+    }
+    get author() {
+      return this.data.author;
+    }
+    get date() {
+      return this.data.date;
+    }
+    get path() {
+      return this.data.path;
+    }
+    get title() {
+      return this.name;
+    }
+    get href() {
+      return `/blog/${this.plainKey}`;
+    }
+  };
+
+  // packages/frontend/src/app/pl.ts
+  function getPl(pg, target) {
+    const keyHolder = target.closest("[data-vkey]");
+    if (!keyHolder || !keyHolder.dataset.vertexKey) return;
+    return pg.plang.get(keyHolder.dataset.vertexKey);
+  }
+  function lastPlang(pg) {
+    try {
+      const { key, data } = JSON.parse(localStorage.getItem("last-plang") || "{}");
+      return new VPlang(pg, key).merge(data);
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  // packages/frontend/src/components/vertex-info/vertex-info.tsx
+  function VertexInfo({ vertex, open, tab }) {
+    const forGrid = tab === "plangs";
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        class: tw(
+          "w-full overflow-y-scroll",
+          "px-2 pt-2 sm:p-4",
+          !forGrid && "-mx-4",
+          // Compensate for padding so it aligns with the rest of the content.
+          "prose prose-green dark:prose-invert",
+          "max-w-[unset]",
+          forGrid && "bg-linear-to-b to-secondary/50",
+          tw(BORDER, forGrid && "border-b-1")
+        ),
+        children: [
+          /* @__PURE__ */ u4("h2", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${vertex?.plainKey}`, children: vertex?.name ?? "" }) }),
+          vertex && /* @__PURE__ */ u4(k, { children: [
+            /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
+            /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
+              vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
+              ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Last Rel ${rel2.date ?? rel2.version}` })),
+              vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
+              vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
+            ] }),
+            /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: vertex.description || "..." }),
+            /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
+              /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-xl", children: "Details" }),
+              relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4("div", { children: [
+                /* @__PURE__ */ u4("h3", { class: "mt-4 text-xl", children: title }),
+                vertices.map(({ name, key }) => /* @__PURE__ */ u4(Pill, { children: name }, key))
+              ] }, title))
+            ] })
+          ] })
+        ]
+      }
+    );
+  }
+  function Pill({ children }) {
+    return /* @__PURE__ */ u4("span", { class: tw("inline-block", "mr-2 mb-2 px-1", "border-2 border-secondary", "bg-secondary/50"), children });
+  }
+  function relations(pl) {
+    const all = [
+      ["Type Systems", pl.relTypeSystems.values],
+      ["Platforms", pl.relPlatforms.values],
+      ["Influenced By", pl.relInfluencedBy.values],
+      ["Influenced", pl.relInfluenced.values],
+      ["Dialect Of", pl.relDialectOf.values],
+      ["Implements", pl.relImplements.values],
+      ["Compiles To", pl.relCompilesTo.values],
+      ["Licenses", pl.relLicenses.values],
+      ["Tags", pl.relTags.values],
+      ["Extensions", pl.extensions.map((name) => ({ key: name, name, kind: "ext" })).existing]
+    ];
+    return all.filter(([_2, vertices]) => vertices.length > 0);
+  }
+
+  // packages/frontend/src/components/vertex-info/index.tsx
+  function renderVertexInfo({ vertex, tab, open }) {
+    if (!vertex || !tab) {
+      console.log("Missing props to render vertexInfo.", { vertex, tab });
+      return;
+    }
+    for (const elem2 of elems("vertexInfo")) {
+      B(/* @__PURE__ */ u4(VertexInfo, { vertex, tab, open }), elem2);
+    }
+  }
+  function renderLastVertexInfo(pg) {
+    const vertex = lastPlang(pg);
+    if (vertex) renderVertexInfo({ vertex, tab: "plangs" });
+  }
+
   // packages/auxiliar/src/filters.ts
   var Filter = class _Filter {
     constructor(mode = "any", values = /* @__PURE__ */ new Set()) {
@@ -1227,8 +2873,8 @@
     get isEmpty() {
       return this.values.size === 0;
     }
-    add(value) {
-      this.values.add(value);
+    add(...values) {
+      for (const val of values) this.values.add(val);
       return this;
     }
     delete(value) {
@@ -1395,74 +3041,6 @@
     }
   }
 
-  // packages/auxiliar/src/array.ts
-  function arrayMerge(target, newData, similar = (l1, l22) => l1 === l22, onDuplicate) {
-    for (const newElem of newData) {
-      const prevElem = target.find((elem2) => similar(elem2, newElem));
-      if (prevElem) {
-        onDuplicate?.(prevElem, newElem);
-      } else {
-        target.push(newElem);
-      }
-    }
-  }
-
-  // packages/auxiliar/src/iter_tap.ts
-  var IterTap = class _IterTap {
-    constructor(iterable) {
-      this.array = Array.isArray(iterable) ? iterable : iterable ? [...iterable] : void 0;
-    }
-    filter(callback) {
-      return this.array ? this.array.filter(callback) : [];
-    }
-    map(callback) {
-      return new _IterTap(this.array ? this.array.map(callback) : []);
-    }
-    reduce(callback, init) {
-      return this.array ? this.array.reduce(callback, init) : init;
-    }
-    sort(cmp) {
-      return this.array ? [...this.array].sort(cmp) : [];
-    }
-    join(str) {
-      return this.array ? this.array.join(str) : "";
-    }
-    includes(val) {
-      return this.array ? this.array.includes(val) : false;
-    }
-    some(predicate) {
-      return this.array ? this.array.some(predicate) : false;
-    }
-    find(predicate) {
-      return this.array?.find(predicate);
-    }
-    tap(callback) {
-      if (this.array && this.array.length > 0) return callback(this.array);
-    }
-    get isEmpty() {
-      return this.array ? this.array.length === 0 : true;
-    }
-    get size() {
-      return this.array ? this.array.length : 0;
-    }
-    /** Return all non-null and non-undefined values (if strings, returns the ones with length > 0). */
-    get existing() {
-      return this.filter((v4) => v4 !== void 0 && v4 !== null && (typeof v4 !== "string" || v4.length > 0));
-    }
-    get reverse() {
-      return new _IterTap(this.array ? [...this.array].reverse() : void 0);
-    }
-    get first() {
-      return this.array && this.array.length > 0 ? this.array[0] : void 0;
-    }
-    get last() {
-      return this.array && this.array.length > 0 ? this.array[this.array.length - 1] : void 0;
-    }
-    [Symbol.iterator]() {
-      return this.array ? this.array[Symbol.iterator]() : [].values();
-    }
-  };
-
   // packages/auxiliar/src/map2.ts
   var Map2 = class {
     #map = /* @__PURE__ */ new Map();
@@ -1525,9 +3103,16 @@
     size2(k1) {
       return this.#map.get(k1)?.size ?? 0;
     }
-    /** Returns an iterator of the keys in the first dimension. */
+    /** Returns the keys in the first dimension. */
     keys() {
       return [...this.#map.keys()].filter((k1) => (this.#map.get(k1)?.size ?? 0) > 0);
+    }
+    /** Return all the keys from a first dimension. */
+    keys2(k1) {
+      const res = [];
+      const m3 = this.#map.get(k1);
+      if (m3) for (const k22 of m3.keys()) res.push(k22);
+      return res;
     }
     entries() {
       return [...this.#map.entries()].filter(([_k1, map2]) => map2.size > 0);
@@ -1542,992 +3127,160 @@
     values() {
       return [...this.#map.values()].flatMap((map) => [...map.values()]);
     }
+    values2(k1) {
+      const m3 = this.#map.get(k1);
+      return m3 ? [...m3.values()] : [];
+    }
+    /** Get all values going from first dimension, them map them and return the non-falsey values. */
+    values2Mapped(k1, mapper) {
+      return this.values2(k1).map(mapper).filter((v4) => v4);
+    }
     toString() {
       const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
       return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
     }
   };
 
-  // packages/auxiliar/src/graph.ts
-  var Node = class {
-    constructor(graph, key) {
-      this.graph = graph;
-      this.key = key;
-      this.data = {};
+  // packages/frontend/src/auxiliar/utils.ts
+  function debounce(callback, millies) {
+    let timeout;
+    return (...args) => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => callback(...args), millies);
+    };
+  }
+
+  // packages/frontend/src/facets/main/grid_util.ts
+  function doUpdateThumbns(vertexKeys) {
+    for (const div of elems("vertexThumbn")) {
+      const plKey = div.dataset.vertexKey;
+      const visible = vertexKeys.has(plKey);
+      div.classList.toggle("hidden", !visible);
     }
-    /** Shallow merge data. */
-    merge(data) {
-      Object.assign(this.data, data);
-      return this;
+    adjustGrid();
+  }
+  var updateThumbns = debounce(doUpdateThumbns, 30);
+  function doAdjustGrid() {
+    const widthRow = 0;
+    const widthThumb = 0;
+    const visibleThumbs = 0;
+    const numCols = Math.min(Math.floor(widthRow / widthThumb), visibleThumbs);
+    const maxCols = Math.floor(widthRow / (5 * 16));
+    if (numCols < maxCols && visibleThumbs < maxCols && minWidthBP("48rem")) {
+    } else {
     }
-    /** The key without the node kind prefix. */
-    get plainKey() {
-      return this.key.replace(/^[a-z]+\+/, "");
-    }
-    /** The first letter of the key, or "_" if it starts with a non-letter. */
-    get keyPrefix() {
-      const pk = this.plainKey;
-      return /^[a-z]/i.test(pk) ? pk[0].toLowerCase() : "_";
-    }
-    toString() {
-      return this.key;
-    }
-  };
-  var Edge = class {
-    constructor(graph, from, to) {
-      this.graph = graph;
-      this.from = from;
-      this.to = to;
-      this.data = {};
-    }
-    /** Shallow merge data. */
-    merge(data) {
-      Object.assign(this.data, data);
-      return this;
-    }
-    get key() {
-      return `${this.kind}~${this.from}~${this.to}`;
-    }
-    toString() {
-      return `${this.from} -[${this.kind}]-> ${this.to}`;
-    }
-  };
-  var NodeMap = class {
-    constructor(factory) {
-      this.factory = factory;
-    }
-    #map = /* @__PURE__ */ new Map();
-    entries() {
-      return this.#map.entries();
-    }
-    get(key) {
-      return key ? this.#map.get(key) : void 0;
-    }
-    get size() {
-      return this.#map.size;
-    }
-    keys() {
-      return [...this.#map.keys()];
-    }
-    set(key, data = {}) {
-      let n2 = this.#map.get(key);
-      if (n2 === void 0) {
-        n2 = this.factory(key);
-        this.#map.set(key, n2);
-      }
-      return n2.merge(data);
-    }
-    has(key) {
-      return this.#map.has(key);
-    }
-    get values() {
-      return new IterTap(this.#map.values());
-    }
-    findAll(predicate) {
-      return [...this.#map.values()].filter(predicate);
-    }
-    batch(maxEntries, start2 = 0) {
-      return Array.from(this.#map).slice(start2, maxEntries);
-    }
-    toString() {
-      return `NodeMap(size: ${this.size})`;
-    }
-  };
-  var EdgeMap = class {
-    constructor(factory) {
-      this.factory = factory;
-      this.adjFrom = new Map2();
-      this.adjTo = new Map2();
-    }
-    connect(from, to) {
-      let edge = this.adjFrom.get(from, to);
-      if (edge) return edge;
-      edge = this.factory(from, to);
-      this.adjFrom.set(from, to, edge);
-      this.adjTo.set(to, from, edge);
-      return edge;
-    }
-    get(from, to) {
-      return this.adjFrom.get(from, to);
-    }
-    set(from, to, data) {
-      return this.connect(from, to).merge(data);
-    }
-    delete(from, to) {
-      const f5 = this.adjFrom.delete(from, to);
-      const t3 = this.adjTo.delete(to, from);
-      return f5 || t3;
-    }
-    /** Get all edges. Uses the adjFrom map, but both maps should have the same values. */
-    get values() {
-      return this.adjFrom.values();
-    }
-    get size() {
-      return this.adjFrom.size;
-    }
-    toString() {
-      return `EdgeMap(size: ${this.size})`;
-    }
-  };
-  var BaseGraph = class {
-    get nodeEntries() {
-      return Object.entries(this.nodes);
-    }
-    get edgeEntries() {
-      return Object.entries(this.edges);
-    }
-    get nodeCount() {
-      return this.nodeEntries.reduce((acc, [_2, map]) => acc + map.size, 0);
-    }
-    get edgeCount() {
-      return this.edgeEntries.reduce((acc, [_2, map]) => acc + map.adjFrom.size, 0);
-    }
-    toJSON() {
-      const data = { nodes: {}, edges: {} };
-      for (const [name, nodeMap] of this.nodeEntries) {
-        const m3 = {};
-        for (const [key, { data: data2 }] of nodeMap.entries()) m3[key] = data2;
-        data.nodes[name] = m3;
-      }
-      for (const [name, edgeMap] of this.edgeEntries) {
-        const m3 = {};
-        for (const edge of edgeMap.adjFrom.values()) {
-          const fromMap = m3[edge.from] ??= {};
-          fromMap[edge.to] = edge.data;
+  }
+  var adjustGrid = debounce(doAdjustGrid, 30);
+
+  // packages/frontend/src/facets/main/state.ts
+  var FacetsMainState = class _FacetsMainState extends Dispatchable {
+    /** Attempt to reconstruct the state from a serialized value (ex: a value coming from the URL fragment). */
+    // biome-ignore lint/suspicious/noExplicitAny: this data is the result of a de/serialization process and is not typed.
+    static deserialize(groupsByFacetKey, genericData) {
+      const result = new Map2();
+      if (!genericData) return result;
+      for (const [facetKey, rawValue] of Object.entries(genericData)) {
+        const groupKey = groupsByFacetKey.get(facetKey);
+        if (!groupKey) {
+          console.error("missing group for facet", facetKey);
+          continue;
         }
-        data.edges[name] = m3;
+        const value = deserializeValue(rawValue);
+        if (value?.isPresent) {
+          result.set(groupKey, facetKey, value);
+        } else {
+          console.error("failed to deserialize value", facetKey, rawValue);
+        }
+      }
+      return result;
+    }
+    doSetCurrentGroup(groupKey) {
+      this.data.currentGroupKey = groupKey;
+      updateLocalStorage(this.tab, "lastGroup", groupKey);
+      this.dispatch();
+    }
+    /** Removes any and all values for the given group.  */
+    doResetGroup(groupKey) {
+      this.values.delete1(groupKey);
+      this.dispatch();
+    }
+    /** Removes any and all values for the given group.  */
+    // biome-ignore lint/suspicious/noExplicitAny: coming from deserialize we'll have to deal with it.
+    doResetAll(values) {
+      if (values) {
+        this.data.values = _FacetsMainState.deserialize(this.gkByFk, values);
+      } else {
+        this.values.clear();
+      }
+      this.doSetCurrentGroup(this.nav.default);
+    }
+    /** This dispatches since we want to change the indicator of active state. */
+    doSetValue(groupKey, facetKey, value) {
+      const { values } = this.data;
+      let result;
+      if (value.isPresent) {
+        if (!value.equalTo(values.get(groupKey, facetKey))) {
+          values.set(groupKey, facetKey, value);
+          result = "changed";
+        } else {
+          result = "unchanged";
+        }
+      } else {
+        result = values.delete(groupKey, facetKey) ? "changed" : "unchanged";
+      }
+      this.dispatch();
+      return result;
+    }
+    /** Queries */
+    get pg() {
+      return this.data.pg;
+    }
+    get values() {
+      return this.data.values;
+    }
+    get serialized() {
+      const data = {};
+      for (const [_2, facetKey, value] of this.values.flatEntries()) {
+        if (value.isPresent) data[facetKey] = value.serializable();
       }
       return data;
     }
-    loadJSON(data) {
-      for (const [name, nodes] of Object.entries(data.nodes)) {
-        const nodeMap = this.nodes[name];
-        if (!nodes) console.warn(`Data has no nodes for type "${name}"`);
-        if (!nodeMap) console.warn(`Graph has no node map for type "${name}"`);
-        if (!nodes || !nodeMap) continue;
-        for (const [key, nodeData] of Object.entries(nodes)) {
-          nodeMap.set(key).merge(nodeData);
-        }
+    get currentGroupKey() {
+      return this.data.currentGroupKey;
+    }
+    groupHasValues(groupKey) {
+      for (const v4 of this.values.getMap(groupKey)?.values() ?? []) {
+        if (v4.isPresent) return true;
       }
-      for (const [name, edges] of Object.entries(data.edges)) {
-        const edgeMap = this.edges[name];
-        if (!edges) console.warn(`Data has no edges for type "${name}"`);
-        if (!edgeMap) console.warn(`Graph has no edge map for type "${name}"`);
-        if (!edges || !edgeMap) continue;
-        for (const [from, tos] of Object.entries(edges)) {
-          for (const [to, edgeData] of Object.entries(tos)) {
-            edgeMap.connect(from, to).merge(edgeData);
-          }
-        }
+      return false;
+    }
+    groupTitle(key) {
+      return this.groupsConfig.get(key)?.title ?? key;
+    }
+    /** Helpers */
+    /** Update the clear facets button on the toolbar. */
+    updateClearFacets() {
+      const clearAll = $2("#icon-button-clearFacets");
+      if (!clearAll?.state) return this;
+      clearAll.state.doToggleMode(this.values.isEmpty ? "" : "clearFacets");
+      return this;
+    }
+    dispatch() {
+      try {
+        super.dispatch();
+        const data = this.serialized;
+        window.fragment.pushState(FragmentTracker.serialize(data));
+        updateLocalStorage(this.tab, "inputs", data);
+        updateThumbns(this.results);
+        this.updateClearFacets();
+      } catch (err) {
+        console.error(err);
       }
       return this;
     }
   };
 
-  // packages/auxiliar/src/map_tap.ts
-  var MapTap = class {
-    constructor(map) {
-      this.map = map;
-    }
-    get size() {
-      return this.map ? this.map.size : 0;
-    }
-    has(val) {
-      return this.map ? this.map.has(val) : false;
-    }
-    tap(callback) {
-      if (this.map && this.map.size > 0) return callback(this);
-    }
-    get keys() {
-      return new IterTap(this.map?.keys());
-    }
-    get values() {
-      return new IterTap(this.map?.values());
-    }
-    get entries() {
-      return new IterTap(this.map?.entries());
-    }
-    [Symbol.iterator]() {
-      return (this.map ?? /* @__PURE__ */ new Map())[Symbol.iterator]();
-    }
-  };
-
-  // packages/plangs/src/facets/plangs.ts
-  var PLANG_FACET_PREDICATES = {
-    compilesTo: ({ relCompilesTo }, flt) => flt.matches((key) => relCompilesTo.has(key)),
-    createdRecently: (pl, year) => pl.createdRecently(year.value),
-    creationYear: (pl, flt) => flt.matches((year) => pl.year === year),
-    dialectOf: ({ relDialectOf }, flt) => flt.matches((key) => relDialectOf.has(key)),
-    extensions: ({ extensions }, flt) => flt.matches((key) => extensions.includes(key)),
-    isPopular: (pl, val) => val.value === pl.isPopular,
-    hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
-    hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
-    implements: ({ relImplements }, flt) => flt.matches((key) => relImplements.has(key)),
-    influenced: ({ relInfluenced }, flt) => flt.matches((key) => relInfluenced.has(key)),
-    influencedBy: ({ relInfluencedBy }, flt) => flt.matches((key) => relInfluencedBy.has(key)),
-    isTranspiler: (pl, val) => val.value === pl.isTranspiler,
-    licenses: ({ relLicenses }, flt) => flt.matches((key) => relLicenses.has(key)),
-    paradigms: ({ relParadigms }, flt) => flt.matches((key) => relParadigms.has(key)),
-    plangName: (pl, regexp) => regexp.value.test(pl.name),
-    platforms: ({ relPlatforms }, flt) => flt.matches((key) => relPlatforms.has(key)),
-    releasedRecently: (pl, year) => pl.releasedRecently(year.value),
-    tags: ({ relTags }, flt) => flt.matches((key) => relTags.has(key)),
-    typeSystems: ({ relTsys }, flt) => flt.matches((key) => relTsys.has(key)),
-    writtenIn: ({ relWrittenIn }, flt) => flt.matches((key) => relWrittenIn.has(key))
-  };
-  function plangMatches(pl, values) {
-    for (const [key, value] of values) {
-      const pred = PLANG_FACET_PREDICATES[key];
-      if (!pred) console.error(`No predicate found for key: ${key}`);
-      if (pred && value.isPresent && !pred(pl, value)) return false;
-    }
-    return true;
-  }
-
-  // packages/plangs/src/index.ts
-  var PlangsGraph = class extends BaseGraph {
-    constructor() {
-      super(...arguments);
-      this.#nodeMap = (ctor) => new NodeMap((key) => new ctor(this, key));
-      this.#edgeMap = (ctor) => new EdgeMap((from, to) => new ctor(this, from, to));
-      this.nodes = {
-        app: this.#nodeMap(NApp),
-        bundle: this.#nodeMap(NBundle),
-        community: this.#nodeMap(NCommunity),
-        learning: this.#nodeMap(NLearning),
-        lib: this.#nodeMap(NLibrary),
-        license: this.#nodeMap(NLicense),
-        paradigm: this.#nodeMap(NParadigm),
-        pl: this.#nodeMap(NPlang),
-        plat: this.#nodeMap(NPlatform),
-        post: this.#nodeMap(NPost),
-        tag: this.#nodeMap(NTag),
-        tool: this.#nodeMap(NTool),
-        tsys: this.#nodeMap(NTsys)
-      };
-      this.edges = {
-        app: this.#edgeMap(EApp),
-        bundle: this.#edgeMap(EBundle),
-        commPl: this.#edgeMap(ECommPl),
-        commTag: this.#edgeMap(ECommTag),
-        compilesTo: this.#edgeMap(ECompilesTo),
-        dialect: this.#edgeMap(EDialect),
-        impl: this.#edgeMap(EImpl),
-        influence: this.#edgeMap(EInfluence),
-        learningPl: this.#edgeMap(ELearningPl),
-        learningTag: this.#edgeMap(ELearningTag),
-        learningComm: this.#edgeMap(ELearningComm),
-        lib: this.#edgeMap(ELib),
-        license: this.#edgeMap(ELicense),
-        paradigm: this.#edgeMap(EParadigm),
-        plBundle: this.#edgeMap(EPlBundle),
-        plat: this.#edgeMap(EPlat),
-        post: this.#edgeMap(EPost),
-        tag: this.#edgeMap(ETag),
-        tool: this.#edgeMap(ETool),
-        tsys: this.#edgeMap(ETsys),
-        writtenIn: this.#edgeMap(EWrittenIn)
-      };
-    }
-    #nodeMap;
-    #edgeMap;
-    /** Find all plangs that match the given filters. */
-    plangs(values, limit = -1) {
-      const keys = /* @__PURE__ */ new Set();
-      for (const pl of this.nodes.pl.values) {
-        if (limit >= 0 && keys.size >= limit) break;
-        if (plangMatches(pl, values)) keys.add(pl.key);
-      }
-      return keys;
-    }
-  };
-  var NBase = class extends Node {
-    get name() {
-      return this.data.name ? this.data.name : this.plainKey;
-    }
-    get description() {
-      return this.data.description || this.name;
-    }
-    get urlHome() {
-      return this.data.extHomeURL;
-    }
-    get links() {
-      return new IterTap(this.data.links);
-    }
-    get images() {
-      return new IterTap(this.data.images);
-    }
-    get keywords() {
-      return new IterTap(this.data.keywords);
-    }
-    get keywordsRegexp() {
-      const { keywords } = this.data;
-      if (!keywords) return void 0;
-      const lenient = keywords.map((k3) => k3.replaceAll(/[- ]/g, "\\s*.?\\s*"));
-      return new RegExp(`\\b(${lenient.join("|")})\\b`, "i");
-    }
-    get thumbUrl() {
-      return (this.images.find(({ kind }) => kind === "logo") ?? this.images.first)?.url;
-    }
-    addImages(images) {
-      arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
-      return this;
-    }
-    addLinks(links) {
-      arrayMerge(this.data.links ??= [], links, (l1, l22) => l1.url === l22.url);
-      return this;
-    }
-  };
-  var NPlang = class _NPlang extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NPlang.kind;
-    }
-    static {
-      this.kind = "pl";
-    }
-    get ranking() {
-      return this.data.languishRanking;
-    }
-    get href() {
-      return `/${this.plainKey}`;
-    }
-    get extensions() {
-      return new IterTap(this.data.extensions);
-    }
-    /** Whether the language is considered popular by Github, or its Languish ranking is <= 25. */
-    get isPopular() {
-      const { githubPopular, languishRanking } = this.data;
-      return !!githubPopular || typeof languishRanking === "number" && languishRanking <= 25;
-    }
-    get isTranspiler() {
-      return this.data.isTranspiler === true;
-    }
-    get releases() {
-      return new IterTap(this.data.releases);
-    }
-    get lastRelease() {
-      const rel = this.releases.sort((r1, r22) => r22.date?.localeCompare(r1.date ?? "") ?? 0);
-      if (rel.length === 0) return void 0;
-      return rel[0];
-    }
-    get lastReleaseYear() {
-      return getStrDateYear(this.lastRelease?.date);
-    }
-    get year() {
-      return this.data.year;
-    }
-    get urlRepository() {
-      return this.data.extRepositoryURL;
-    }
-    get urlGithub() {
-      return this.data.extGithubPath ? `https://github.com/${this.data.extGithubPath}` : void 0;
-    }
-    get urlWikipedia() {
-      return this.data.extWikipediaPath ? `https://github.com/${this.data.extGithubPath}` : void 0;
-    }
-    get urlReddit() {
-      return this.data.extRedditPath ? `https://reddit.com/${this.data.extRedditPath}` : void 0;
-    }
-    get urlStackov() {
-      return this.stackovTags ? `https://stackoverflow.com/questions/tagged/${this.stackovTags.join("+")}` : void 0;
-    }
-    get stackovTags() {
-      return new IterTap(this.data.stackovTags);
-    }
-    releasedRecently(minYear) {
-      const relYear = this.lastReleaseYear;
-      if (!relYear) return false;
-      return relYear >= minYear;
-    }
-    createdRecently(minYear) {
-      if (!this.year) return false;
-      return this.year >= minYear;
-    }
-    addApps(others) {
-      for (const other of others) this.graph.edges.app.connect(this.key, other);
-      return this;
-    }
-    addBundles(others) {
-      for (const other of others) this.graph.edges.plBundle.connect(this.key, other);
-      return this;
-    }
-    addExtensions(exts) {
-      arrayMerge(this.data.extensions ??= [], exts);
-      return this;
-    }
-    addFilenames(filenames) {
-      arrayMerge(this.data.filenames ??= [], filenames);
-      return this;
-    }
-    addReleases(releases) {
-      arrayMerge(this.data.releases ??= [], releases, (r1, r22) => r1.version === r22.version);
-      return this;
-    }
-    addCompilesTo(others) {
-      if (others.length > 0) this.data.isTranspiler = true;
-      for (const other of others) this.graph.edges.compilesTo.connect(this.key, other);
-      return this;
-    }
-    addDialectOf(others) {
-      for (const other of others) this.graph.edges.dialect.connect(this.key, other);
-      return this;
-    }
-    addImplements(others) {
-      for (const other of others) this.graph.edges.impl.connect(this.key, other);
-      return this;
-    }
-    addInfluencedBy(others) {
-      for (const other of others) this.graph.edges.influence.connect(this.key, other);
-      return this;
-    }
-    addLibs(others) {
-      for (const other of others) this.graph.edges.lib.connect(this.key, other);
-      return this;
-    }
-    addLicenses(others) {
-      for (const other of others) this.graph.edges.license.connect(this.key, other);
-      return this;
-    }
-    addParadigms(others) {
-      for (const otherkey of others) this.graph.edges.paradigm.connect(this.key, otherkey);
-      return this;
-    }
-    addPlatforms(others) {
-      for (const other of others) this.graph.edges.plat.connect(this.key, other);
-      return this;
-    }
-    addPosts(others) {
-      for (const other of others) this.graph.edges.post.connect(this.key, other);
-      return this;
-    }
-    addStackovTags(stackovTags) {
-      arrayMerge(this.data.stackovTags ??= [], stackovTags);
-      return this;
-    }
-    addTags(others) {
-      for (const other of others) this.graph.edges.tag.connect(this.key, other);
-      return this;
-    }
-    addTools(others) {
-      for (const other of others) this.graph.edges.tool.connect(this.key, other);
-      return this;
-    }
-    addTypeSystems(others) {
-      for (const other of others) this.graph.edges.tsys.connect(this.key, other);
-      return this;
-    }
-    addWrittenIn(others) {
-      for (const other of others) this.graph.edges.writtenIn.connect(this.key, other);
-      return this;
-    }
-    /**
-     * Builds (non-recursively) a set of all languages that this language is related to, not including self.
-     * A language is related if it is compiled to, is a dialect of, or implements this language.
-     */
-    family(opt = { compilesTo: true, dialectOf: true, implements: true }) {
-      const set = /* @__PURE__ */ new Set([]);
-      const addRel = (rel) => {
-        for (const pl of rel.values.map((e3) => e3.nodeTo).existing) set.add(pl);
-      };
-      if (opt.compilesTo) addRel(this.relCompilesTo);
-      if (opt.dialectOf) addRel(this.relDialectOf);
-      if (opt.implements) addRel(this.relImplements);
-      return set;
-    }
-    get relApps() {
-      return new MapTap(this.graph.edges.app.adjFrom.getMap(this.key));
-    }
-    get relCompilesTo() {
-      return new MapTap(this.graph.edges.compilesTo.adjFrom.getMap(this.key));
-    }
-    get relDialectOf() {
-      return new MapTap(this.graph.edges.dialect.adjFrom.getMap(this.key));
-    }
-    get relImplements() {
-      return new MapTap(this.graph.edges.impl.adjFrom.getMap(this.key));
-    }
-    get relInfluenced() {
-      return new MapTap(this.graph.edges.influence.adjTo.getMap(this.key));
-    }
-    get relInfluencedBy() {
-      return new MapTap(this.graph.edges.influence.adjFrom.getMap(this.key));
-    }
-    get relLibs() {
-      return new MapTap(this.graph.edges.lib.adjFrom.getMap(this.key));
-    }
-    get relLicenses() {
-      return new MapTap(this.graph.edges.license.adjFrom.getMap(this.key));
-    }
-    get relParadigms() {
-      return new MapTap(this.graph.edges.paradigm.adjFrom.getMap(this.key));
-    }
-    get relPlBundles() {
-      return new MapTap(this.graph.edges.plBundle.adjFrom.getMap(this.key));
-    }
-    get relPlatforms() {
-      return new MapTap(this.graph.edges.plat.adjFrom.getMap(this.key));
-    }
-    get relTags() {
-      return new MapTap(this.graph.edges.tag.adjFrom.getMap(this.key));
-    }
-    get relTools() {
-      return new MapTap(this.graph.edges.tool.adjFrom.getMap(this.key));
-    }
-    get relTsys() {
-      return new MapTap(this.graph.edges.tsys.adjFrom.getMap(this.key));
-    }
-    get relWrittenIn() {
-      return new MapTap(this.graph.edges.writtenIn.adjFrom.getMap(this.key));
-    }
-    get relPosts() {
-      return new MapTap(this.graph.edges.post.adjFrom.getMap(this.key));
-    }
-  };
-  var NCommunity = class _NCommunity extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NCommunity.kind;
-    }
-    static {
-      this.kind = "community";
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.commPl.connect(other, this.key);
-      return this;
-    }
-    addTags(others) {
-      for (const other of others) this.graph.edges.commTag.connect(this.key, other);
-      return this;
-    }
-  };
-  var NLearning = class _NLearning extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NLearning.kind;
-    }
-    static {
-      this.kind = "learning";
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.learningPl.connect(other, this.key);
-      return this;
-    }
-    addTags(others) {
-      for (const other of others) this.graph.edges.learningTag.connect(this.key, other);
-      return this;
-    }
-    addCommunities(others) {
-      for (const other of others) this.graph.edges.learningComm.connect(this.key, other);
-      return this;
-    }
-  };
-  var NLibrary = class _NLibrary extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NLibrary.kind;
-    }
-    static {
-      this.kind = "lib";
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.lib.connect(other, this.key);
-      return this;
-    }
-  };
-  var NLicense = class _NLicense extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NLicense.kind;
-    }
-    static {
-      this.kind = "license";
-    }
-    get spdx() {
-      return this.data.spdx;
-    }
-    get isFSFLibre() {
-      return this.data.isFSFLibre === true;
-    }
-    get isOSIApproved() {
-      return this.data.isOSIApproved === true;
-    }
-  };
-  var NParadigm = class _NParadigm extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NParadigm.kind;
-    }
-    static {
-      this.kind = "paradigm";
-    }
-  };
-  var NPlatform = class _NPlatform extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NPlatform.kind;
-    }
-    static {
-      this.kind = "plat";
-    }
-  };
-  var NTag = class _NTag extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NTag.kind;
-    }
-    static {
-      this.kind = "tag";
-    }
-  };
-  var NTool = class _NTool extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NTool.kind;
-    }
-    static {
-      this.kind = "tool";
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.tool.connect(other, this.key);
-      return this;
-    }
-  };
-  var NTsys = class _NTsys extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NTsys.kind;
-    }
-    static {
-      this.kind = "tsys";
-    }
-  };
-  var NApp = class _NApp extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NApp.kind;
-    }
-    static {
-      this.kind = "app";
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.app.connect(other, this.key);
-      return this;
-    }
-  };
-  var NBundle = class _NBundle extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NBundle.kind;
-    }
-    static {
-      this.kind = "bundle";
-    }
-    addTools(others) {
-      for (const other of others) this.graph.edges.bundle.connect(this.key, other);
-      return this;
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.plBundle.connect(other, this.key);
-      return this;
-    }
-    get relTools() {
-      return new MapTap(this.graph.edges.bundle.adjFrom.getMap(this.key));
-    }
-    get relPls() {
-      return new MapTap(this.graph.edges.plBundle.adjTo.getMap(this.key));
-    }
-  };
-  var NPost = class _NPost extends NBase {
-    constructor() {
-      super(...arguments);
-      this.kind = _NPost.kind;
-    }
-    static {
-      this.kind = "post";
-    }
-    set path(path) {
-      this.data.path = path;
-    }
-    get author() {
-      return this.data.author;
-    }
-    get date() {
-      return this.data.date;
-    }
-    get path() {
-      return this.data.path;
-    }
-    get title() {
-      return this.name;
-    }
-    get href() {
-      return `/blog/${this.plainKey}`;
-    }
-    addPlangs(others) {
-      for (const other of others) this.graph.edges.post.connect(other, this.key);
-      return this;
-    }
-    get relPls() {
-      return new MapTap(this.graph.edges.post.adjTo.getMap(this.key));
-    }
-  };
-  var EBase = class extends Edge {
-  };
-  var EApp = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "app";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.app.get(this.to);
-    }
-  };
-  var EBundle = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "bundle";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.bundle.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tool.get(this.to);
-    }
-  };
-  var ECompilesTo = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "compilesTo";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.pl.get(this.to);
-    }
-  };
-  var EDialect = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "dialect";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.pl.get(this.to);
-    }
-  };
-  var ELicense = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "license";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.license.get(this.to);
-    }
-  };
-  var EImpl = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "impl";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.pl.get(this.to);
-    }
-  };
-  var EInfluence = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "influence";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.pl.get(this.to);
-    }
-  };
-  var EParadigm = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "paradigm";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.paradigm.get(this.to);
-    }
-  };
-  var ETsys = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "tsys";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tsys.get(this.to);
-    }
-  };
-  var EPlBundle = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "plBundle";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.bundle.get(this.to);
-    }
-  };
-  var EPlat = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "plat";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.plat.get(this.to);
-    }
-  };
-  var EPost = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "post";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.post.get(this.to);
-    }
-  };
-  var ELib = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "lib";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.lib.get(this.to);
-    }
-  };
-  var ETag = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "tag";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tag.get(this.to);
-    }
-  };
-  var ETool = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "tool";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tool.get(this.to);
-    }
-  };
-  var EWrittenIn = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "writtenIn";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.pl.get(this.to);
-    }
-  };
-  var ECommPl = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "commPl";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.community.get(this.to);
-    }
-  };
-  var ECommTag = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "commTag";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.community.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tag.get(this.to);
-    }
-  };
-  var ELearningPl = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "learningPl";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.pl.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.learning.get(this.to);
-    }
-  };
-  var ELearningTag = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "learningTag";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.learning.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.tag.get(this.to);
-    }
-  };
-  var ELearningComm = class extends EBase {
-    constructor() {
-      super(...arguments);
-      this.kind = "learningTag";
-    }
-    get nodeFrom() {
-      return this.graph.nodes.learning.get(this.from);
-    }
-    get nodeTo() {
-      return this.graph.nodes.community.get(this.to);
-    }
-  };
-
-  // packages/frontend/src/components/facets/misc/facet-bool.tsx
+  // packages/frontend/src/facets/misc/facet-bool.tsx
   function FacetBool({
     groupKey,
     facetKey,
@@ -2557,54 +3310,7 @@
     ] });
   }
 
-  // packages/frontend/src/components/facets/misc/facet-group.tsx
-  function FacetGroup({
-    label: label2,
-    groupKey,
-    active,
-    children
-  }) {
-    const main = x2(FacetsMainContext);
-    const hasValues = main.groupHasValues(groupKey);
-    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
-      /* @__PURE__ */ u4(
-        "header",
-        {
-          class: tw(
-            "sticky top-0 z-10",
-            "shrink-0",
-            "p-2",
-            "flex flex-row",
-            "items-center justify-between",
-            "truncate",
-            "text-primary",
-            tw(BORDER, "border-b-1"),
-            BAR
-          ),
-          children: [
-            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
-            /* @__PURE__ */ u4(
-              "span",
-              {
-                tabIndex: 0,
-                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
-                ...onClickOnEnter(() => {
-                  main.doResetGroup(groupKey);
-                }),
-                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
-                ] })
-              }
-            )
-          ]
-        }
-      ),
-      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
-    ] });
-  }
-
-  // packages/frontend/src/components/facets/misc/facet-text.tsx
+  // packages/frontend/src/facets/misc/facet-text.tsx
   function FacetText({
     groupKey,
     facetKey,
@@ -2612,213 +3318,13 @@
   }) {
     const main = x2(FacetsMainContext);
     const onInput = handler((input) => {
-      main.doSetValue(groupKey, facetKey, new ValRegExp(new RegExp(`${input.value}`, "i")));
+      main.doSetValue(groupKey, facetKey, new ValString(input.value.toLowerCase()));
     });
-    return /* @__PURE__ */ u4(
-      "input",
-      {
-        type: "search",
-        onInput,
-        placeholder: label2,
-        class: tw("w-full", INPUT),
-        value: main.values.get(groupKey, facetKey)?.value?.source ?? ""
-      }
-    );
+    const current = main.values.get(groupKey, facetKey)?.value ?? "";
+    return /* @__PURE__ */ u4("input", { type: "search", onInput, placeholder: label2, class: tw("w-full", INPUT), value: current });
   }
 
-  // packages/frontend/src/components/icon-button/state.tsx
-  function useIconButtonState({ action, disabled, initial }) {
-    if (action === "lights") return useDispatchable(() => ToggleLights.initial(disabled));
-    if (action === "hamburger") return useDispatchable(() => ToggleHamburguer.initial(disabled));
-    if (action === "facets") return useDispatchable(() => ToggleFacetsMenu.initial(disabled));
-    if (action === "allAny") return useDispatchable(() => ToggleAllAny.initial(initial, disabled));
-    if (action === "clearFacets") return useDispatchable(() => ToggleClearFacets.initial(disabled));
-    if (action === "gridOrder") return useDispatchable(() => ToggleGridOrder.initial(disabled));
-    console.error(`Unknown action: ${action}`);
-  }
-  var IconButtonBaseState = class extends Dispatchable {
-    get disabled() {
-      return this.data.disabled;
-    }
-    set disabled(value) {
-      this.data.disabled = value;
-    }
-    get value() {
-      const { disabled, ...data } = this.data;
-      return data;
-    }
-  };
-  var ToggleLights = class _ToggleLights extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleLights({ mode: localStorage.getItem("lightMode") === "light" ? "light" : "dark", disabled });
-    }
-    get isDark() {
-      return this.data.mode === "dark";
-    }
-    get icon() {
-      return this.isDark ? SUN : MOON;
-    }
-    doAction() {
-      this.data.mode = this.isDark ? "light" : "dark";
-    }
-    runEffects() {
-      document.body.classList.toggle("dark", this.isDark);
-      localStorage.setItem("lightMode", this.data.mode);
-    }
-  };
-  var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleHamburguer({ mode: localStorage.getItem("hamburguer") === "show" ? "show" : "hide", disabled });
-    }
-    get hide() {
-      return this.data.mode === "hide";
-    }
-    get icon() {
-      return this.hide ? MENU : CLOSE;
-    }
-    doAction() {
-      this.data.mode = this.hide ? "show" : "hide";
-    }
-    runEffects() {
-      elem("mainNav")?.classList.toggle("hidden", this.hide);
-      localStorage.setItem("hamburguer", this.data.mode);
-    }
-  };
-  var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleFacetsMenu({ mode: localStorage.getItem("facets") === "show" ? "show" : "hide", disabled });
-    }
-    get show() {
-      return this.data.mode === "show";
-    }
-    get icon() {
-      return /* @__PURE__ */ u4(
-        "span",
-        {
-          class: tw(
-            "inline-block",
-            "mt-[6px] scale-85",
-            this.show && "stroke-[1px] stroke-foreground/50",
-            this.show ? "text-hiliteb" : "text-primary"
-            // fmt.
-          ),
-          children: FILTER_EDIT
-        }
-      );
-    }
-    doAction() {
-      this.data.mode = this.show ? "hide" : "show";
-    }
-    runEffects() {
-      const fm = elems("facetsMain");
-      if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      localStorage.setItem("facets", this.data.mode);
-    }
-  };
-  var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
-    static initial(initial, disabled = false) {
-      return new _ToggleAllAny({ mode: initial === "all" ? "all" : "any", disabled });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      const disabled = this.data.disabled;
-      const shadeAll = disabled || this.mode === "any";
-      const shadeAny = disabled || this.mode === "all";
-      return /* @__PURE__ */ u4("span", { class: tw("flex flex-row gap-1", "items-center"), children: [
-        /* @__PURE__ */ u4("span", { class: tw(shadeAll && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "All of" }),
-        /* @__PURE__ */ u4("span", { class: tw("inline-block", "mt-[1px]", "scale-85", this.mode === "all" && "rotate-180"), children: BOOLEAN }),
-        /* @__PURE__ */ u4("span", { class: tw(shadeAny && "opacity-50", !disabled && "group-hover:text-hiliteb"), children: "Any of" })
-      ] });
-    }
-    doAction() {
-      this.data.mode = this.mode === "all" ? "any" : "all";
-    }
-    runEffects() {
-    }
-  };
-  var ToggleClearFacets = class _ToggleClearFacets extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleClearFacets({ disabled, mode: "" });
-    }
-    get icon() {
-      return this.data.mode === "clearFacets" ? DESELECT : null;
-    }
-    doAction() {
-      this.data.mode = "";
-    }
-    doToggleMode(mode) {
-      this.data.mode = mode;
-      this.dispatch();
-    }
-    runEffects() {
-      for (const el of elems("facetsMain")) el.state?.doResetAll();
-    }
-  };
-  var ToggleGridOrder = class _ToggleGridOrder extends IconButtonBaseState {
-    static initial(disabled = false) {
-      return new _ToggleGridOrder({ disabled, mode: "alpha" });
-    }
-    get mode() {
-      return this.data.mode;
-    }
-    get icon() {
-      return this.mode === "alpha" ? ABC : RANKING;
-    }
-    doAction() {
-      this.data.mode = this.mode === "alpha" ? "ranking" : "alpha";
-    }
-    /** Reorder the grid on dispatch. */
-    runEffects() {
-      const grid = elem("nodeGrid");
-      if (!grid) return;
-      const thumbns = [...elems("nodeThumbn")].sort(CMP[this.mode]);
-      for (const thumb of thumbns) {
-        grid.appendChild(thumb);
-      }
-    }
-  };
-  var RANKED_LAST = Number.MAX_SAFE_INTEGER;
-  var getRank = (el) => el.dataset.nodeRanking ? Number.parseInt(el.dataset.nodeRanking, 10) : RANKED_LAST;
-  var getKey = (el) => el.dataset.nodeKey ?? "";
-  var CMP = {
-    ranking: (elA, elB) => getRank(elA) - getRank(elB),
-    alpha: (elA, elB) => getKey(elA).localeCompare(getKey(elB))
-  };
-
-  // packages/frontend/src/components/icon-button/icon-button.tsx
-  function IconButton({ action, disabled, initial, class: cssClass2 }) {
-    const state = useIconButtonState({ action, disabled, initial });
-    const self = useRootState(state);
-    y3(() => {
-      if (!state) return;
-      const newval = disabled === void 0 ? false : disabled;
-      if (newval !== state.disabled) {
-        state.disabled = newval;
-        state.dispatch();
-      }
-    }, [disabled]);
-    const toggle = () => {
-      if (!state) return;
-      state.doAction();
-      state.runEffects();
-      state.dispatch();
-      send(self.current, customEvent("icon-button", state.value));
-    };
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        ref: self,
-        tabIndex: disabled ? void 0 : 0,
-        ...onClickOnEnter(toggle),
-        class: tw("group", "cursor-pointer", !disabled && HOVER_SVG, cssClass2),
-        children: state?.icon
-      }
-    );
-  }
-
-  // packages/frontend/src/components/facets/multisel/state.ts
+  // packages/frontend/src/facets/multisel/state.ts
   var FacetMultiState = class extends Dispatchable {
     /** Actions */
     doSetValue(val) {
@@ -2855,7 +3361,7 @@
     }
   };
 
-  // packages/frontend/src/components/facets/multisel/facet-multi.tsx
+  // packages/frontend/src/facets/multisel/facet-multi.tsx
   function FacetMulti({
     active,
     facetKey,
@@ -2929,26 +3435,29 @@
     return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
   }
 
-  // packages/frontend/src/components/facets/table/entries.ts
+  // packages/frontend/src/facets/table/entries.ts
   function generateEntries(pg, config) {
-    if (config.kind === "noderel") {
-      const { node, edge, dir } = config;
-      const emap = dir === "direct" ? pg.edges[edge].adjTo : pg.edges[edge].adjFrom;
-      if (!emap) {
-        console.error("No edges found for:", edge, dir);
+    if (config.kind === "rel") {
+      const { edgeName, direction, minEntries } = config;
+      const edges = pg.edges[edgeName];
+      if (!edges) {
+        console.error("No edges found for:", edgeName, direction);
         return [];
       }
-      return [...emap.entries()].filter(([, edges]) => edges.size > 0).map(([key, edges]) => {
-        const anyEdge = edges.values().next().value;
-        const name = (dir === "direct" ? anyEdge.nodeTo : anyEdge.nodeFrom)?.name ?? anyEdge.key;
-        return { value: key, label: name, count: edges.size };
+      const relations2 = direction === "direct" ? edges.entriesBackward : edges.entriesForward;
+      const source = direction === "direct" ? edges.toSource : edges.fromSource;
+      const entries = [...relations2].map(([key, toKeys]) => {
+        const name = source.get(key)?.name ?? key;
+        return { value: key, label: name, count: toKeys.size };
       });
+      if (typeof minEntries === "number") return entries.filter((entry) => entry.count >= minEntries);
+      return entries;
     }
-    if (config.kind === "year") {
+    if (config.kind === "prop") {
       const years = /* @__PURE__ */ new Map();
-      for (const { year } of pg.nodes.pl.values) {
-        if (!year) continue;
-        years.set(year, (years.get(year) ?? 0) + 1);
+      for (const { created } of pg.plang.values) {
+        if (!created.value) continue;
+        years.set(created.value, (years.get(created.value) ?? 0) + 1);
       }
       return [...years.entries()].map(([year, count]) => {
         const strYear = `${year}`;
@@ -2959,8 +3468,8 @@
     return [];
   }
   function label(col, config) {
-    if (col === "facet" && config.kind === "noderel") return config.node;
-    if (col === "facet" && config.kind === "year") return `${config.node} year`;
+    if (col === "facet" && config.kind === "rel") return config.edgeName;
+    if (col === "facet" && config.kind === "prop") return `${config.vertexName} year`;
     return col;
   }
   function icon(col, order) {
@@ -2986,7 +3495,7 @@
     return entries.sort((a4, b3) => less(a4, b3, isSel));
   }
 
-  // packages/frontend/src/components/facets/table/header.tsx
+  // packages/frontend/src/facets/table/header.tsx
   function Header({
     action,
     class: cssClass2,
@@ -3009,7 +3518,7 @@
     );
   }
 
-  // packages/frontend/src/components/facets/table/state.ts
+  // packages/frontend/src/facets/table/state.ts
   var FacetTableState = class extends Dispatchable {
     /** Actions */
     doSetValue(val) {
@@ -3056,7 +3565,7 @@
     }
   };
 
-  // packages/frontend/src/components/facets/table/facet-table.tsx
+  // packages/frontend/src/facets/table/facet-table.tsx
   function FacetTable({
     groupKey,
     facetKey,
@@ -3066,7 +3575,7 @@
     const self = A2();
     const main = x2(FacetsMainContext);
     const state = useDispatchable(() => {
-      const order = config.kind === "year" ? "facet-desc" : "facet-asc";
+      const order = config.kind === "prop" ? "facet-desc" : "facet-asc";
       const entries = sortEntries(generateEntries(main.pg, config), order);
       return new FacetTableState({ config, entries, facetKey, groupKey, main, order });
     });
@@ -3081,7 +3590,7 @@
     const CENTER_ROW = tw("items-center justify-between");
     const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
       /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
-        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "year" && "hidden") }) }) }),
+        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "prop" && "hidden") }) }) }),
         /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
           /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
           /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
@@ -3089,7 +3598,7 @@
         ] })
       ] }),
       state.entries.map(
-        (entry) => tap(
+        (entry) => ret(
           onClickOnEnter(() => state.doToggle(entry.value)),
           (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
             /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
@@ -3102,12 +3611,12 @@
     return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col"), children: active ? body() : null });
   }
 
-  // packages/frontend/src/components/facets/main/groups-util.tsx
-  function createFacetGroups(groups, facets) {
-    return ({ currentFacetGroup }) => /* @__PURE__ */ u4(k, { children: [...groups.values()].map(({ groupKey, label: label2, facetKeys }) => /* @__PURE__ */ u4(FacetGroup, { groupKey, label: label2, active: currentFacetGroup === groupKey, children: facetKeys.map((facetKey) => {
-      const facet = facets.get(facetKey);
-      const props = { groupKey, facetKey, label: facet.label, active: currentFacetGroup === groupKey };
-      switch (facet?.kind) {
+  // packages/frontend/src/facets/misc/facet-group.tsx
+  function createFacetGroupsComponent(groups) {
+    return ({ currentFacetGroup }) => /* @__PURE__ */ u4(k, { children: [...groups.entries()].map(([groupKey, { title, facets }]) => /* @__PURE__ */ u4(FacetGroup, { groupKey, label: title, active: currentFacetGroup === groupKey, children: facets.map((facet) => {
+      const { kind, label: label2, facetKey } = facet;
+      const props = { groupKey, facetKey, label: label2, active: currentFacetGroup === groupKey };
+      switch (kind) {
         case "bool":
           return /* @__PURE__ */ u4(FacetBool, { ...props, valueMapper: facet.valueMapper });
         case "multi":
@@ -3121,137 +3630,53 @@
       }
     }) }, groupKey)) });
   }
-
-  // packages/frontend/src/components/facets/main/grid.ts
-  function doUpdateThumbns(nodeKeys) {
-    for (const div of elems("nodeThumbn")) {
-      const plKey = div.dataset.nodeKey;
-      const visible = nodeKeys.has(plKey);
-      div.classList.toggle("hidden", !visible);
-    }
-    adjustGrid();
+  function FacetGroup({
+    label: label2,
+    groupKey,
+    active,
+    children
+  }) {
+    const main = x2(FacetsMainContext);
+    const hasValues = main.groupHasValues(groupKey);
+    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
+      /* @__PURE__ */ u4(
+        "header",
+        {
+          class: tw(
+            "sticky top-0 z-10",
+            "shrink-0",
+            "p-2",
+            "flex flex-row",
+            "items-center justify-between",
+            "truncate",
+            "text-primary",
+            tw(BORDER, "border-b-1"),
+            BAR
+          ),
+          children: [
+            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
+            /* @__PURE__ */ u4(
+              "span",
+              {
+                tabIndex: 0,
+                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
+                ...onClickOnEnter(() => {
+                  main.doResetGroup(groupKey);
+                }),
+                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
+                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
+                ] })
+              }
+            )
+          ]
+        }
+      ),
+      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
+    ] });
   }
-  var updateThumbns = debounce(doUpdateThumbns, 30);
-  function doAdjustGrid() {
-    const widthRow = 0;
-    const widthThumb = 0;
-    const visibleThumbs = 0;
-    const numCols = Math.min(Math.floor(widthRow / widthThumb), visibleThumbs);
-    const maxCols = Math.floor(widthRow / (5 * 16));
-    if (numCols < maxCols && visibleThumbs < maxCols && minWidthBP("48rem")) {
-    } else {
-    }
-  }
-  var adjustGrid = debounce(doAdjustGrid, 30);
 
-  // packages/frontend/src/components/facets/main/state.ts
-  var FacetsMainState = class _FacetsMainState extends Dispatchable {
-    /** Attempt to reconstruct a structured "form value" from generic data. */
-    // biome-ignore lint/suspicious/noExplicitAny: this data is the result of a de/serialization process and is not typed.
-    static dataToValue(groupsByFacetKey, genericData) {
-      const result = new Map2();
-      if (!genericData) return result;
-      for (const [facetKey, rawValue] of Object.entries(genericData)) {
-        const groupKey = groupsByFacetKey.get(facetKey);
-        if (!groupKey) {
-          console.error("missing group for facet", facetKey);
-          continue;
-        }
-        const value = deserializeValue(rawValue);
-        if (value?.isPresent) {
-          result.set(groupKey, facetKey, value);
-        } else {
-          console.error("failed to deserialize value", facetKey, rawValue);
-        }
-      }
-      return result;
-    }
-    doSetCurrentGroup(groupKey) {
-      this.data.currentGroupKey = groupKey;
-      updateLocalStorage(this.tab, "lastGroup", groupKey);
-      this.dispatch();
-    }
-    /** Removes any and all values for the given group.  */
-    doResetGroup(groupKey) {
-      this.values.delete1(groupKey);
-      this.dispatch();
-    }
-    /** Removes any and all values for the given group.  */
-    // biome-ignore lint/suspicious/noExplicitAny: coming from deserialize we'll have to deal with it.
-    doResetAll(values) {
-      if (values) {
-        this.data.values = _FacetsMainState.dataToValue(GROUP_FOR_FACET_KEY, values);
-      } else {
-        this.values.clear();
-      }
-      this.doSetCurrentGroup(this.defaultGroup);
-    }
-    /** This dispatches since we want to change the indicator of active state. */
-    doSetValue(groupKey, facetKey, value) {
-      const { values } = this.data;
-      let result;
-      if (value.isPresent) {
-        if (!value.equalTo(values.get(groupKey, facetKey))) {
-          values.set(groupKey, facetKey, value);
-          result = "changed";
-        } else {
-          result = "unchanged";
-        }
-      } else {
-        result = values.delete(groupKey, facetKey) ? "changed" : "unchanged";
-      }
-      this.dispatch();
-      return result;
-    }
-    /** Queries */
-    get tab() {
-      return this.data.tab;
-    }
-    get defaultGroup() {
-      return this.data.defaultGroup;
-    }
-    get pg() {
-      return this.data.pg;
-    }
-    get values() {
-      return this.data.values;
-    }
-    get serialized() {
-      const data = {};
-      for (const [_2, facetKey, value] of this.values.flatEntries()) {
-        if (value.isPresent) data[facetKey] = value.serializable();
-      }
-      return data;
-    }
-    get currentGroupKey() {
-      return this.data.currentGroupKey;
-    }
-    groupHasValues(groupKey) {
-      for (const v4 of this.values.getMap(groupKey)?.values() ?? []) {
-        if (v4.isPresent) return true;
-      }
-      return false;
-    }
-    /** Helpers */
-    /** Update the clear facets button on the toolbar. */
-    updateClearFacets() {
-      const clearAll = $2("#icon-button-clearFacets");
-      if (!clearAll?.state) return this;
-      clearAll.state.doToggleMode(this.values.isEmpty ? "" : "clearFacets");
-      return this;
-    }
-    dispatch() {
-      super.dispatch();
-      const data = this.serialized;
-      window.fragment.pushState(FragmentTracker.serialize(data));
-      updateLocalStorage(this.tab, "inputs", data);
-      updateThumbns(this.results);
-      this.updateClearFacets();
-      return this;
-    }
-  };
-
-  // packages/frontend/src/components/facets/main/types.ts
+  // packages/frontend/src/facets/main/types.ts
   function bool(facetKey, label2, valueMapper) {
     return { kind: "bool", facetKey, label: label2, valueMapper };
   }
@@ -3264,112 +3689,458 @@
   function text(facetKey, label2) {
     return { kind: "text", facetKey, label: label2 };
   }
-  function defineFacets(...facets) {
-    return facets.reduce(
-      (map, facet) => {
-        map.set(facet.facetKey, facet);
-        return map;
-      },
-      /* @__PURE__ */ new Map()
-    );
-  }
-  function group(groupKey, label2, facetKeys) {
-    return { groupKey, label: label2, facetKeys };
-  }
-  function defineGroups(...groups) {
-    const groupMap = /* @__PURE__ */ new Map();
-    const groupForFacetKey = /* @__PURE__ */ new Map();
-    for (const group2 of groups) {
-      groupMap.set(group2.groupKey, group2);
-      for (const facetKey of group2.facetKeys) groupForFacetKey.set(facetKey, group2.groupKey);
+  function defineFacetGroups(groups) {
+    const groupsMap = new Map(Object.entries(groups));
+    const gkByFk = /* @__PURE__ */ new Map();
+    for (const [groupKey, { facets }] of Object.entries(groups)) {
+      for (const facet of facets) gkByFk.set(facet.facetKey, groupKey);
     }
-    return [groupMap, groupForFacetKey];
+    const component = createFacetGroupsComponent(groupsMap);
+    return [groupsMap, gkByFk, component];
   }
 
-  // packages/frontend/src/components/facets/main/plangs.tsx
-  var FACETS = defineFacets(
-    bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
-    bool("hasLogo", "Has Logo"),
-    bool("hasWikipedia", "Has Wikipedia"),
-    bool("isPopular", "Is Popular"),
-    bool("isTranspiler", "Is Transpiler"),
-    bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
-    multi("extensions", "Extensions"),
-    table("compilesTo", "Compiles To", { kind: "noderel", edge: "compilesTo", node: NPlang.kind, dir: "direct" }),
-    table("creationYear", "Creation Year", { kind: "year", node: NPlang.kind }),
-    table("dialectOf", "Dialect Of", { kind: "noderel", edge: "dialect", node: NPlang.kind, dir: "direct" }),
-    table("implements", "Implements", { kind: "noderel", edge: "impl", node: NPlang.kind, dir: "direct" }),
-    table("influenced", "Influenced", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "inverse" }),
-    table("influencedBy", "Influenced By", { kind: "noderel", edge: "influence", node: NPlang.kind, dir: "direct" }),
-    table("licenses", "Licenses", { kind: "noderel", edge: "license", node: NLicense.kind, dir: "direct" }),
-    table("paradigms", "Paradigms", { kind: "noderel", edge: "paradigm", node: NParadigm.kind, dir: "direct" }),
-    table("platforms", "Platforms", { kind: "noderel", edge: "plat", node: NPlatform.kind, dir: "direct" }),
-    table("tags", "Tags", { kind: "noderel", edge: "tag", node: NTag.kind, dir: "direct" }),
-    table("typeSystems", "Type Systems", { kind: "noderel", edge: "tsys", node: NTsys.kind, dir: "direct" }),
-    table("writtenIn", "Written In", { kind: "noderel", edge: "writtenIn", node: NPlang.kind, dir: "direct" }),
-    text("plangName", "Plang Name")
-  );
-  var [GROUPS, GROUP_FOR_FACET_KEY] = defineGroups(
-    group("creationYear", "Creation Year", ["creationYear"]),
-    group("dialectOf", "Dialect Of", ["dialectOf"]),
-    group("general", "General", ["plangName", "createdRecently", "releasedRecently", "isPopular", "hasLogo", "hasWikipedia", "extensions"]),
-    group("implements", "Implements", ["implements"]),
-    group("influenced", "Influenced", ["influenced"]),
-    group("influencedBy", "Influenced By", ["influencedBy"]),
-    group("licenses", "Licenses", ["licenses"]),
-    group("paradigms", "Paradigms", ["paradigms"]),
-    group("platforms", "Platforms", ["platforms"]),
-    group("tags", "Tags", ["tags"]),
-    group("transpiler", "Transpiler", ["isTranspiler", "compilesTo"]),
-    group("typeSystems", "Type Systems", ["typeSystems"]),
-    group("writtenIn", "Written In", ["writtenIn"])
-  );
-  var NAV = [
-    ["general"],
-    ["platforms", "paradigms", "typeSystems"],
-    ["writtenIn", "transpiler", "dialectOf", "implements", "influencedBy", "influenced"],
-    ["tags", "creationYear", "licenses"]
-  ];
-  var PlangsFacetGroups = createFacetGroups(GROUPS, FACETS);
-  var DEFAULT_GROUP = "general";
-  var PlangsFacetsState = class _PlangsFacetsState extends FacetsMainState {
+  // packages/plangs/src/facets/apps.ts
+  var APP_FACET_PREDICATES = {
+    createdRecently: (app, date) => app.created.isRecent(date.value),
+    creationYear: (app, flt) => ret(app.created.strYear, (appYear) => flt.matches((year) => appYear === year)),
+    ghStars: (app, num) => app.github.stars > num.value,
+    licenses: (app, flt) => flt.matches((key) => app.relLicenses.has(key)),
+    name: (app, str) => app.lcName.includes(str.value),
+    platforms: (app, flt) => flt.matches((key) => app.relPlatforms.has(key)),
+    releasedRecently: (app, date) => ret(app.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (app, flt) => flt.matches((key) => app.relTags.has(key)),
+    writtenWith: (app, flt) => flt.matches((key) => app.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/communities.ts
+  var COMMUNITY_FACET_PREDICATES = {
+    apps: (comm, flt) => flt.matches((key) => comm.relApps.has(key)),
+    createdRecently: (comm, date) => comm.created.isRecent(date.value),
+    creationYear: (comm, flt) => ret(comm.created.strYear, (communityYear) => flt.matches((year) => communityYear === year)),
+    libraries: (comm, flt) => flt.matches((key) => comm.relLibraries.has(key)),
+    name: (comm, str) => comm.lcName.includes(str.value),
+    plangs: (com, flt) => flt.matches((key) => com.relPlangs.has(key)),
+    tags: (comm, flt) => flt.matches((key) => comm.relTags.has(key)),
+    tools: (comm, flt) => flt.matches((key) => comm.relTools.has(key))
+  };
+
+  // packages/plangs/src/facets/learning.ts
+  var LEARNING_FACET_PREDICATES = {
+    apps: (learn, flt) => flt.matches((key) => learn.relApps.has(key)),
+    createdRecently: (learn, date) => learn.created.isRecent(date.value),
+    creationYear: (learn, flt) => ret(learn.created.strYear, (learningYear) => flt.matches((year) => learningYear === year)),
+    libraries: (learn, flt) => flt.matches((key) => learn.relLibraries.has(key)),
+    name: (learn, str) => learn.lcName.includes(str.value),
+    plangs: (learn, flt) => flt.matches((key) => learn.relPlangs.has(key)),
+    tags: (learn, flt) => flt.matches((key) => learn.relTags.has(key)),
+    tools: (learn, flt) => flt.matches((key) => learn.relTools.has(key))
+  };
+
+  // packages/plangs/src/facets/libraries.ts
+  var LIBRARY_FACET_PREDICATES = {
+    createdRecently: (lib, date) => lib.created.isRecent(date.value),
+    creationYear: (lib, flt) => ret(lib.created.strYear, (libraryYear) => flt.matches((year) => libraryYear === year)),
+    ghStars: (lib, num) => lib.github.stars > num.value,
+    licenses: (lib, flt) => flt.matches((key) => lib.relLicenses.has(key)),
+    name: (lib, str) => lib.lcName.includes(str.value),
+    platforms: (lib, flt) => flt.matches((key) => lib.relPlatforms.has(key)),
+    releasedRecently: (lib, date) => ret(lib.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (lib, flt) => flt.matches((key) => lib.relTags.has(key)),
+    writtenFor: (lib, flt) => flt.matches((key) => lib.relPlangs.has(key)),
+    writtenWith: (lib, flt) => flt.matches((key) => lib.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/plangs.ts
+  var PLANG_FACET_PREDICATES = {
+    compilesTo: (pl, flt) => flt.matches((key) => pl.relCompilesTo.has(key)),
+    createdRecently: (pl, date) => pl.created.isRecent(date.value),
+    creationYear: (pl, flt) => ret(pl.created.strYear, (plYear) => flt.matches((year) => plYear === year)),
+    dialectOf: (pl, flt) => flt.matches((key) => pl.relDialectOf.has(key)),
+    extensions: (pl, flt) => flt.matches((key) => pl.extensions.includes(key)),
+    hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
+    hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
+    implements: (pl, flt) => flt.matches((key) => pl.relImplements.has(key)),
+    influenced: (pl, flt) => flt.matches((key) => pl.relInfluenced.has(key)),
+    influencedBy: (pl, flt) => flt.matches((key) => pl.relInfluencedBy.has(key)),
+    isPopular: (pl, val) => val.value === pl.isPopular,
+    isTranspiler: (pl, val) => val.value === pl.isTranspiler,
+    licenses: (pl, flt) => flt.matches((key) => pl.relLicenses.has(key)),
+    paradigms: (pl, flt) => flt.matches((key) => pl.relParadigms.has(key)),
+    plangName: (pl, str) => pl.lcName.includes(str.value),
+    platforms: (pl, flt) => flt.matches((key) => pl.relPlatforms.has(key)),
+    releasedRecently: (pl, date) => ret(pl.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (pl, flt) => flt.matches((key) => pl.relTags.has(key)),
+    typeSystems: (pl, flt) => flt.matches((key) => pl.relTypeSystems.has(key)),
+    writtenWith: (pl, flt) => flt.matches((key) => pl.relWrittenWith.has(key))
+    // These relationships are probably less useful for filtering.
+    // dialects: // "Dialects", rel("plang", "relDialects")). Ex. Pick "VisualBasic" and see "Basic".
+    // implementedBy: // "Implemented By", rel("plang", "relImplementedBy")). Ex. Pick "CPython" and see "Python".
+    // targetOf: // "Target of", rel("plang", "relTargetOf")). Ex. Pick "Haxe" and see what languages it targets.
+    // usedToWrite: //  "Used to Write", rel("plang", "relUsedToWrite")). Ex Pick "C++" and see "C".
+  };
+
+  // packages/plangs/src/facets/tools.ts
+  var TOOL_FACET_PREDICATES = {
+    createdRecently: (tool, date) => tool.created.isRecent(date.value),
+    creationYear: (tool, flt) => ret(tool.created.strYear, (toolYear) => flt.matches((year) => toolYear === year)),
+    ghStars: (tool, num) => tool.github.stars > num.value,
+    licenses: (tool, flt) => flt.matches((key) => tool.relLicenses.has(key)),
+    name: (tool, str) => tool.lcName.includes(str.value),
+    platforms: (tool, flt) => flt.matches((key) => tool.relPlatforms.has(key)),
+    releasedRecently: (tool, date) => ret(tool.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (tool, flt) => flt.matches((key) => tool.relTags.has(key)),
+    writtenFor: (tool, flt) => flt.matches((key) => tool.relPlangs.has(key)),
+    writtenWith: (tool, flt) => flt.matches((key) => tool.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/index.ts
+  function matchVertex(vertex, predicates, facetValues) {
+    for (const [key, value] of facetValues) {
+      const pred = predicates[key];
+      if (!pred) console.error(`No predicate found for key: ${key}`);
+      if (pred && value.isPresent && !pred(vertex, value)) return false;
+    }
+    return true;
+  }
+  function matchVertices(vertices, facetValues, limit = -1) {
+    const predicates = vertexPredicates(vertices.name);
+    const result = /* @__PURE__ */ new Set();
+    if (!predicates) {
+      console.warn(`No predicates found for vertex name: ${vertices.name}`);
+      return result;
+    }
+    for (const vertex of vertices.values) {
+      if (limit >= 0 && result.size >= limit) break;
+      if (matchVertex(vertex, predicates, facetValues)) result.add(vertex.key);
+    }
+    return result;
+  }
+  function vertexPredicates(name) {
+    switch (name) {
+      case "app":
+        return APP_FACET_PREDICATES;
+      case "community":
+        return COMMUNITY_FACET_PREDICATES;
+      case "learning":
+        return LEARNING_FACET_PREDICATES;
+      case "library":
+        return LIBRARY_FACET_PREDICATES;
+      case "plang":
+        return PLANG_FACET_PREDICATES;
+      case "tool":
+        return TOOL_FACET_PREDICATES;
+    }
+  }
+
+  // packages/frontend/src/facets/kind/apps.tsx
+  var [GROUPS, GK_BY_FK, COMPONENT] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("app", "created"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("name", "App Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
+        bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
+        text("ghStars", "GitHub Stars")
+      ]
+    },
+    licenses: { title: "Licenses", facets: [table("licenses", "Licenses", rel("app", "relLicenses"))] },
+    platforms: { title: "Platforms", facets: [table("platforms", "Platforms", rel("app", "relPlatforms"))] },
+    tags: { title: "Tags", facets: [table("tags", "Tags", rel("app", "relTags"))] },
+    writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("app", "relWrittenWith"))] }
+  });
+  var APPS_TAB = "apps";
+  var NAV = {
+    groupKeys: [["general"], ["writtenWith"], ["tags", "creationYear", "licenses"], ["platforms"]],
+    default: "general"
+  };
+  var AppsFacetsState = class _AppsFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV;
+      this.tab = APPS_TAB;
+      this.gkByFk = GK_BY_FK;
+      this.groupsConfig = GROUPS;
+      this.groupsComponent = COMPONENT;
+    }
     static initial(pg) {
-      const tab = "plangs";
-      return new _PlangsFacetsState({
-        pg,
-        tab,
-        defaultGroup: DEFAULT_GROUP,
-        currentGroupKey: loadLocalStorage(tab, "lastGroup") ?? DEFAULT_GROUP,
-        values: FacetsMainState.dataToValue(GROUP_FOR_FACET_KEY, FragmentTracker.deserialize() ?? loadLocalStorage(tab, "inputs"))
-      }).updateClearFacets();
-    }
-    get nav() {
-      return NAV;
-    }
-    groupTitle(key) {
-      return GROUPS.get(key)?.label ?? key;
-    }
-    get facetGroupsComponent() {
-      return PlangsFacetGroups;
+      const currentGroupKey = loadLocalStorage(APPS_TAB, "lastGroup") ?? NAV.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? loadLocalStorage(APPS_TAB, "inputs"));
+      return new _AppsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
       if (!this.pg) return /* @__PURE__ */ new Set();
-      return this.pg.plangs(this.values.getMap2());
+      return matchVertices(this.pg.app, this.values.getMap2());
     }
   };
 
-  // packages/frontend/src/components/facets/main/facets-main.tsx
+  // packages/frontend/src/facets/kind/communities.tsx
+  var [GROUPS2, GK_BY_FK2, COMPONENT2] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("community", "created"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("name", "Community Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil())
+      ]
+    },
+    apps: { title: "Licenses", facets: [table("apps", "Apps", rel("community", "relApps"))] },
+    libraries: { title: "Platforms", facets: [table("libraries", "libraries", rel("community", "relLibraries"))] },
+    tags: { title: "Tags", facets: [table("tags", "Tags", rel("community", "relTags"))] },
+    plangs: { title: "Written For", facets: [table("plangs", "Plangs", rel("community", "relPlangs"))] },
+    tools: { title: "Written With", facets: [table("tools", "Tools", rel("community", "relTools"))] }
+  });
+  var COMMUNITY_TAB = "communities";
+  var NAV2 = {
+    groupKeys: [["general"], ["plangs", "libraries"], ["apps", "tools"], ["tags"]],
+    default: "general"
+  };
+  var CommunitiesFacetsState = class _CommunitiesFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV2;
+      this.tab = COMMUNITY_TAB;
+      this.gkByFk = GK_BY_FK2;
+      this.groupsConfig = GROUPS2;
+      this.groupsComponent = COMPONENT2;
+    }
+    static initial(pg) {
+      const currentGroupKey = loadLocalStorage(COMMUNITY_TAB, "lastGroup") ?? NAV2.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? loadLocalStorage(COMMUNITY_TAB, "inputs"));
+      return new _CommunitiesFacetsState({ pg, currentGroupKey, values });
+    }
+    get results() {
+      if (!this.pg) return /* @__PURE__ */ new Set();
+      return matchVertices(this.pg.community, this.values.getMap2());
+    }
+  };
+
+  // packages/frontend/src/facets/kind/learning.tsx
+  var [GROUPS3, GK_BY_FK3, COMPONENT3] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("learning", "created"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("name", "Learning Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil())
+      ]
+    },
+    apps: { title: "Apps", facets: [table("apps", "Apps", rel("learning", "relApps"))] },
+    libraries: { title: "Libraries", facets: [table("libraries", "libraries", rel("learning", "relLibraries"))] },
+    tags: { title: "Tags", facets: [table("tags", "Tags", rel("learning", "relTags"))] },
+    plangs: { title: "Plangs", facets: [table("plangs", "Plangs", rel("learning", "relPlangs"))] },
+    tools: { title: "Tools", facets: [table("tools", "Tools", rel("learning", "relTools"))] }
+  });
+  var COMMUNITY_TAB2 = "communities";
+  var NAV3 = {
+    groupKeys: [["general"], ["plangs", "libraries"], ["apps", "tools"], ["tags"]],
+    default: "general"
+  };
+  var LearningFacetsState = class _LearningFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV3;
+      this.tab = COMMUNITY_TAB2;
+      this.gkByFk = GK_BY_FK3;
+      this.groupsConfig = GROUPS3;
+      this.groupsComponent = COMPONENT3;
+    }
+    static initial(pg) {
+      const currentGroupKey = loadLocalStorage(COMMUNITY_TAB2, "lastGroup") ?? NAV3.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? loadLocalStorage(COMMUNITY_TAB2, "inputs"));
+      return new _LearningFacetsState({ pg, currentGroupKey, values });
+    }
+    get results() {
+      if (!this.pg) return /* @__PURE__ */ new Set();
+      return matchVertices(this.pg.learning, this.values.getMap2());
+    }
+  };
+
+  // packages/frontend/src/facets/kind/libraries.tsx
+  var [GROUPS4, GK_BY_FK4, COMPONENT4] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("library", "created"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("name", "Library Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
+        bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
+        text("ghStars", "GitHub Stars")
+      ]
+    },
+    licenses: {
+      title: "Licenses",
+      facets: [table("licenses", "Licenses", rel("library", "relLicenses"))]
+    },
+    platforms: {
+      title: "Platforms",
+      facets: [table("platforms", "Platforms", rel("library", "relPlatforms"))]
+    },
+    tags: {
+      title: "Tags",
+      facets: [table("tags", "Tags", rel("library", "relTags"))]
+    },
+    writtenWith: { title: "Written With ", facets: [table("writtenWith", "Written With", rel("library", "relWrittenWith"))] },
+    writtenFor: { title: "Written For", facets: [table("writtenFor", "Written For", rel("tool", "relPlangs"))] }
+  });
+  var LIBS_TAB = "libs";
+  var NAV4 = {
+    groupKeys: [["general"], ["writtenWith", "writtenFor"], ["tags", "creationYear", "licenses"], ["platforms"]],
+    default: "general"
+  };
+  var LibrariesFacetsState = class _LibrariesFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV4;
+      this.tab = LIBS_TAB;
+      this.gkByFk = GK_BY_FK4;
+      this.groupsConfig = GROUPS4;
+      this.groupsComponent = COMPONENT4;
+    }
+    static initial(pg) {
+      const currentGroupKey = loadLocalStorage(LIBS_TAB, "lastGroup") ?? NAV4.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? loadLocalStorage(LIBS_TAB, "inputs"));
+      return new _LibrariesFacetsState({ pg, currentGroupKey, values });
+    }
+    get results() {
+      if (!this.pg) return /* @__PURE__ */ new Set();
+      return matchVertices(this.pg.library, this.values.getMap2());
+    }
+  };
+
+  // packages/frontend/src/facets/kind/plangs.tsx
+  var [GROUPS5, GK_BY_FK5, COMPONENT5] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("plang", "created"))] },
+    dialectOf: { title: "Dialect Of", facets: [table("dialectOf", "Dialect Of", rel("plang", "relDialectOf"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("plangName", "Plang Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
+        bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
+        bool("isPopular", "Is Popular"),
+        bool("hasLogo", "Has Logo"),
+        bool("hasWikipedia", "Has Wikipedia"),
+        multi("extensions", "Extensions")
+      ]
+    },
+    implements: {
+      title: "Implements",
+      facets: [
+        table("implements", "Implements", { ...rel("plang", "relImplements"), minEntries: 2 })
+        // All plangs implement themselves.
+      ]
+    },
+    influenced: { title: "Influenced", facets: [table("influenced", "Influenced", rel("plang", "relInfluenced"))] },
+    influencedBy: { title: "Influenced By", facets: [table("influencedBy", "Influenced By", rel("plang", "relInfluencedBy"))] },
+    licenses: { title: "Licenses", facets: [table("licenses", "Licenses", rel("plang", "relLicenses"))] },
+    paradigms: { title: "Paradigms", facets: [table("paradigms", "Paradigms", rel("plang", "relParadigms"))] },
+    platforms: { title: "Platforms", facets: [table("platforms", "Platforms", rel("plang", "relPlatforms"))] },
+    tags: { title: "Tags", facets: [table("tags", "Tags", rel("plang", "relTags"))] },
+    transpiler: {
+      title: "Transpiler",
+      facets: [bool("isTranspiler", "Is Transpiler"), table("compilesTo", "Compiles To", rel("plang", "relCompilesTo"))]
+    },
+    typeSystems: { title: "Type Systems", facets: [table("typeSystems", "Type Systems", rel("plang", "relTypeSystems"))] },
+    writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("plang", "relWrittenWith"))] }
+  });
+  var PLANGS_TAB = "plangs";
+  var NAV5 = {
+    groupKeys: [
+      ["general"],
+      ["platforms", "paradigms", "typeSystems"],
+      ["writtenWith", "transpiler", "dialectOf", "implements", "influencedBy", "influenced"],
+      ["tags", "creationYear", "licenses"]
+    ],
+    default: "general"
+  };
+  var PlangsFacetsState = class _PlangsFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV5;
+      this.tab = PLANGS_TAB;
+      this.gkByFk = GK_BY_FK5;
+      this.groupsConfig = GROUPS5;
+      this.groupsComponent = COMPONENT5;
+    }
+    static initial(pg) {
+      const currentGroupKey = loadLocalStorage(PLANGS_TAB, "lastGroup") ?? NAV5.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? loadLocalStorage(PLANGS_TAB, "inputs"));
+      return new _PlangsFacetsState({ pg, currentGroupKey, values });
+    }
+    get results() {
+      if (!this.pg) return /* @__PURE__ */ new Set();
+      return matchVertices(this.pg.plang, this.values.getMap2());
+    }
+  };
+
+  // packages/frontend/src/facets/kind/tools.tsx
+  var [GROUPS6, GK_BY_FK6, COMPONENT6] = defineFacetGroups({
+    creationYear: { title: "Creation Year", facets: [table("creationYear", "Creation Year", prop("tool", "created"))] },
+    general: {
+      title: "General",
+      facets: [
+        text("name", "Tool Name"),
+        bool("createdRecently", "Created Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 5) : new ValNil()),
+        bool("releasedRecently", "Released Recently", (checked) => checked ? new ValNumber((/* @__PURE__ */ new Date()).getFullYear() - 1) : new ValNil()),
+        text("ghStars", "GitHub Stars")
+      ]
+    },
+    licenses: { title: "Licenses", facets: [table("licenses", "Licenses", rel("tool", "relLicenses"))] },
+    platforms: { title: "Platforms", facets: [table("platforms", "Platforms", rel("tool", "relPlatforms"))] },
+    tags: { title: "Tags", facets: [table("tags", "Tags", rel("tool", "relTags"))] },
+    writtenFor: { title: "Written For", facets: [table("writtenFor", "Written For", rel("tool", "relPlangs"))] },
+    writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("tool", "relWrittenWith"))] }
+  });
+  var TOOLS_TAB = "tools";
+  var NAV6 = {
+    groupKeys: [["general"], ["writtenWith", "writtenFor"], ["tags", "creationYear", "licenses"], ["platforms"]],
+    default: "general"
+  };
+  var ToolsFacetsState = class _ToolsFacetsState extends FacetsMainState {
+    constructor() {
+      super(...arguments);
+      this.nav = NAV6;
+      this.tab = TOOLS_TAB;
+      this.gkByFk = GK_BY_FK6;
+      this.groupsConfig = GROUPS6;
+      this.groupsComponent = COMPONENT6;
+    }
+    static initial(pg) {
+      const currentGroupKey = loadLocalStorage(TOOLS_TAB, "lastGroup") ?? NAV6.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? loadLocalStorage(TOOLS_TAB, "inputs"));
+      return new _ToolsFacetsState({ pg, currentGroupKey, values });
+    }
+    get results() {
+      if (!this.pg) return /* @__PURE__ */ new Set();
+      return matchVertices(this.pg.tool, this.values.getMap2());
+    }
+  };
+
+  // packages/frontend/src/facets/main/use_state.ts
   var FacetsMainContext = G(void 0);
   function useFacetState(tab, pg) {
-    if (tab === "plangs") return useDispatchable(() => PlangsFacetsState.initial(pg));
-    console.error("Unknown tab", tab);
+    let state;
+    if (tab === "apps") state = useDispatchable(() => AppsFacetsState.initial(pg));
+    if (tab === "communities") state = useDispatchable(() => CommunitiesFacetsState.initial(pg));
+    if (tab === "learning") state = useDispatchable(() => LearningFacetsState.initial(pg));
+    if (tab === "libs") state = useDispatchable(() => LibrariesFacetsState.initial(pg));
+    if (tab === "plangs") state = useDispatchable(() => PlangsFacetsState.initial(pg));
+    if (tab === "tools") state = useDispatchable(() => ToolsFacetsState.initial(pg));
+    if (!state) {
+      console.error("Unknown tab", tab);
+      return;
+    }
+    return state.updateClearFacets();
   }
+
+  // packages/frontend/src/facets/main/main.tsx
   function FacetsMain({ tab, pg }) {
     const state = useFacetState(tab, pg);
     const self = useRootState(state);
     y3(() => window.fragment.onUserChange((ev) => state?.doResetAll(ev.deserFrag)));
     const body = () => !state ? null : /* @__PURE__ */ u4(FacetsMainContext.Provider, { value: state, children: [
-      /* @__PURE__ */ u4("div", { class: tw(tw(BORDER, "border-r-1"), "overflow-y-scroll", "shrink-0 grow-0"), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]", "gap-2", "pt-1"), children: state.nav.flatMap((keys) => (
+      /* @__PURE__ */ u4("div", { class: tw(tw(BORDER, "border-r-1"), "overflow-y-scroll", "shrink-0 grow-0"), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]", "gap-2", "pt-1"), children: state.nav.groupKeys.flatMap((keys) => (
         // Subgrid respects the alignment of indicators while allowing to group the links and add a border.
         /* @__PURE__ */ u4("div", { class: tw("col-span-2", "grid grid-cols-subgrid", "items-center", "pb-2", tw(BORDER, "border-b-1")), children: keys.map((groupKey) => /* @__PURE__ */ u4(k, { children: [
           /* @__PURE__ */ u4("div", { class: tw("mt-[.45rem] pl-1", state.groupHasValues(groupKey) ? "text-primary" : "text-foreground/20 text-xs"), children: /* @__PURE__ */ u4("div", { class: "-mt-[2px] scale-66", children: FULLCIRCLE }) }),
@@ -3391,7 +4162,7 @@
           )
         ] }, groupKey)) }, keys.join("-"))
       )) }) }),
-      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50"), children: /* @__PURE__ */ u4(state.facetGroupsComponent, { currentFacetGroup: state.currentGroupKey }) })
+      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50"), children: /* @__PURE__ */ u4(state.groupsComponent, { currentFacetGroup: state.currentGroupKey }) })
     ] });
     return /* @__PURE__ */ u4(
       "aside",
@@ -3403,140 +4174,36 @@
     );
   }
 
-  // packages/frontend/src/components/facets/main/index.tsx
+  // packages/frontend/src/facets/main/index.tsx
   var CL = "facetsMain";
   function activateFacetsMain(pg) {
     for (const elem2 of elems(CL)) {
       if (pg && elem2.dataset.tab) {
-        const props = { pg, tab: elem2.dataset.tab };
-        B(/* @__PURE__ */ u4(FacetsMain, { ...props }), elem2);
+        B(/* @__PURE__ */ u4(FacetsMain, { pg, tab: elem2.dataset.tab }), elem2);
       } else {
         console.error("Missing prop for FacetsMain component.");
       }
     }
   }
 
-  // packages/frontend/src/components/icon-button/index.tsx
-  function activateIconButtons() {
-    for (const elem2 of elems("iconButton")) {
-      if (elem2.dataset.action) {
-        const props = {
-          action: elem2.dataset.action,
-          class: classesExcept(elem2, cssClass("iconButton"))
-        };
-        B(/* @__PURE__ */ u4(IconButton, { ...props }), elem2);
-      } else {
-        console.error("Missing prop for IconButton component.");
-      }
-    }
-  }
-
-  // packages/frontend/src/app/pl.ts
-  function getPl(pg, target) {
-    const keyHolder = target.closest("[data-node-key]");
-    if (!keyHolder || !keyHolder.dataset.nodeKey) return;
-    return pg.nodes.pl.get(keyHolder.dataset.nodeKey);
-  }
-  function lastPlang(pg) {
-    try {
-      const { key, data } = JSON.parse(localStorage.getItem("last-plang") || "{}");
-      return new NPlang(pg, key).merge(data);
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-
-  // packages/frontend/src/components/node-info/node-info.tsx
-  function NodeInfo({ node: pl, open, tab }) {
-    const forGrid = tab === "plangs";
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        class: tw(
-          "w-full overflow-y-scroll",
-          "px-2 pt-2 sm:p-4",
-          !forGrid && "-mx-4",
-          // Compensate for padding so it aligns with the rest of the content.
-          "prose prose-green dark:prose-invert",
-          "max-w-[unset]",
-          forGrid && "bg-linear-to-b to-secondary/50",
-          tw(BORDER, forGrid && "border-b-1")
-        ),
-        children: [
-          /* @__PURE__ */ u4("h2", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-foreground decoration-1 decoration-dotted", href: `/${pl?.plainKey}`, children: pl?.name ?? "Plang" }) }),
-          pl && /* @__PURE__ */ u4(k, { children: [
-            /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
-            /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
-              pl.year && /* @__PURE__ */ u4(Pill, { children: `Appeared ${pl.year}` }),
-              pl.lastRelease && /* @__PURE__ */ u4(Pill, { children: `Last Rel ${pl.lastRelease.date ?? pl.lastRelease.version}` }),
-              pl.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
-              pl.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
-            ] }),
-            /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: pl.description || "..." }),
-            /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
-              /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-xl", children: "Details" }),
-              relations(pl).map(([title, iterTap]) => /* @__PURE__ */ u4("div", { children: [
-                /* @__PURE__ */ u4("h3", { class: "mt-4 text-xl", children: title }),
-                iterTap.existing.map(({ name, key, kind }) => /* @__PURE__ */ u4(Pill, { children: name }, key))
-              ] }, title))
-            ] })
-          ] })
-        ]
-      }
-    );
-  }
-  function Pill({ children }) {
-    return /* @__PURE__ */ u4("span", { class: tw("inline-block", "mr-2 mb-2 px-1", "border-2 border-secondary", "bg-secondary/50"), children });
-  }
-  function relations(pl) {
-    const all = [
-      ["Type Systems", pl.relTsys.values.map(({ nodeTo }) => nodeTo)],
-      ["Platforms", pl.relPlatforms.values.map(({ nodeTo }) => nodeTo)],
-      ["Influenced By", pl.relInfluencedBy.values.map(({ nodeTo }) => nodeTo)],
-      ["Influenced", pl.relInfluenced.values.map(({ nodeFrom }) => nodeFrom)],
-      ["Dialect Of", pl.relDialectOf.values.map(({ nodeTo }) => nodeTo)],
-      ["Implements", pl.relImplements.values.map(({ nodeTo }) => nodeTo)],
-      ["Compiles To", pl.relCompilesTo.values.map(({ nodeTo }) => nodeTo)],
-      ["Licenses", pl.relLicenses.values.map(({ nodeTo }) => nodeTo)],
-      ["Tags", pl.relTags.values.map(({ nodeTo }) => nodeTo)],
-      ["Extensions", pl.extensions.map((name) => ({ key: name, name, kind: "ext" }))]
-    ];
-    return all.filter(([_2, iterTap]) => iterTap.isEmpty === false);
-  }
-
-  // packages/frontend/src/components/node-info/index.tsx
-  function renderNodeInfo({ node, tab, open }) {
-    if (!node || !tab) {
-      console.log("Missing props to render nodeInfo.", { node, tab });
-      return;
-    }
-    for (const elem2 of elems("nodeInfo")) {
-      B(/* @__PURE__ */ u4(NodeInfo, { node, tab, open }), elem2);
-    }
-  }
-  function renderLastNodeInfo(pg) {
-    const node = lastPlang(pg);
-    if (node) renderNodeInfo({ node, tab: "plangs" });
-  }
-
   // packages/frontend/src/app/index.tsx
   async function start() {
     const pg = new PlangsGraph();
-    const loadData = fetch("/plangs.json").then(async (r3) => pg.loadJSON(await r3.json()));
+    const loadData = fetch("/plangs.json").then(async (r3) => pg.loadJSON(await r3.json())).then((g2) => g2.materialize());
     window.fragment = new FragmentTracker().bind();
     window.restoreFilters = () => ToggleFacetsMenu.initial().runEffects();
     window.restoreHamburguer = () => ToggleHamburguer.initial().runEffects();
     window.restoreLightMode = () => ToggleLights.initial().runEffects();
-    window.restoreNodeInfo = () => renderLastNodeInfo(pg);
+    window.restoreVertexInfo = () => renderLastVertexInfo(pg);
     document.addEventListener("DOMContentLoaded", () => {
       activateIconButtons();
       loadData.then(() => {
         activateFacetsMain(pg);
-        const grid = elem("nodeGrid");
+        const grid = elem("vertexGrid");
         if (!grid) return;
         on(grid, "pointerdown", ({ target }) => {
           const pl = getPl(pg, target);
-          if (pl) renderNodeInfo({ node: pl, tab: "plangs" });
+          if (pl) renderVertexInfo({ vertex: pl, tab: "plangs" });
         });
         on(grid, "dblclick", ({ target }) => {
           const pl = getPl(pg, target);
@@ -3545,7 +4212,7 @@
       });
     });
   }
-  if (false) {
+  if (true) {
     try {
       connectLivereload();
     } catch (err) {
