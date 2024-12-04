@@ -1237,14 +1237,14 @@
   ] });
 
   // packages/frontend/src/auxiliar/storage.ts
-  function storageKey(tab, key, postfix) {
+  function storeKey(tab, key, postfix) {
     if (postfix) return `site-${tab}-${key}-${postfix}`;
     return `site-${tab}-${key}`;
   }
-  function updateLocalStorage(key, data2) {
+  function storeUpdate(key, data2) {
     localStorage.setItem(key, JSON.stringify(data2));
   }
-  function loadLocalStorage(key) {
+  function storeLoad(key) {
     const jsonString = localStorage.getItem(key);
     if (!jsonString) return void 0;
     try {
@@ -1279,7 +1279,7 @@
   };
   var ToggleLights = class _ToggleLights extends IconButtonBaseState {
     static initial(disabled = false) {
-      const theme = loadLocalStorage(storageKey("any_tab", "theme"));
+      const theme = storeLoad(storeKey("any_tab", "theme"));
       return new _ToggleLights({ mode: theme === "light" ? "light" : "dark", disabled });
     }
     get isDark() {
@@ -1293,12 +1293,12 @@
     }
     runEffects() {
       document.body.classList.toggle("dark", this.isDark);
-      updateLocalStorage(storageKey("any_tab", "theme"), this.data.mode);
+      storeUpdate(storeKey("any_tab", "theme"), this.data.mode);
     }
   };
   var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = loadLocalStorage(storageKey("any_tab", "hamburger-menu"));
+      const mode = storeLoad(storeKey("any_tab", "hamburger-menu"));
       return new _ToggleHamburguer({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get hide() {
@@ -1312,12 +1312,12 @@
     }
     runEffects() {
       elem("mainNav")?.classList.toggle("hidden", this.hide);
-      updateLocalStorage(storageKey("any_tab", "hamburger-menu"), this.data.mode);
+      storeUpdate(storeKey("any_tab", "hamburger-menu"), this.data.mode);
     }
   };
   var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = loadLocalStorage(storageKey("any_tab", "facets-browser"));
+      const mode = storeLoad(storeKey("any_tab", "facets-browser"));
       return new _ToggleFacetsMenu({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get show() {
@@ -1344,7 +1344,7 @@
     runEffects() {
       const fm = elems("facetsMain");
       if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      updateLocalStorage(storageKey("any_tab", "facets-browser"), this.data.mode);
+      storeUpdate(storeKey("any_tab", "facets-browser"), this.data.mode);
     }
   };
   var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
@@ -3234,7 +3234,7 @@
     }
     doSetCurrentGroup(groupKey) {
       this.data.currentGroupKey = groupKey;
-      updateLocalStorage(this.tab, "lastGroup", groupKey);
+      storeUpdate(storeKey(this.tab, "facets-last-group"), groupKey);
       this.dispatch();
     }
     /** Removes any and all values for the given group.  */
@@ -3305,7 +3305,7 @@
       if (persist === "persist") {
         const data2 = this.serialized;
         this.pushState(data2);
-        updateLocalStorage(this.tab, "inputs", data2);
+        storeUpdate(storeKey(this.tab, "facet-value"), data2);
       }
       updateThumbns(this.results);
       this.updateClearFacets();
@@ -3916,8 +3916,8 @@
       this.groupsComponent = COMPONENT;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(APPS_TAB, "lastGroup") ?? NAV.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? loadLocalStorage(APPS_TAB, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(APPS_TAB, "facets-last-group")) ?? NAV.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? storeLoad(storeKey(APPS_TAB, "facet-value")));
       return new _AppsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -3957,8 +3957,8 @@
       this.groupsComponent = COMPONENT2;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(COMMUNITY_TAB, "lastGroup") ?? NAV2.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? loadLocalStorage(COMMUNITY_TAB, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(COMMUNITY_TAB, "facets-last-group")) ?? NAV2.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? storeLoad(storeKey(COMMUNITY_TAB, "facet-value")));
       return new _CommunitiesFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -3983,7 +3983,7 @@
     plangs: { title: "Plangs", facets: [table("plangs", "Plangs", rel("learning", "relPlangs"))] },
     tools: { title: "Tools", facets: [table("tools", "Tools", rel("learning", "relTools"))] }
   });
-  var COMMUNITY_TAB2 = "communities";
+  var LEARNING_TAB = "learning";
   var NAV3 = {
     groupKeys: [["general"], ["plangs", "libraries"], ["apps", "tools"], ["tags"]],
     default: "general"
@@ -3992,14 +3992,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV3;
-      this.tab = COMMUNITY_TAB2;
+      this.tab = LEARNING_TAB;
       this.gkByFk = GK_BY_FK3;
       this.groupsConfig = GROUPS3;
       this.groupsComponent = COMPONENT3;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(COMMUNITY_TAB2, "lastGroup") ?? NAV3.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? loadLocalStorage(COMMUNITY_TAB2, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(LEARNING_TAB, "facets-last-group")) ?? NAV3.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? storeLoad(storeKey(LEARNING_TAB, "facet-value")));
       return new _LearningFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4050,8 +4050,8 @@
       this.groupsComponent = COMPONENT4;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(LIBS_TAB, "lastGroup") ?? NAV4.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? loadLocalStorage(LIBS_TAB, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(LIBS_TAB, "facets-last-group")) ?? NAV4.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? storeLoad(storeKey(LIBS_TAB, "facet-value")));
       return new _LibrariesFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4116,8 +4116,8 @@
       this.groupsComponent = COMPONENT5;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(PLANGS_TAB, "lastGroup") ?? NAV5.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? loadLocalStorage(PLANGS_TAB, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(PLANGS_TAB, "facets-last-group")) ?? NAV5.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? storeLoad(storeKey(PLANGS_TAB, "facet-value")));
       return new _PlangsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4159,8 +4159,8 @@
       this.groupsComponent = COMPONENT6;
     }
     static initial(pg) {
-      const currentGroupKey = loadLocalStorage(TOOLS_TAB, "lastGroup") ?? NAV6.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? loadLocalStorage(TOOLS_TAB, "inputs"));
+      const currentGroupKey = storeLoad(storeKey(TOOLS_TAB, "facets-last-group")) ?? NAV6.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? storeLoad(storeKey(TOOLS_TAB, "facet-value")));
       return new _ToolsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4270,6 +4270,10 @@
           const pl = getClosestVertex(pg, target);
           if (pl) window.location.href = `/${pl.plainKey}`;
         });
+        for (const img of elems("vertexThumbnImg")) {
+          const src = img.dataset.src;
+          if (src) img.setAttribute("src", src);
+        }
       });
     });
   }
