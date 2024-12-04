@@ -925,38 +925,6 @@
     }
   };
 
-  // packages/frontend/src/auxiliar/livereload.ts
-  var pingTimer;
-  var INITIAL_TIMEOUT_MS = 500;
-  var PING_FREQ_MS = 10;
-  var RELOAD_LATENCY_MS = 10;
-  function connectLivereload(timeout = INITIAL_TIMEOUT_MS, lifecycle = "start") {
-    if (pingTimer) {
-      clearInterval(pingTimer);
-      pingTimer = void 0;
-    }
-    const reconnect = () => {
-      console.info("attempting livereload reconnect in", timeout, "ms");
-      setTimeout(() => connectLivereload(timeout * 1.5, "error"), timeout);
-    };
-    const reload = () => {
-      setTimeout(() => window.location.reload(), RELOAD_LATENCY_MS);
-    };
-    const socket = new WebSocket("/livereload");
-    socket.addEventListener("open", () => {
-      if (lifecycle === "error") return reload();
-      socket.send("CONNECT");
-      pingTimer = setInterval(() => socket.readyState === WebSocket.OPEN && socket.send("PING"), PING_FREQ_MS);
-    });
-    socket.addEventListener("message", (event) => {
-      if (event.data === "ACK") console.info("livereload connected", /* @__PURE__ */ new Date());
-      if (event.data === "RELOAD") reload();
-    });
-    socket.addEventListener("close", (event) => {
-      reconnect();
-    });
-  }
-
   // packages/frontend/src/auxiliar/styles.ts
   var BAR = "bg-linear-to-b from-secondary to-background";
   var BORDER = "border-primary/85 border-dotted";
@@ -4277,7 +4245,7 @@
       });
     });
   }
-  if (true) {
+  if (false) {
     try {
       connectLivereload();
     } catch (err) {
