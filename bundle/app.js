@@ -925,6 +925,38 @@
     }
   };
 
+  // packages/frontend/src/auxiliar/livereload.ts
+  var pingTimer;
+  var INITIAL_TIMEOUT_MS = 1e3;
+  var PING_FREQ_MS = 10;
+  var RELOAD_LATENCY_MS = 10;
+  function connectLivereload(timeout = INITIAL_TIMEOUT_MS, lifecycle = "start") {
+    if (pingTimer) {
+      clearInterval(pingTimer);
+      pingTimer = void 0;
+    }
+    const reconnect = () => {
+      console.info("attempting livereload reconnect in", timeout, "ms");
+      setTimeout(() => connectLivereload(timeout * 1.5, "error"), timeout);
+    };
+    const reload = () => {
+      setTimeout(() => window.location.reload(), RELOAD_LATENCY_MS);
+    };
+    const socket = new WebSocket("/livereload");
+    socket.addEventListener("open", () => {
+      if (lifecycle === "error") return reload();
+      socket.send("CONNECT");
+      pingTimer = setInterval(() => socket.readyState === WebSocket.OPEN && socket.send("PING"), PING_FREQ_MS);
+    });
+    socket.addEventListener("message", (event) => {
+      if (event.data === "ACK") console.info("livereload connected", /* @__PURE__ */ new Date());
+      if (event.data === "RELOAD") reload();
+    });
+    socket.addEventListener("close", (event) => {
+      reconnect();
+    });
+  }
+
   // packages/frontend/src/auxiliar/styles.ts
   var BAR = "bg-linear-to-b from-secondary to-background";
   var BORDER = "border-primary/85 border-dotted";
@@ -932,6 +964,8 @@
   var HOVER_SVG = "hover:stroke-1 hover:stroke-hiliteb";
   var HOVER_SVG_GROUP = "group-hover:stroke-1 group-hover:stroke-hiliteb";
   var INPUT = "bg-background text-foreground placeholder:text-foreground/50";
+  var PROSE_BASIC = "prose dark:prose-invert sm:prose-sm lg:prose-lg xl:prose-xl";
+  var PROSE = `${PROSE_BASIC} max-w-[80ch] mx-auto`;
   function tw(...classes) {
     return classes.flat(5).filter((s4) => typeof s4 === "string" && !/^;|;$/.test(s4)).join(" ");
   }
@@ -1202,6 +1236,23 @@
     /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "8", x: "1", y: "8" }),
     /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "12" }),
     /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
+  ] });
+  var EXTERNAL = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
+    /* @__PURE__ */ u4("title", { children: "External" }),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M12.5,13h-1a.5.5,0,0,0-.5.5V15H3V3h8V4.5a.5.5,0,0,0,.5.5h1a.5.5,0,0,0,.5-.5v-3a.5.5,0,0,0-.5-.5H1.5a.5.5,0,0,0-.5.5v15a.5.5,0,0,0,.5.5h11a.5.5,0,0,0,.5-.5v-3A.5.5,0,0,0,12.5,13Z"
+      }
+    ),
+    /* @__PURE__ */ u4(
+      "path",
+      {
+        class: "fill",
+        d: "M17.9255,8.8275,14.666,5.1a.39352.39352,0,0,0-.2635-.1.4.4,0,0,0-.4.4V8H8.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5H14v2.6a.4.4,0,0,0,.4.4.39352.39352,0,0,0,.2635-.1l3.262-3.7225A.25.25,0,0,0,17.9255,8.8275Z"
+      }
+    )
   ] });
 
   // packages/frontend/src/auxiliar/storage.ts
@@ -1815,6 +1866,18 @@
       super(key);
       this.graph = graph;
     }
+    /** Internal path name for rendering the vertex in the web UI.  */
+    get href() {
+      const vn = this.vertexName;
+      if (vn === "license") return `/licenses#${this.plainKey}`;
+      if (vn === "paradigm") return `/paradigms#${this.plainKey}`;
+      if (vn === "plang") return `/${this.plainKey}`;
+      if (vn === "platform") return `/platforms#${this.plainKey}`;
+      if (vn === "post") return `/blog/${this.plainKey}`;
+      if (vn === "tag") return `/tags#${this.plainKey}`;
+      if (vn === "typeSystem") return `/tsys#${this.plainKey}`;
+      return `/${this.vertexName.toLowerCase()}/${this.plainKey}`;
+    }
     /** Node ranking, if the nodes are ranked. For instance, Plangs use Linguist data for ranking popularity. */
     get ranking() {
       return void 0;
@@ -1929,7 +1992,12 @@
         plangRelTools: new Edges(this.plang, this.tool, "Tools for this", "Plangs supported"),
         plangRelTypeSystems: new Edges(this.plang, this.typeSystem, "Type Systems implemented", "Plangs implementing this"),
         plangRelWrittenWith: new Edges(this.plang, this.plang, "Plangs used to implement this", "Plangs implemented with this"),
-        postRelPlangs: new Edges(this.post, this.plang, "Plangs covered", "Posts talking about this"),
+        postRelApps: new Edges(this.post, this.app, "Apps covered in a Post", "Posts talking about this"),
+        postRelCommunities: new Edges(this.post, this.community, "Communities covered in a Post", "Posts talking about this"),
+        postRelLearning: new Edges(this.post, this.learning, "Learning Resources covered in a Post", "Posts talking about this"),
+        postRelLibraries: new Edges(this.post, this.library, "Libraries covered in a Post", "Posts talking about this"),
+        postRelPlangs: new Edges(this.post, this.plang, "Plangs covered in a Post", "Posts talking about this"),
+        postRelTools: new Edges(this.post, this.tool, "Tools covered in a Post", "Posts talking about this"),
         tagRelApps: new Edges(this.tag, this.app, "Apps tagged", "Tags"),
         tagRelCommunities: new Edges(this.tag, this.community, "Communities tagged", "Tags"),
         tagRelLearning: new Edges(this.tag, this.learning, "Learning resources tagged", "Tags"),
@@ -1943,7 +2011,7 @@
     /** Return a type checked object identifying a relationship of a specific kind of Vertex. */
     static relConfig(vertexName, vertexRel) {
       const klass = _PlangsGraphBase.vertexClass(vertexName);
-      const rel2 = klass.relations[vertexRel];
+      const rel2 = klass.relations.get(vertexRel);
       return { kind: "rel", edgeName: rel2.edgeName, direction: rel2.direction };
     }
     /** Return a type checked object identifying a property of the class that is "readable" (a prop returning a String, Boolean or Nunber). */
@@ -1965,6 +2033,24 @@
       if (vertexName === "tag") return VTag;
       if (vertexName === "tool") return VTool;
       if (vertexName === "typeSystem") return VTypeSystem;
+    }
+    static {
+      /** Vertex kinds per Vertex Name. The kind is the prefix of a Vertex Key. */
+      this.vertexKind = /* @__PURE__ */ new Map([
+        ["app", "app"],
+        ["bundle", "bun"],
+        ["community", "comm"],
+        ["learning", "learn"],
+        ["library", "lib"],
+        ["license", "lic"],
+        ["paradigm", "para"],
+        ["plang", "pl"],
+        ["platform", "plat"],
+        ["post", "post"],
+        ["tag", "tag"],
+        ["tool", "tool"],
+        ["typeSystem", "tsys"]
+      ]);
     }
     toJSON() {
       return {
@@ -1994,6 +2080,7 @@
       this.vertexKind = _VAppBase.vertexKind;
       this.vertexDesc = _VAppBase.vertexDesc;
       this.vertexName = _VAppBase.vertexName;
+      this.relations = _VAppBase.relations;
     }
     static {
       this.vertexKind = "app";
@@ -2006,14 +2093,15 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relCommunities: { edgeName: "communityRelApps", direction: "inverse" },
-        relLearning: { edgeName: "learningRelApps", direction: "inverse" },
-        relLicenses: { edgeName: "licenseRelApps", direction: "inverse" },
-        relPlatforms: { edgeName: "appRelPlatforms", direction: "direct" },
-        relTags: { edgeName: "tagRelApps", direction: "inverse" },
-        relWrittenWith: { edgeName: "appRelWrittenWith", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relCommunities", { edgeName: "communityRelApps", direction: "inverse" }],
+        ["relLearning", { edgeName: "learningRelApps", direction: "inverse" }],
+        ["relLicenses", { edgeName: "licenseRelApps", direction: "inverse" }],
+        ["relPlatforms", { edgeName: "appRelPlatforms", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelApps", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelApps", direction: "inverse" }],
+        ["relWrittenWith", { edgeName: "appRelWrittenWith", direction: "direct" }]
+      ]);
     }
     /** Communities suporting this `VCommunity-[relApps]->(this:VApp)`. Inverse: {@link VCommunity.relApps}. */
     get relCommunities() {
@@ -2031,6 +2119,10 @@
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.appRelPlatforms);
     }
+    /** Posts talking about this `VPost-[relApps]->(this:VApp)`. Inverse: {@link VPost.relApps}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelApps);
+    }
     /** Tags `VTag-[relApps]->(this:VApp)`. Inverse: {@link VTag.relApps}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelApps);
@@ -2046,6 +2138,7 @@
       this.vertexKind = _VBundleBase.vertexKind;
       this.vertexDesc = _VBundleBase.vertexDesc;
       this.vertexName = _VBundleBase.vertexName;
+      this.relations = _VBundleBase.relations;
     }
     static {
       this.vertexKind = "bun";
@@ -2058,10 +2151,10 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relPlangs: { edgeName: "bundleRelPlangs", direction: "direct" },
-        relTools: { edgeName: "bundleRelTools", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relPlangs", { edgeName: "bundleRelPlangs", direction: "direct" }],
+        ["relTools", { edgeName: "bundleRelTools", direction: "direct" }]
+      ]);
     }
     /** Plangs this Bundle is for `(this:VBundle)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relBundles}. */
     get relPlangs() {
@@ -2078,6 +2171,7 @@
       this.vertexKind = _VCommunityBase.vertexKind;
       this.vertexDesc = _VCommunityBase.vertexDesc;
       this.vertexName = _VCommunityBase.vertexName;
+      this.relations = _VCommunityBase.relations;
     }
     static {
       this.vertexKind = "comm";
@@ -2090,14 +2184,15 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "communityRelApps", direction: "direct" },
-        relLearning: { edgeName: "learningRelCommunities", direction: "inverse" },
-        relLibraries: { edgeName: "communityRelLibraries", direction: "direct" },
-        relPlangs: { edgeName: "communityRelPlangs", direction: "direct" },
-        relTags: { edgeName: "tagRelCommunities", direction: "inverse" },
-        relTools: { edgeName: "communityRelTools", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "communityRelApps", direction: "direct" }],
+        ["relLearning", { edgeName: "learningRelCommunities", direction: "inverse" }],
+        ["relLibraries", { edgeName: "communityRelLibraries", direction: "direct" }],
+        ["relPlangs", { edgeName: "communityRelPlangs", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelCommunities", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelCommunities", direction: "inverse" }],
+        ["relTools", { edgeName: "communityRelTools", direction: "direct" }]
+      ]);
     }
     /** Apps supported `(this:VCommunity)-[relApps]->VApp`. Inverse: {@link VApp.relCommunities}. */
     get relApps() {
@@ -2115,6 +2210,10 @@
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.communityRelPlangs);
     }
+    /** Posts talking about this `VPost-[relCommunities]->(this:VCommunity)`. Inverse: {@link VPost.relCommunities}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelCommunities);
+    }
     /** Tags `VTag-[relCommunities]->(this:VCommunity)`. Inverse: {@link VTag.relCommunities}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelCommunities);
@@ -2130,6 +2229,7 @@
       this.vertexKind = _VLearningBase.vertexKind;
       this.vertexDesc = _VLearningBase.vertexDesc;
       this.vertexName = _VLearningBase.vertexName;
+      this.relations = _VLearningBase.relations;
     }
     static {
       this.vertexKind = "learn";
@@ -2142,14 +2242,15 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "learningRelApps", direction: "direct" },
-        relCommunities: { edgeName: "learningRelCommunities", direction: "direct" },
-        relLibraries: { edgeName: "learningRelLibraries", direction: "direct" },
-        relPlangs: { edgeName: "learningRelPlangs", direction: "direct" },
-        relTags: { edgeName: "tagRelLearning", direction: "inverse" },
-        relTools: { edgeName: "learningRelTools", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "learningRelApps", direction: "direct" }],
+        ["relCommunities", { edgeName: "learningRelCommunities", direction: "direct" }],
+        ["relLibraries", { edgeName: "learningRelLibraries", direction: "direct" }],
+        ["relPlangs", { edgeName: "learningRelPlangs", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelLearning", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelLearning", direction: "inverse" }],
+        ["relTools", { edgeName: "learningRelTools", direction: "direct" }]
+      ]);
     }
     /** Apps supported `(this:VLearning)-[relApps]->VApp`. Inverse: {@link VApp.relLearning}. */
     get relApps() {
@@ -2167,6 +2268,10 @@
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.learningRelPlangs);
     }
+    /** Posts talking about this `VPost-[relLearning]->(this:VLearning)`. Inverse: {@link VPost.relLearning}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelLearning);
+    }
     /** Tags `VTag-[relLearning]->(this:VLearning)`. Inverse: {@link VTag.relLearning}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelLearning);
@@ -2182,6 +2287,7 @@
       this.vertexKind = _VLibraryBase.vertexKind;
       this.vertexDesc = _VLibraryBase.vertexDesc;
       this.vertexName = _VLibraryBase.vertexName;
+      this.relations = _VLibraryBase.relations;
     }
     static {
       this.vertexKind = "lib";
@@ -2194,15 +2300,16 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relCommunities: { edgeName: "communityRelLibraries", direction: "inverse" },
-        relLearning: { edgeName: "learningRelLibraries", direction: "inverse" },
-        relLicenses: { edgeName: "licenseRelLibraries", direction: "inverse" },
-        relPlangs: { edgeName: "libraryRelPlangs", direction: "direct" },
-        relPlatforms: { edgeName: "libraryRelPlatforms", direction: "direct" },
-        relTags: { edgeName: "tagRelLibraries", direction: "inverse" },
-        relWrittenWith: { edgeName: "libraryRelWrittenWith", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relCommunities", { edgeName: "communityRelLibraries", direction: "inverse" }],
+        ["relLearning", { edgeName: "learningRelLibraries", direction: "inverse" }],
+        ["relLicenses", { edgeName: "licenseRelLibraries", direction: "inverse" }],
+        ["relPlangs", { edgeName: "libraryRelPlangs", direction: "direct" }],
+        ["relPlatforms", { edgeName: "libraryRelPlatforms", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelLibraries", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelLibraries", direction: "inverse" }],
+        ["relWrittenWith", { edgeName: "libraryRelWrittenWith", direction: "direct" }]
+      ]);
     }
     /** Communities suporting this `VCommunity-[relLibraries]->(this:VLibrary)`. Inverse: {@link VCommunity.relLibraries}. */
     get relCommunities() {
@@ -2224,6 +2331,10 @@
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.libraryRelPlatforms);
     }
+    /** Posts talking about this `VPost-[relLibraries]->(this:VLibrary)`. Inverse: {@link VPost.relLibraries}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelLibraries);
+    }
     /** Tags `VTag-[relLibraries]->(this:VLibrary)`. Inverse: {@link VTag.relLibraries}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelLibraries);
@@ -2239,6 +2350,7 @@
       this.vertexKind = _VLicenseBase.vertexKind;
       this.vertexDesc = _VLicenseBase.vertexDesc;
       this.vertexName = _VLicenseBase.vertexName;
+      this.relations = _VLicenseBase.relations;
     }
     static {
       this.vertexKind = "lic";
@@ -2251,12 +2363,12 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "licenseRelApps", direction: "direct" },
-        relLibraries: { edgeName: "licenseRelLibraries", direction: "direct" },
-        relPlangs: { edgeName: "licenseRelPlangs", direction: "direct" },
-        relTools: { edgeName: "licenseRelTools", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "licenseRelApps", direction: "direct" }],
+        ["relLibraries", { edgeName: "licenseRelLibraries", direction: "direct" }],
+        ["relPlangs", { edgeName: "licenseRelPlangs", direction: "direct" }],
+        ["relTools", { edgeName: "licenseRelTools", direction: "direct" }]
+      ]);
     }
     /** Apps using this `(this:VLicense)-[relApps]->VApp`. Inverse: {@link VApp.relLicenses}. */
     get relApps() {
@@ -2281,6 +2393,7 @@
       this.vertexKind = _VParadigmBase.vertexKind;
       this.vertexDesc = _VParadigmBase.vertexDesc;
       this.vertexName = _VParadigmBase.vertexName;
+      this.relations = _VParadigmBase.relations;
     }
     static {
       this.vertexKind = "para";
@@ -2293,7 +2406,9 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = { relPlangs: { edgeName: "plangRelParadigms", direction: "inverse" } };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relPlangs", { edgeName: "plangRelParadigms", direction: "inverse" }]
+      ]);
     }
     /** Plangs implementing this `VPlang-[relParadigms]->(this:VParadigm)`. Inverse: {@link VPlang.relParadigms}. */
     get relPlangs() {
@@ -2306,6 +2421,7 @@
       this.vertexKind = _VPlangBase.vertexKind;
       this.vertexDesc = _VPlangBase.vertexDesc;
       this.vertexName = _VPlangBase.vertexName;
+      this.relations = _VPlangBase.relations;
     }
     static {
       this.vertexKind = "pl";
@@ -2318,32 +2434,32 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "appRelWrittenWith", direction: "inverse" },
-        relBundles: { edgeName: "bundleRelPlangs", direction: "inverse" },
-        relCommunities: { edgeName: "communityRelPlangs", direction: "inverse" },
-        relCompilesTo: { edgeName: "plangRelCompilesTo", direction: "direct" },
-        relDialectOf: { edgeName: "plangRelDialectOf", direction: "direct" },
-        relDialects: { edgeName: "plangRelDialectOf", direction: "inverse" },
-        relImplementedBy: { edgeName: "plangRelImplements", direction: "inverse" },
-        relImplements: { edgeName: "plangRelImplements", direction: "direct" },
-        relInfluenced: { edgeName: "plangRelInfluencedBy", direction: "inverse" },
-        relInfluencedBy: { edgeName: "plangRelInfluencedBy", direction: "direct" },
-        relLearning: { edgeName: "learningRelPlangs", direction: "inverse" },
-        relLibraries: { edgeName: "libraryRelPlangs", direction: "inverse" },
-        relLicenses: { edgeName: "licenseRelPlangs", direction: "inverse" },
-        relParadigms: { edgeName: "plangRelParadigms", direction: "direct" },
-        relPlatforms: { edgeName: "plangRelPlatforms", direction: "direct" },
-        relPosts: { edgeName: "postRelPlangs", direction: "inverse" },
-        relTags: { edgeName: "tagRelPlangs", direction: "inverse" },
-        relTargetOf: { edgeName: "plangRelCompilesTo", direction: "inverse" },
-        relTools: { edgeName: "plangRelTools", direction: "direct" },
-        relToolsUsing: { edgeName: "toolRelWrittenWith", direction: "inverse" },
-        relTypeSystems: { edgeName: "plangRelTypeSystems", direction: "direct" },
-        relUsedInLibrary: { edgeName: "libraryRelWrittenWith", direction: "inverse" },
-        relUsedToWrite: { edgeName: "plangRelWrittenWith", direction: "inverse" },
-        relWrittenWith: { edgeName: "plangRelWrittenWith", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "appRelWrittenWith", direction: "inverse" }],
+        ["relBundles", { edgeName: "bundleRelPlangs", direction: "inverse" }],
+        ["relCommunities", { edgeName: "communityRelPlangs", direction: "inverse" }],
+        ["relCompilesTo", { edgeName: "plangRelCompilesTo", direction: "direct" }],
+        ["relDialectOf", { edgeName: "plangRelDialectOf", direction: "direct" }],
+        ["relDialects", { edgeName: "plangRelDialectOf", direction: "inverse" }],
+        ["relImplementedBy", { edgeName: "plangRelImplements", direction: "inverse" }],
+        ["relImplements", { edgeName: "plangRelImplements", direction: "direct" }],
+        ["relInfluenced", { edgeName: "plangRelInfluencedBy", direction: "inverse" }],
+        ["relInfluencedBy", { edgeName: "plangRelInfluencedBy", direction: "direct" }],
+        ["relLearning", { edgeName: "learningRelPlangs", direction: "inverse" }],
+        ["relLibraries", { edgeName: "libraryRelPlangs", direction: "inverse" }],
+        ["relLicenses", { edgeName: "licenseRelPlangs", direction: "inverse" }],
+        ["relParadigms", { edgeName: "plangRelParadigms", direction: "direct" }],
+        ["relPlatforms", { edgeName: "plangRelPlatforms", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelPlangs", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelPlangs", direction: "inverse" }],
+        ["relTargetOf", { edgeName: "plangRelCompilesTo", direction: "inverse" }],
+        ["relTools", { edgeName: "plangRelTools", direction: "direct" }],
+        ["relToolsUsing", { edgeName: "toolRelWrittenWith", direction: "inverse" }],
+        ["relTypeSystems", { edgeName: "plangRelTypeSystems", direction: "direct" }],
+        ["relUsedInLibrary", { edgeName: "libraryRelWrittenWith", direction: "inverse" }],
+        ["relUsedToWrite", { edgeName: "plangRelWrittenWith", direction: "inverse" }],
+        ["relWrittenWith", { edgeName: "plangRelWrittenWith", direction: "direct" }]
+      ]);
     }
     /** Apps implemented with this `VApp-[relWrittenWith]->(this:VPlang)`. Inverse: {@link VApp.relWrittenWith}. */
     get relApps() {
@@ -2448,6 +2564,7 @@
       this.vertexKind = _VPlatformBase.vertexKind;
       this.vertexDesc = _VPlatformBase.vertexDesc;
       this.vertexName = _VPlatformBase.vertexName;
+      this.relations = _VPlatformBase.relations;
     }
     static {
       this.vertexKind = "plat";
@@ -2460,12 +2577,12 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "appRelPlatforms", direction: "inverse" },
-        relLibraries: { edgeName: "libraryRelPlatforms", direction: "inverse" },
-        relPlangs: { edgeName: "plangRelPlatforms", direction: "inverse" },
-        relTools: { edgeName: "toolRelPlatforms", direction: "inverse" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "appRelPlatforms", direction: "inverse" }],
+        ["relLibraries", { edgeName: "libraryRelPlatforms", direction: "inverse" }],
+        ["relPlangs", { edgeName: "plangRelPlatforms", direction: "inverse" }],
+        ["relTools", { edgeName: "toolRelPlatforms", direction: "inverse" }]
+      ]);
     }
     /** Apps supporting this `VApp-[relPlatforms]->(this:VPlatform)`. Inverse: {@link VApp.relPlatforms}. */
     get relApps() {
@@ -2490,6 +2607,7 @@
       this.vertexKind = _VPostBase.vertexKind;
       this.vertexDesc = _VPostBase.vertexDesc;
       this.vertexName = _VPostBase.vertexName;
+      this.relations = _VPostBase.relations;
     }
     static {
       this.vertexKind = "post";
@@ -2502,11 +2620,38 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = { relPlangs: { edgeName: "postRelPlangs", direction: "direct" } };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "postRelApps", direction: "direct" }],
+        ["relCommunities", { edgeName: "postRelCommunities", direction: "direct" }],
+        ["relLearning", { edgeName: "postRelLearning", direction: "direct" }],
+        ["relLibraries", { edgeName: "postRelLibraries", direction: "direct" }],
+        ["relPlangs", { edgeName: "postRelPlangs", direction: "direct" }],
+        ["relTools", { edgeName: "postRelTools", direction: "direct" }]
+      ]);
     }
-    /** Plangs covered `(this:VPost)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relPosts}. */
+    /** Apps covered in a Post `(this:VPost)-[relApps]->VApp`. Inverse: {@link VApp.relPosts}. */
+    get relApps() {
+      return new RelFrom(this, this.graph.edges.postRelApps);
+    }
+    /** Communities covered in a Post `(this:VPost)-[relCommunities]->VCommunity`. Inverse: {@link VCommunity.relPosts}. */
+    get relCommunities() {
+      return new RelFrom(this, this.graph.edges.postRelCommunities);
+    }
+    /** Learning Resources covered in a Post `(this:VPost)-[relLearning]->VLearning`. Inverse: {@link VLearning.relPosts}. */
+    get relLearning() {
+      return new RelFrom(this, this.graph.edges.postRelLearning);
+    }
+    /** Libraries covered in a Post `(this:VPost)-[relLibraries]->VLibrary`. Inverse: {@link VLibrary.relPosts}. */
+    get relLibraries() {
+      return new RelFrom(this, this.graph.edges.postRelLibraries);
+    }
+    /** Plangs covered in a Post `(this:VPost)-[relPlangs]->VPlang`. Inverse: {@link VPlang.relPosts}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.postRelPlangs);
+    }
+    /** Tools covered in a Post `(this:VPost)-[relTools]->VTool`. Inverse: {@link VTool.relPosts}. */
+    get relTools() {
+      return new RelFrom(this, this.graph.edges.postRelTools);
     }
   };
   var VTagBase = class _VTagBase extends PlangsVertex {
@@ -2515,6 +2660,7 @@
       this.vertexKind = _VTagBase.vertexKind;
       this.vertexDesc = _VTagBase.vertexDesc;
       this.vertexName = _VTagBase.vertexName;
+      this.relations = _VTagBase.relations;
     }
     static {
       this.vertexKind = "tag";
@@ -2527,14 +2673,14 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relApps: { edgeName: "tagRelApps", direction: "direct" },
-        relCommunities: { edgeName: "tagRelCommunities", direction: "direct" },
-        relLearning: { edgeName: "tagRelLearning", direction: "direct" },
-        relLibraries: { edgeName: "tagRelLibraries", direction: "direct" },
-        relPlangs: { edgeName: "tagRelPlangs", direction: "direct" },
-        relTools: { edgeName: "tagRelTools", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relApps", { edgeName: "tagRelApps", direction: "direct" }],
+        ["relCommunities", { edgeName: "tagRelCommunities", direction: "direct" }],
+        ["relLearning", { edgeName: "tagRelLearning", direction: "direct" }],
+        ["relLibraries", { edgeName: "tagRelLibraries", direction: "direct" }],
+        ["relPlangs", { edgeName: "tagRelPlangs", direction: "direct" }],
+        ["relTools", { edgeName: "tagRelTools", direction: "direct" }]
+      ]);
     }
     /** Apps tagged `(this:VTag)-[relApps]->VApp`. Inverse: {@link VApp.relTags}. */
     get relApps() {
@@ -2567,6 +2713,7 @@
       this.vertexKind = _VToolBase.vertexKind;
       this.vertexDesc = _VToolBase.vertexDesc;
       this.vertexName = _VToolBase.vertexName;
+      this.relations = _VToolBase.relations;
     }
     static {
       this.vertexKind = "tool";
@@ -2579,16 +2726,17 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = {
-        relBundles: { edgeName: "bundleRelTools", direction: "inverse" },
-        relCommunities: { edgeName: "communityRelTools", direction: "inverse" },
-        relLearning: { edgeName: "learningRelTools", direction: "inverse" },
-        relLicenses: { edgeName: "licenseRelTools", direction: "inverse" },
-        relPlangs: { edgeName: "plangRelTools", direction: "inverse" },
-        relPlatforms: { edgeName: "toolRelPlatforms", direction: "direct" },
-        relTags: { edgeName: "tagRelTools", direction: "inverse" },
-        relWrittenWith: { edgeName: "toolRelWrittenWith", direction: "direct" }
-      };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relBundles", { edgeName: "bundleRelTools", direction: "inverse" }],
+        ["relCommunities", { edgeName: "communityRelTools", direction: "inverse" }],
+        ["relLearning", { edgeName: "learningRelTools", direction: "inverse" }],
+        ["relLicenses", { edgeName: "licenseRelTools", direction: "inverse" }],
+        ["relPlangs", { edgeName: "plangRelTools", direction: "inverse" }],
+        ["relPlatforms", { edgeName: "toolRelPlatforms", direction: "direct" }],
+        ["relPosts", { edgeName: "postRelTools", direction: "inverse" }],
+        ["relTags", { edgeName: "tagRelTools", direction: "inverse" }],
+        ["relWrittenWith", { edgeName: "toolRelWrittenWith", direction: "direct" }]
+      ]);
     }
     /** Bundles including this `VBundle-[relTools]->(this:VTool)`. Inverse: {@link VBundle.relTools}. */
     get relBundles() {
@@ -2614,6 +2762,10 @@
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.toolRelPlatforms);
     }
+    /** Posts talking about this `VPost-[relTools]->(this:VTool)`. Inverse: {@link VPost.relTools}. */
+    get relPosts() {
+      return new RelTo(this, this.graph.edges.postRelTools);
+    }
     /** Tags `VTag-[relTools]->(this:VTool)`. Inverse: {@link VTag.relTools}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelTools);
@@ -2629,6 +2781,7 @@
       this.vertexKind = _VTypeSystemBase.vertexKind;
       this.vertexDesc = _VTypeSystemBase.vertexDesc;
       this.vertexName = _VTypeSystemBase.vertexName;
+      this.relations = _VTypeSystemBase.relations;
     }
     static {
       this.vertexKind = "tsys";
@@ -2641,7 +2794,9 @@
     }
     static {
       /** Describes the edges and direction used for every relationship in this Vertex. */
-      this.relations = { relPlangs: { edgeName: "plangRelTypeSystems", direction: "inverse" } };
+      this.relations = /* @__PURE__ */ new Map([
+        ["relPlangs", { edgeName: "plangRelTypeSystems", direction: "inverse" }]
+      ]);
     }
     /** Plangs implementing this `VPlang-[relTypeSystems]->(this:VTypeSystem)`. Inverse: {@link VPlang.relTypeSystems}. */
     get relPlangs() {
@@ -2698,9 +2853,6 @@
     }
     get github() {
       return new FieldGithub(this);
-    }
-    get href() {
-      return `/${this.plainKey}`;
     }
     get isPopular() {
       const { githubPopular, languishRanking } = this.data;
@@ -2799,59 +2951,77 @@
     get title() {
       return this.name;
     }
-    get href() {
-      return `/blog/${this.plainKey}`;
-    }
   };
 
   // packages/server/src/components/layout.tsx
   var GRID_TABS = /* @__PURE__ */ new Set(["plangs", "tools", "apps", "libs", "learning", "communities"]);
 
+  // packages/server/src/components/vertex-link.tsx
+  function VertexLink({
+    vertex,
+    nocolor,
+    title,
+    includeLocal
+  }) {
+    const url = includeLocal ? vertex.href : vertex.urlHome;
+    const overrideProse = nocolor ? { style: "color: var(--color-foreground);" } : {};
+    return /* @__PURE__ */ u4("div", { class: tw("group relative", "inline-flex flex-row gap-2 align-middle"), children: [
+      /* @__PURE__ */ u4("div", { class: tw("-left-5 absolute", "font-bold", "hidden", includeLocal && "group-hover:block"), children: "#" }),
+      /* @__PURE__ */ u4("a", { id: `${vertex.plainKey}`, href: url, title: vertex.name, ...overrideProse, children: title ?? vertex.name }),
+      /* @__PURE__ */ u4("a", { class: "inline-block scale-70 hover:opacity-100 sm:opacity-50", href: vertex.urlHome, ...overrideProse, children: EXTERNAL })
+    ] });
+  }
+
   // packages/frontend/src/components/vertex-info/vertex-info.tsx
   function VertexInfo({ vertex, open, tab }) {
+    const h1Ref = A2(null);
+    y3(() => h1Ref.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
     const forGrid = GRID_TABS.has(tab);
     return /* @__PURE__ */ u4(
       "div",
       {
         class: tw(
           "w-full overflow-y-scroll",
-          "px-2 pt-2 sm:p-4",
+          "px-2 pt-2 sm:px-4",
           !forGrid && "-mx-4",
           // Compensate for padding so it aligns with the rest of the content.
-          "prose prose-green dark:prose-invert",
+          PROSE_BASIC,
           "max-w-[unset]",
           forGrid && "bg-linear-to-b to-secondary/50",
           tw(BORDER, forGrid && "border-b-1")
         ),
         children: [
-          !vertex && /* @__PURE__ */ u4(k, { children: [
-            /* @__PURE__ */ u4("p", { children: "Click a thumbnail for more info." }),
-            /* @__PURE__ */ u4("p", { children: "Double-click a thumbnail to go directly to the item's page." })
+          !vertex && /* @__PURE__ */ u4("p", { children: [
+            /* @__PURE__ */ u4("strong", { children: "Click" }),
+            " a thumbnail for more info. ",
+            /* @__PURE__ */ u4("strong", { children: "Double-click" }),
+            " a thumbnail to go directly to the item's page."
           ] }),
-          vertex && /* @__PURE__ */ u4("h1", { class: tw(forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex ? `/${vertex.plainKey}` : "#", children: vertex ? vertex.name : "Info" }) }),
           vertex && /* @__PURE__ */ u4(k, { children: [
+            /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("mt-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
             /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
             /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
+              vertex.urlHome && /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4(VertexLink, { vertex, includeLocal: false, title: "Homepage", nocolor: true }) }),
               vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
-              "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Last Rel ${rel2.date ?? rel2.version}` })),
-              vertex instanceof VPlang && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
+              "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
+              "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
               "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
             ] }),
-            /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: vertex.description || "..." })
+            /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: vertex.description })
           ] }),
           vertex instanceof VPlang && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
-            /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-xl", children: "Details" }),
-            relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4("div", { children: [
+            /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
+            /* @__PURE__ */ u4("div", { class: tw(!forGrid && "bg-linear-to-b to-secondary/25 pb-4"), children: relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4("div", { children: [
               /* @__PURE__ */ u4("h3", { class: "mt-4 text-xl", children: title }),
-              vertices.map(({ name, key }) => /* @__PURE__ */ u4(Pill, { children: name }, key))
-            ] }, title))
+              vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key))
+            ] }, title)) })
           ] })
         ]
       }
     );
   }
   function Pill({ children }) {
-    return /* @__PURE__ */ u4("span", { class: tw("inline-block", "mr-2 mb-2 px-1", "border-2 border-secondary", "bg-secondary/50"), children });
+    return /* @__PURE__ */ u4("span", { style: "font-size: 1.25rem;", class: tw("inline-block", "mr-2 mb-3 px-1", "border-2 border-secondary", "bg-secondary/50 text-foreground"), children });
   }
   function relations(pl) {
     const all = [
@@ -2863,8 +3033,8 @@
       ["Implements", pl.relImplements.values],
       ["Compiles To", pl.relCompilesTo.values],
       ["Licenses", pl.relLicenses.values],
-      ["Tags", pl.relTags.values],
-      ["Extensions", pl.extensions.map((name) => ({ key: name, name, kind: "ext" })).existing]
+      ["Tags", pl.relTags.values]
+      // ["Extensions", pl.extensions.map(name => ({ key: name, name, kind: "ext" })).existing],
     ];
     return all.filter(([_2, vertices]) => vertices.length > 0);
   }
@@ -3488,8 +3658,8 @@
     return [];
   }
   function label(col, config) {
-    if (col === "facet" && config.kind === "rel") return config.edgeName;
-    if (col === "facet" && config.kind === "prop") return `${config.vertexName} year`;
+    if (col === "facet" && config.kind === "rel") return "Name";
+    if (col === "facet" && config.kind === "prop") return "Value";
     return col;
   }
   function icon(col, order) {
@@ -4235,8 +4405,13 @@
           if (vertex) renderVertexInfo({ vertex });
         });
         on(grid, "dblclick", ({ target }) => {
-          const pl = getClosestVertex(pg, target);
-          if (pl) window.location.href = `/${pl.plainKey}`;
+          const vertex = getClosestVertex(pg, target);
+          if (!vertex) return;
+          if (vertex.vertexName === "plang") {
+            window.location.href = `/${vertex.plainKey}`;
+          } else {
+            window.location.href = `/${vertex.vertexName}/${vertex.plainKey}`;
+          }
         });
         for (const img of elems("vertexThumbnImg")) {
           const src = img.dataset.src;
@@ -4245,7 +4420,7 @@
       });
     });
   }
-  if (false) {
+  if (true) {
     try {
       connectLivereload();
     } catch (err) {

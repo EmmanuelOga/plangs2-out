@@ -1039,6 +1039,9 @@
   .mt-0 {
     margin-top: var(--spacing-0);
   }
+  .mt-0\! {
+    margin-top: var(--spacing-0) !important;
+  }
   .mt-1 {
     margin-top: var(--spacing-1);
   }
@@ -1060,14 +1063,14 @@
   .mb-1 {
     margin-bottom: var(--spacing-1);
   }
-  .mb-2 {
-    margin-bottom: var(--spacing-2);
-  }
-  .mb-4 {
-    margin-bottom: var(--spacing-4);
+  .mb-3 {
+    margin-bottom: var(--spacing-3);
   }
   .mb-8 {
     margin-bottom: var(--spacing-8);
+  }
+  .mb-16 {
+    margin-bottom: var(--spacing-16);
   }
   .ml-2 {
     margin-left: var(--spacing-2);
@@ -1338,6 +1341,10 @@
     --tw-gradient-to: var(--color-background);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
+  .to-secondary\/25 {
+    --tw-gradient-to: color-mix(in oklab, var(--color-secondary) 25%, transparent);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
   .to-secondary\/50 {
     --tw-gradient-to: color-mix(in oklab, var(--color-secondary) 50%, transparent);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -1465,9 +1472,6 @@
   .text-red-500 {
     color: var(--color-red-500);
   }
-  .text-transparent {
-    color: transparent;
-  }
   .capitalize {
     text-transform: capitalize;
   }
@@ -1505,9 +1509,6 @@
   }
   .shadow-background {
     --tw-shadow-color: var(--color-background);
-  }
-  .shadow-primary\/20 {
-    --tw-shadow-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
   }
   .blur {
     --tw-blur: blur(var(--blur));
@@ -1887,11 +1888,6 @@
     @media (width >= 40rem) {
       border-right-style: var(--tw-border-style);
       border-right-width: 1px;
-    }
-  }
-  .sm\:p-4 {
-    @media (width >= 40rem) {
-      padding: var(--spacing-4);
     }
   }
   .sm\:px-4 {
@@ -2612,6 +2608,12 @@
   --color-stripes: rgba(102, 0, 153, .85);
   --color-hiliteb: yellow;
   --color-hilitef: #222;
+}
+#id-mainContent a, h2, h3 {
+  color: var(--color-primary);
+}
+header, h2, h3 {
+  font-style: italic;
 }
 ::-webkit-scrollbar {
   width: 4px;
