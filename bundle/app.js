@@ -958,11 +958,9 @@
   }
 
   // packages/frontend/src/auxiliar/styles.ts
-  var BAR = "bg-linear-to-b from-secondary to-background";
   var BORDER = "border-primary/85 border-dotted";
   var HOVER = "hover:bg-hiliteb hover:text-hilitef cursor-pointer";
-  var HOVER_SVG = "hover:stroke-1 hover:stroke-hiliteb";
-  var HOVER_SVG_GROUP = "group-hover:stroke-1 group-hover:stroke-hiliteb";
+  var HOVER_SVG = "hover:stroke-1 hover:stroke-hiliteb cursor-pointer";
   var INPUT = "bg-background text-foreground placeholder:text-foreground/50";
   var PROSE_BASIC = "prose dark:prose-invert sm:prose-sm lg:prose-lg xl:prose-xl";
   var PROSE = `${PROSE_BASIC} max-w-[80ch] mx-auto`;
@@ -1187,10 +1185,6 @@
       }
     )
   ] });
-  var FULLCIRCLE = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
-    /* @__PURE__ */ u4("title", { children: "Circle" }),
-    /* @__PURE__ */ u4("circle", { class: "fill", cx: "9", cy: "9", r: "8" })
-  ] });
   var SUN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: css, children: [
     /* @__PURE__ */ u4("title", { children: "Sun" }),
     /* @__PURE__ */ u4("path", { d: "m9,5.05c2.18152,0,3.95,1.76848,3.95,3.95s-1.76848,3.95-3.95,3.95-3.95-1.76848-3.95-3.95,1.76848-3.95,3.95-3.95Zm-.9-4.8v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25V.25c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25Zm0,15v2.5c0,.13807.11193.25.25.25h1.3c.13807,0,.25-.11193.25-.25v-2.5c0-.13807-.11193-.25-.25-.25h-1.3c-.13807,0-.25.11193-.25.25ZM0,8.35v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25H.25c-.13807,0-.25.11193-.25.25Zm15,0v1.3c0,.13807.11193.25.25.25h2.5c.13807,0,.25-.11193.25-.25v-1.3c0-.13807-.11193-.25-.25-.25h-2.5c-.13807,0-.25.11193-.25.25Zm-2.01021-4.23913l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355ZM1.98978,15.11121l.91924.91924c.09763.09763.25592.09763.35355,0l1.76777-1.76777c.09763-.09763.09763-.25592,0-.35355l-.91924-.91924c-.09763-.09763-.25592-.09763-.35355,0l-1.76777,1.76777c-.09763.09763-.09763.25592,0,.35355Zm-.01031-11.8587l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Zm10.9902,10.99001l1.76777,1.76777c.09763.09763.25592.09763.35355,0l.91924-.91924c.09763-.09763.09763-.25592,0-.35355l-1.76777-1.76777c-.09763-.09763-.25592-.09763-.35355,0l-.91924.91924c-.09763.09763-.09763.25592,0,.35355Z" })
@@ -1256,9 +1250,9 @@
   ] });
 
   // packages/frontend/src/auxiliar/storage.ts
-  function storeKey(tab, key, postfix) {
-    if (postfix) return `site-${tab}-${key}-${postfix}`;
-    return `site-${tab}-${key}`;
+  function storeKey(page, key, postfix) {
+    if (postfix) return `site-${page}-${key}-${postfix}`;
+    return `site-${page}-${key}`;
   }
   function storeUpdate(key, data2) {
     localStorage.setItem(key, JSON.stringify(data2));
@@ -1298,7 +1292,7 @@
   };
   var ToggleLights = class _ToggleLights extends IconButtonBaseState {
     static initial(disabled = false) {
-      const theme = storeLoad(storeKey("any_tab", "theme"));
+      const theme = storeLoad(storeKey("_any_page_", "theme"));
       return new _ToggleLights({ mode: theme === "light" ? "light" : "dark", disabled });
     }
     get isDark() {
@@ -1312,12 +1306,12 @@
     }
     runEffects() {
       document.body.classList.toggle("dark", this.isDark);
-      storeUpdate(storeKey("any_tab", "theme"), this.data.mode);
+      storeUpdate(storeKey("_any_page_", "theme"), this.data.mode);
     }
   };
   var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = storeLoad(storeKey("any_tab", "hamburger-menu"));
+      const mode = storeLoad(storeKey("_any_page_", "hamburger-menu"));
       return new _ToggleHamburguer({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get hide() {
@@ -1331,12 +1325,12 @@
     }
     runEffects() {
       elem("mainNav")?.classList.toggle("hidden", this.hide);
-      storeUpdate(storeKey("any_tab", "hamburger-menu"), this.data.mode);
+      storeUpdate(storeKey("_any_page_", "hamburger-menu"), this.data.mode);
     }
   };
   var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = storeLoad(storeKey("any_tab", "facets-browser"));
+      const mode = storeLoad(storeKey("_any_page_", "facets-browser"));
       return new _ToggleFacetsMenu({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get show() {
@@ -1363,7 +1357,7 @@
     runEffects() {
       const fm = elems("facetsMain");
       if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      storeUpdate(storeKey("any_tab", "facets-browser"), this.data.mode);
+      storeUpdate(storeKey("_any_page_", "facets-browser"), this.data.mode);
     }
   };
   var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
@@ -1868,14 +1862,8 @@
     }
     /** Internal path name for rendering the vertex in the web UI.  */
     get href() {
-      const vn = this.vertexName;
-      if (vn === "license") return `/licenses#${this.plainKey}`;
-      if (vn === "paradigm") return `/paradigms#${this.plainKey}`;
-      if (vn === "plang") return `/${this.plainKey}`;
-      if (vn === "platform") return `/platforms#${this.plainKey}`;
-      if (vn === "post") return `/blog/${this.plainKey}`;
-      if (vn === "tag") return `/tags#${this.plainKey}`;
-      if (vn === "typeSystem") return `/tsys#${this.plainKey}`;
+      if (this.vertexName === "plang") return `/${this.plainKey}`;
+      if (this.vertexName === "post") return `/blog/${this.plainKey}`;
       return `/${this.vertexName.toLowerCase()}/${this.plainKey}`;
     }
     /** Node ranking, if the nodes are ranked. For instance, Plangs use Linguist data for ranking popularity. */
@@ -2954,7 +2942,7 @@
   };
 
   // packages/server/src/components/layout.tsx
-  var GRID_TABS = /* @__PURE__ */ new Set(["plangs", "tools", "apps", "libs", "learning", "communities"]);
+  var GRID_PAGES = /* @__PURE__ */ new Set(["plangs", "tools", "apps", "libs", "learning", "communities"]);
 
   // packages/server/src/components/vertex-link.tsx
   function VertexLink({
@@ -2965,18 +2953,18 @@
   }) {
     const url = includeLocal ? vertex.href : vertex.urlHome;
     const overrideProse = nocolor ? { style: "color: var(--color-foreground);" } : {};
-    return /* @__PURE__ */ u4("div", { class: tw("group relative", "inline-flex flex-row gap-2 align-middle"), children: [
+    return /* @__PURE__ */ u4("div", { class: tw("group relative", "inline-flex flex-row items-center gap-2 align-middle"), children: [
       /* @__PURE__ */ u4("div", { class: tw("-left-5 absolute", "font-bold", "hidden", includeLocal && "group-hover:block"), children: "#" }),
       /* @__PURE__ */ u4("a", { id: `${vertex.plainKey}`, href: url, title: vertex.name, ...overrideProse, children: title ?? vertex.name }),
-      /* @__PURE__ */ u4("a", { class: "inline-block scale-70 hover:opacity-100 sm:opacity-50", href: vertex.urlHome, ...overrideProse, children: EXTERNAL })
+      /* @__PURE__ */ u4("a", { class: tw("inline-block scale-50 opacity-50 hover:opacity-100", HOVER_SVG), href: vertex.urlHome, ...overrideProse, children: EXTERNAL })
     ] });
   }
 
   // packages/frontend/src/components/vertex-info/vertex-info.tsx
-  function VertexInfo({ vertex, open, tab }) {
+  function VertexInfo({ vertex, open, page }) {
     const h1Ref = A2(null);
     y3(() => h1Ref.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
-    const forGrid = GRID_TABS.has(tab);
+    const forGrid = GRID_PAGES.has(page);
     return /* @__PURE__ */ u4(
       "div",
       {
@@ -3021,7 +3009,14 @@
     );
   }
   function Pill({ children }) {
-    return /* @__PURE__ */ u4("span", { style: "font-size: 1.25rem;", class: tw("inline-block", "mr-2 mb-3 px-1", "border-2 border-secondary", "bg-secondary/50 text-foreground"), children });
+    return /* @__PURE__ */ u4(
+      "span",
+      {
+        style: "font-size: 1rem;",
+        class: tw("inline-block", "rounded-tl-2xl rounded-br-2xl", "mr-2 mb-3 px-2", "border-2 border-secondary", "bg-secondary/50 text-foreground"),
+        children
+      }
+    );
   }
   function relations(pl) {
     const all = [
@@ -3042,7 +3037,7 @@
   // packages/frontend/src/components/vertex-info/index.tsx
   function renderVertexInfo({ vertex }) {
     for (const elem2 of elems("vertexInfo")) {
-      B(/* @__PURE__ */ u4(VertexInfo, { vertex, tab: elem2.dataset.tab, open: elem2.dataset.open === "true" }), elem2);
+      B(/* @__PURE__ */ u4(VertexInfo, { vertex, page: elem2.dataset.page, open: elem2.dataset.open === "true" }), elem2);
     }
   }
 
@@ -3372,7 +3367,7 @@
     }
     doSetCurrentGroup(groupKey) {
       this.data.currentGroupKey = groupKey;
-      storeUpdate(storeKey(this.tab, "facets-last-group"), groupKey);
+      storeUpdate(storeKey(this.page, "facets-last-group"), groupKey);
       this.dispatch();
     }
     /** Removes any and all values for the given group.  */
@@ -3430,6 +3425,9 @@
       }
       return false;
     }
+    get anyValues() {
+      return this.values.values().some((v4) => v4.isPresent);
+    }
     groupTitle(key) {
       return this.groupsConfig.get(key)?.title ?? key;
     }
@@ -3443,7 +3441,7 @@
       if (persist === "persist") {
         const data2 = this.serialized;
         this.pushState(data2);
-        storeUpdate(storeKey(this.tab, "facet-value"), data2);
+        storeUpdate(storeKey(this.page, "facet-value"), data2);
       }
       updateThumbns(this.results);
       this.updateClearFacets();
@@ -3453,7 +3451,7 @@
     updateClearFacets() {
       const clearAll = $2("#icon-button-clearFacets");
       if (!clearAll?.state) return this;
-      clearAll.state.doToggleMode(this.values.isEmpty ? "" : "clearFacets");
+      clearAll.state.doToggleMode(this.anyValues ? "clearFacets" : "");
       return this;
     }
     dispatch() {
@@ -3511,7 +3509,7 @@
       50
     );
     const current = main.values.get(groupKey, facetKey)?.value ?? "";
-    return /* @__PURE__ */ u4("input", { type: "search", onInput, placeholder: label2, class: tw("w-full", INPUT), value: current });
+    return /* @__PURE__ */ u4("input", { type: "search", onInput, placeholder: label2, class: tw("w-full", INPUT, "mt-8 sm:mt-12"), value: current });
   }
 
   // packages/frontend/src/facets/multisel/state.ts
@@ -3775,12 +3773,12 @@
         state.doSetMode(ev.detail.mode === "all" ? "all" : "any");
       })
     );
-    const SUBGRID = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
-    const ROW = tw(SUBGRID, tw("border-b-1", BORDER));
+    const SUBGRID2 = tw("col-span-3", "grid grid-cols-subgrid", "items-center");
+    const ROW = tw(SUBGRID2, tw("border-b-1", BORDER));
     const CENTER_ROW = tw("items-center justify-between");
     const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-y-auto", "relative"), children: [
       /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0 cursor-pointer", tw(BORDER, "border-b-1")), children: [
-        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW, tw(BORDER, "border-t-1")), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "prop" && "hidden") }) }) }),
+        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "py-1", "flex shrink-0 flex-row", "bg-background", CENTER_ROW), children: /* @__PURE__ */ u4("span", { class: tw("pl-2", CENTER_ROW, state.value.size < 2 ? "text-foreground/50" : "text-foreground"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: state.value.mode, class: tw(config.kind === "prop" && "hidden") }) }) }),
         /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3", "bg-primary text-background/80"), children: [
           /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
           /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
@@ -3821,49 +3819,27 @@
     }) }, groupKey)) });
   }
   function FacetGroup({
-    label: label2,
-    groupKey,
     active,
     children
   }) {
     const main = x2(FacetsMainContext);
-    const hasValues = main.groupHasValues(groupKey);
-    return /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "overflow-hidden", !active && "hidden"), children: [
-      /* @__PURE__ */ u4(
-        "header",
-        {
-          class: tw(
-            "sticky top-0 z-10",
-            "shrink-0",
-            "p-2",
-            "flex flex-row",
-            "items-center justify-between",
-            "truncate",
-            "text-primary",
-            tw(BORDER, "border-b-1"),
-            BAR
-          ),
-          children: [
-            /* @__PURE__ */ u4("span", { class: "inline-block", children: label2 }),
-            /* @__PURE__ */ u4(
-              "span",
-              {
-                tabIndex: 0,
-                class: tw("group", "cursor-pointer", hasValues ? "text-foreground" : "text-foreground/50"),
-                ...onClickOnEnter(() => {
-                  main.doResetGroup(groupKey);
-                }),
-                children: /* @__PURE__ */ u4("div", { class: "inline-flex flex-row items-center", children: [
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && "group-hover:text-hiliteb"), children: "Reset" }),
-                  /* @__PURE__ */ u4("span", { class: tw(hasValues && HOVER_SVG_GROUP, "scale-50"), children: DESELECT })
-                ] })
-              }
-            )
-          ]
-        }
-      ),
-      /* @__PURE__ */ u4("div", { class: tw("flex-1", "flex flex-col", "gap-4", "overflow-y-scroll", "relative"), children })
-    ] });
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        class: tw(
+          "relative",
+          !active && "hidden",
+          // Self.
+          "flex-1",
+          "overflow-y-scroll",
+          "self-center",
+          "w-[calc(100%_-_1rem)]",
+          // Children.
+          "flex flex-col gap-4"
+        ),
+        children
+      }
+    );
   }
 
   // packages/frontend/src/facets/main/types.ts
@@ -4039,7 +4015,7 @@
     tags: { title: "Tags", facets: [table("tags", "Tags", rel("app", "relTags"))] },
     writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("app", "relWrittenWith"))] }
   });
-  var APPS_TAB = "apps";
+  var PAGE = "apps";
   var NAV = {
     groupKeys: [["general"], ["writtenWith"], ["tags", "creationYear", "licenses"], ["platforms"]],
     default: "general"
@@ -4048,14 +4024,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV;
-      this.tab = APPS_TAB;
+      this.page = PAGE;
       this.gkByFk = GK_BY_FK;
       this.groupsConfig = GROUPS;
       this.groupsComponent = COMPONENT;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(APPS_TAB, "facets-last-group")) ?? NAV.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? storeLoad(storeKey(APPS_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE, "facets-last-group")) ?? NAV.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE, "facet-value")));
       return new _AppsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4080,7 +4056,7 @@
     plangs: { title: "Written For", facets: [table("plangs", "Plangs", rel("community", "relPlangs"))] },
     tools: { title: "Written With", facets: [table("tools", "Tools", rel("community", "relTools"))] }
   });
-  var COMMUNITY_TAB = "communities";
+  var PAGE2 = "communities";
   var NAV2 = {
     groupKeys: [["general"], ["plangs", "libraries"], ["apps", "tools"], ["tags"]],
     default: "general"
@@ -4089,14 +4065,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV2;
-      this.tab = COMMUNITY_TAB;
+      this.page = PAGE2;
       this.gkByFk = GK_BY_FK2;
       this.groupsConfig = GROUPS2;
       this.groupsComponent = COMPONENT2;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(COMMUNITY_TAB, "facets-last-group")) ?? NAV2.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? storeLoad(storeKey(COMMUNITY_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE2, "facets-last-group")) ?? NAV2.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE2, "facet-value")));
       return new _CommunitiesFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4121,7 +4097,7 @@
     plangs: { title: "Plangs", facets: [table("plangs", "Plangs", rel("learning", "relPlangs"))] },
     tools: { title: "Tools", facets: [table("tools", "Tools", rel("learning", "relTools"))] }
   });
-  var LEARNING_TAB = "learning";
+  var PAGE3 = "learning";
   var NAV3 = {
     groupKeys: [["general"], ["plangs", "libraries"], ["apps", "tools"], ["tags"]],
     default: "general"
@@ -4130,14 +4106,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV3;
-      this.tab = LEARNING_TAB;
+      this.page = PAGE3;
       this.gkByFk = GK_BY_FK3;
       this.groupsConfig = GROUPS3;
       this.groupsComponent = COMPONENT3;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(LEARNING_TAB, "facets-last-group")) ?? NAV3.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? storeLoad(storeKey(LEARNING_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE3, "facets-last-group")) ?? NAV3.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE3, "facet-value")));
       return new _LearningFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4173,7 +4149,7 @@
     writtenWith: { title: "Written With ", facets: [table("writtenWith", "Written With", rel("library", "relWrittenWith"))] },
     writtenFor: { title: "Written For", facets: [table("writtenFor", "Written For", rel("tool", "relPlangs"))] }
   });
-  var LIBS_TAB = "libs";
+  var PAGE4 = "libs";
   var NAV4 = {
     groupKeys: [["general"], ["writtenWith", "writtenFor"], ["tags", "creationYear", "licenses"], ["platforms"]],
     default: "general"
@@ -4182,14 +4158,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV4;
-      this.tab = LIBS_TAB;
+      this.page = PAGE4;
       this.gkByFk = GK_BY_FK4;
       this.groupsConfig = GROUPS4;
       this.groupsComponent = COMPONENT4;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(LIBS_TAB, "facets-last-group")) ?? NAV4.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? storeLoad(storeKey(LIBS_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE4, "facets-last-group")) ?? NAV4.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE4, "facet-value")));
       return new _LibrariesFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4234,7 +4210,7 @@
     typeSystems: { title: "Type Systems", facets: [table("typeSystems", "Type Systems", rel("plang", "relTypeSystems"))] },
     writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("plang", "relWrittenWith"))] }
   });
-  var PLANGS_TAB = "plangs";
+  var PAGE5 = "plangs";
   var NAV5 = {
     groupKeys: [
       ["general"],
@@ -4248,14 +4224,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV5;
-      this.tab = PLANGS_TAB;
+      this.page = PAGE5;
       this.gkByFk = GK_BY_FK5;
       this.groupsConfig = GROUPS5;
       this.groupsComponent = COMPONENT5;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PLANGS_TAB, "facets-last-group")) ?? NAV5.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? storeLoad(storeKey(PLANGS_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE5, "facets-last-group")) ?? NAV5.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE5, "facet-value")));
       return new _PlangsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4282,7 +4258,7 @@
     writtenFor: { title: "Written For", facets: [table("writtenFor", "Written For", rel("tool", "relPlangs"))] },
     writtenWith: { title: "Written With", facets: [table("writtenWith", "Written With", rel("tool", "relWrittenWith"))] }
   });
-  var TOOLS_TAB = "tools";
+  var PAGE6 = "tools";
   var NAV6 = {
     groupKeys: [["general"], ["writtenWith", "writtenFor"], ["tags", "creationYear", "licenses"], ["platforms"]],
     default: "general"
@@ -4291,14 +4267,14 @@
     constructor() {
       super(...arguments);
       this.nav = NAV6;
-      this.tab = TOOLS_TAB;
+      this.page = PAGE6;
       this.gkByFk = GK_BY_FK6;
       this.groupsConfig = GROUPS6;
       this.groupsComponent = COMPONENT6;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(TOOLS_TAB, "facets-last-group")) ?? NAV6.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? storeLoad(storeKey(TOOLS_TAB, "facet-value")));
+      const currentGroupKey = storeLoad(storeKey(PAGE6, "facets-last-group")) ?? NAV6.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE6, "facet-value")));
       return new _ToolsFacetsState({ pg, currentGroupKey, values });
     }
     get results() {
@@ -4309,67 +4285,87 @@
 
   // packages/frontend/src/facets/main/use_state.ts
   var FacetsMainContext = G(void 0);
-  function useFacetState(tab, pg) {
+  function useFacetState(page, pg) {
     let state;
-    if (tab === "apps") state = useDispatchable(() => AppsFacetsState.initial(pg));
-    if (tab === "communities") state = useDispatchable(() => CommunitiesFacetsState.initial(pg));
-    if (tab === "learning") state = useDispatchable(() => LearningFacetsState.initial(pg));
-    if (tab === "libs") state = useDispatchable(() => LibrariesFacetsState.initial(pg));
-    if (tab === "plangs") state = useDispatchable(() => PlangsFacetsState.initial(pg));
-    if (tab === "tools") state = useDispatchable(() => ToolsFacetsState.initial(pg));
+    if (page === "apps") state = useDispatchable(() => AppsFacetsState.initial(pg));
+    if (page === "communities") state = useDispatchable(() => CommunitiesFacetsState.initial(pg));
+    if (page === "learning") state = useDispatchable(() => LearningFacetsState.initial(pg));
+    if (page === "libs") state = useDispatchable(() => LibrariesFacetsState.initial(pg));
+    if (page === "plangs") state = useDispatchable(() => PlangsFacetsState.initial(pg));
+    if (page === "tools") state = useDispatchable(() => ToolsFacetsState.initial(pg));
     if (!state) {
-      console.error("Unknown tab", tab);
+      console.error("Unknown page", page);
       return;
     }
     return state.runEffects();
   }
 
   // packages/frontend/src/facets/main/main.tsx
-  function FacetsMain({ tab, pg }) {
-    const state = useFacetState(tab, pg);
+  var SUBGRID = tw("col-span-2", "grid grid-cols-subgrid", "items-center", "grow-0");
+  function FacetsMain({ page, pg }) {
+    const state = useFacetState(page, pg);
     const self = useRootState(state);
     y3(() => window.fragment.onUserChange((ev) => state?.doResetAll(ev.deserFrag)));
-    const body = () => !state ? null : /* @__PURE__ */ u4(FacetsMainContext.Provider, { value: state, children: [
-      /* @__PURE__ */ u4("div", { class: tw(tw(BORDER, "border-r-1"), "overflow-y-scroll", "shrink-0 grow-0"), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]", "gap-2", "pt-1"), children: state.nav.groupKeys.flatMap((keys) => (
-        // Subgrid respects the alignment of indicators while allowing to group the links and add a border.
-        /* @__PURE__ */ u4("div", { class: tw("col-span-2", "grid grid-cols-subgrid", "items-center", "pb-2", tw(BORDER, "border-b-1")), children: keys.map((groupKey) => /* @__PURE__ */ u4(k, { children: [
-          /* @__PURE__ */ u4("div", { class: tw("mt-[.45rem] pl-1", state.groupHasValues(groupKey) ? "text-primary" : "text-foreground/20 text-xs"), children: /* @__PURE__ */ u4("div", { class: "-mt-[2px] scale-66", children: FULLCIRCLE }) }),
-          /* @__PURE__ */ u4(
-            "button",
-            {
-              ...onClickOnEnter(() => state.doSetCurrentGroup(groupKey)),
-              class: tw(
-                "block",
-                "truncate text-left",
-                "mr-2 px-1 py-1",
-                state.currentGroupKey === groupKey ? "text-primary" : "text-foreground/85",
-                "underline decoration-1 decoration-dotted",
-                "cursor-pointer",
-                HOVER
+    const mapGroups = (state2, group, callback) => group.map((groupKey) => callback(groupKey, state2.currentGroupKey === groupKey, state2.groupHasValues(groupKey)));
+    const iconStyle = tw("scale-66", "mr-1");
+    const body = (state2) => /* @__PURE__ */ u4(FacetsMainContext.Provider, { value: state2, children: [
+      /* @__PURE__ */ u4(
+        "aside",
+        {
+          class: tw(
+            "h-full",
+            "bg-linear-to-t from-secondary to-background",
+            "overflow-hidden overflow-y-auto",
+            tw(BORDER, "border-r-1"),
+            // Sizing.
+            "min-w-[10rem]",
+            "sm:min-w-[12rem]"
+          ),
+          children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]"), children: [
+            /* @__PURE__ */ u4("div", { class: tw(SUBGRID, "mb-2", "ml-4"), children: [
+              /* @__PURE__ */ u4("header", { class: tw("uppercase", "text-primary"), children: "Filters" }),
+              /* @__PURE__ */ u4("div", { ...onClickOnEnter(() => state2.doResetAll()), class: tw(iconStyle, !state2.anyValues && "invisible", HOVER_SVG), children: DESELECT })
+            ] }),
+            Array.from(state2.nav.groupKeys.entries()).map(([idx, group]) => /* @__PURE__ */ u4("nav", { class: tw("mb-0", "min-w-[12rem] max-w-[15rem]", SUBGRID), children: mapGroups(state2, group, (groupKey, isCurrent, hasValues) => /* @__PURE__ */ u4("div", { class: tw(SUBGRID, isCurrent ? "bg-primary/85 text-background" : "hover:bg-primary/25"), children: [
+              /* @__PURE__ */ u4(
+                "button",
+                {
+                  ...onClickOnEnter(() => state2.doSetCurrentGroup(groupKey)),
+                  class: tw(
+                    "block w-full",
+                    "truncate text-left",
+                    "sm:ml-4",
+                    "mr-2 px-1 py-1",
+                    "px-4 py-2 sm:mb-1",
+                    "cursor-pointer",
+                    isCurrent ? "text-background/85" : hasValues ? "text-primary" : "text-foreground"
+                  ),
+                  children: state2.groupTitle(groupKey)
+                }
               ),
-              children: state.groupTitle(groupKey)
-            }
-          )
-        ] }, groupKey)) }, keys.join("-"))
-      )) }) }),
-      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50"), children: /* @__PURE__ */ u4(state.groupsComponent, { currentFacetGroup: state.currentGroupKey }) })
+              /* @__PURE__ */ u4(
+                "div",
+                {
+                  ...onClickOnEnter(() => state2.doResetGroup(groupKey)),
+                  class: tw(iconStyle, !state2.groupHasValues(groupKey) && "hidden", HOVER_SVG),
+                  children: DESELECT
+                }
+              )
+            ] }, groupKey)) }, group.join("-")))
+          ] })
+        }
+      ),
+      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50", "relative"), children: /* @__PURE__ */ u4(state2.groupsComponent, { currentFacetGroup: state2.currentGroupKey }) })
     ] });
-    return /* @__PURE__ */ u4(
-      "aside",
-      {
-        ref: self,
-        class: tw("flex flex-row", "max-h-full overflow-hidden", tw(BORDER, "border-b-1", "border-t-1", "sm:border-r-1")),
-        children: body()
-      }
-    );
+    return /* @__PURE__ */ u4("aside", { ref: self, class: tw("flex flex-row items-stretch", "h-full overflow-hidden"), children: state && body(state) });
   }
 
   // packages/frontend/src/facets/main/index.tsx
   var CL = "facetsMain";
   function activateFacetsMain(pg) {
     for (const elem2 of elems(CL)) {
-      if (pg && elem2.dataset.tab) {
-        B(/* @__PURE__ */ u4(FacetsMain, { pg, tab: elem2.dataset.tab }), elem2);
+      if (pg && elem2.dataset.page) {
+        B(/* @__PURE__ */ u4(FacetsMain, { pg, page: elem2.dataset.page }), elem2);
       } else {
         console.error("Missing prop for FacetsMain component.");
       }
