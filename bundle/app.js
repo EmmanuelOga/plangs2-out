@@ -1512,52 +1512,39 @@
     const h1Ref = A2(null);
     y3(() => h1Ref.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
     const forGrid = GRID_PAGES.has(page);
-    return /* @__PURE__ */ u4(
-      "div",
-      {
-        class: tw(
-          "w-full overflow-y-scroll",
-          "px-2 pt-2 sm:px-4",
-          !forGrid && "-mx-4",
-          // Compensate for padding so it aligns with the rest of the content.
-          PROSE_BASIC,
-          "max-w-[unset]"
-        ),
-        children: [
-          !vertex && /* @__PURE__ */ u4(k, { children: [
-            /* @__PURE__ */ u4("h2", { class: tw("mt-0!"), children: "Information" }),
-            /* @__PURE__ */ u4("p", { children: [
-              /* @__PURE__ */ u4("strong", { children: "Click" }),
-              " a thumbnail for more info. ",
-              /* @__PURE__ */ u4("strong", { children: "Double-click" }),
-              " a thumbnail to go directly to the item's page."
-            ] })
-          ] }),
-          vertex && /* @__PURE__ */ u4(k, { children: [
-            /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("mt-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
-            /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
-            /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
-              vertex.urlHome && /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4(VertexLink, { vertex, includeLocal: false, title: "Homepage", nocolor: true }) }),
-              vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
-              "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
-              "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
-              "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
-            ] }),
-            /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: vertex.description })
-          ] }),
-          ret(
-            relations(vertex),
-            (rels) => rels.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
-              /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
-              /* @__PURE__ */ u4("table", { children: /* @__PURE__ */ u4("tbody", { children: relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4("tr", { children: [
-                /* @__PURE__ */ u4("th", { class: "align-baseline", children: title }),
-                /* @__PURE__ */ u4("td", { children: vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key)) })
-              ] }, title)) }) })
-            ] })
-          )
-        ]
-      }
-    );
+    return /* @__PURE__ */ u4("div", { class: tw("w-full overflow-y-scroll", forGrid && "p-4", PROSE_BASIC, "max-w-[unset]"), children: [
+      !vertex && /* @__PURE__ */ u4(k, { children: [
+        /* @__PURE__ */ u4("h2", { class: tw("mt-0!"), children: "Information" }),
+        /* @__PURE__ */ u4("p", { children: [
+          /* @__PURE__ */ u4("strong", { children: "Click" }),
+          " a thumbnail for more info. ",
+          /* @__PURE__ */ u4("strong", { children: "Double-click" }),
+          " a thumbnail to go directly to the item's page."
+        ] })
+      ] }),
+      vertex && /* @__PURE__ */ u4(k, { children: [
+        /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("mt-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
+        /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
+        /* @__PURE__ */ u4("div", { class: tw(forGrid && "hidden sm:block"), children: [
+          vertex.urlHome && /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4(VertexLink, { vertex, includeLocal: false, title: "Homepage", nocolor: true }) }),
+          vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
+          "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
+          "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
+          "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
+        ] }),
+        /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block"), children: vertex.description })
+      ] }),
+      ret(
+        relations(vertex),
+        (rels) => rels.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "pb-4"), open, children: [
+          /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
+          /* @__PURE__ */ u4("table", { children: /* @__PURE__ */ u4("tbody", { children: relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4("tr", { children: [
+            /* @__PURE__ */ u4("th", { class: "align-baseline", children: title }),
+            /* @__PURE__ */ u4("td", { children: vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key)) })
+          ] }, title)) }) })
+        ] })
+      )
+    ] });
   }
   function Pill({ children }) {
     return (
@@ -1583,7 +1570,8 @@
     if (!vertex) return result;
     for (const relName of vertex.relations.keys()) {
       const relation = vertex[relName];
-      if (relation.size > 0) result.push([relation.desc, relation.values]);
+      const relValues = relation.values.filter((related) => related.key !== vertex.key);
+      if (relValues.length > 0) result.push([relation.desc, relValues]);
     }
     return result;
   }

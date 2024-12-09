@@ -2,8 +2,8 @@
 @layer theme, base, components, utilities;
 @layer theme {
   :root {
-    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari, "Arial Rounded MT", "Arial Rounded MT Bold", Calibri,
+    source-sans-pro, sans-serif;
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       "Liberation Mono", "Courier New", monospace;
@@ -377,8 +377,6 @@
     --default-mono-font-variation-settings: var(
       --font-mono--font-variation-settings
     );
-    --font-family-sans: ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari, "Arial Rounded MT", "Arial Rounded MT Bold", Calibri,
-    source-sans-pro, sans-serif;
   }
 }
 @layer base {
@@ -597,9 +595,6 @@
   }
   .m-0 {
     margin: calc(var(--spacing) * 0);
-  }
-  .-mx-4 {
-    margin-inline: calc(var(--spacing) * -4);
   }
   .mx-2 {
     margin-inline: calc(var(--spacing) * 2);
@@ -1335,6 +1330,9 @@
   .bg-\[url\(\'\/images\/plangs-light\.svg\'\)\] {
     background-image: url('/images/plangs-light.svg');
   }
+  .bg-\[url\(\'\/images\/plangs\.svg\'\)\] {
+    background-image: url('/images/plangs.svg');
+  }
   .from-secondary {
     --tw-gradient-from: var(--color-secondary);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position,) var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -1391,9 +1389,6 @@
   }
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
-  }
-  .pt-2 {
-    padding-top: calc(var(--spacing) * 2);
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
@@ -2563,6 +2558,11 @@
       display: none;
     }
   }
+  .dark\:bg-\[url\(\'\/images\/plangs-dark\.svg\'\)\] {
+    &:is(.dark *) {
+      background-image: url('/images/plangs-dark.svg');
+    }
+  }
   .dark\:bg-\[url\(\'\/images\/plangs\.svg\'\)\] {
     &:is(.dark *) {
       background-image: url('/images/plangs.svg');
@@ -2687,15 +2687,17 @@
       max-height: 40dvh;
     }
     .grid-info {
-      max-height: 12dvh;
+      max-height: 15dvh;
     }
   }
   @media (orientation: portrait) and (min-width: 960px) {
     .grid-wrapper {
       grid-template-areas: 'F F I' 'G G G' 'G G G';
+      grid-template-rows: auto 1fr auto;
       grid-template-columns: auto auto 1fr;
       .grid-facets {
         width: 38rem;
+        max-height: 40dvh;
       }
     }
   }
