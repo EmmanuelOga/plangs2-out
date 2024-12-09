@@ -2618,8 +2618,9 @@
     color: var(--color-primary);
     --tw-prose-links: var(--color-primary);
   }
-  header, h2, h3 {
+  * header, h2, h3 {
     font-style: italic;
+    color: var(--color-primary);
   }
   ::-webkit-scrollbar {
     width: 4px;
