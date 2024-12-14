@@ -1219,11 +1219,7 @@
     /* @__PURE__ */ u4("rect", { height: "2", rx: "0.5", width: "10", x: "1", y: "12" }),
     /* @__PURE__ */ u4("path", { d: "M15.99951,6H14.99634v7.5a.49378.49378,0,0,1-.49317.5h-.49633a.5.5,0,0,1-.5-.49951L13.50366,6H12.50049A.24984.24984,0,0,1,12.25,5.74823a.24439.24439,0,0,1,.07373-.175L14.0918,3.5564a.25007.25007,0,0,1,.3164,0l1.76807,2.01684a.24439.24439,0,0,1,.07373.175A.24984.24984,0,0,1,15.99951,6Z" })
   ] });
-  var HOME = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 576 512", class: CSS, children: [
-    /* @__PURE__ */ u4("title", { children: "Home" }),
-    /* @__PURE__ */ u4("path", { d: "M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" })
-  ] });
-  var GITHUB = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 64 480 384", class: CSS, children: [
+  var GITHUB = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 16 480 384", class: CSS, children: [
     /* @__PURE__ */ u4("title", { children: "Github" }),
     /* @__PURE__ */ u4("path", { d: "M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z" })
   ] });
@@ -1231,13 +1227,17 @@
     /* @__PURE__ */ u4("title", { children: "Reddit" }),
     /* @__PURE__ */ u4("path", { d: "M373 138.6c-25.2 0-46.3-17.5-51.9-41l0 0c-30.6 4.3-54.2 30.7-54.2 62.4l0 .2c47.4 1.8 90.6 15.1 124.9 36.3c12.6-9.7 28.4-15.5 45.5-15.5c41.3 0 74.7 33.4 74.7 74.7c0 29.8-17.4 55.5-42.7 67.5c-2.4 86.8-97 156.6-213.2 156.6S45.5 410.1 43 323.4C17.6 311.5 0 285.7 0 255.7c0-41.3 33.4-74.7 74.7-74.7c17.2 0 33 5.8 45.7 15.6c34-21.1 76.8-34.4 123.7-36.4l0-.3c0-44.3 33.7-80.9 76.8-85.5C325.8 50.2 347.2 32 373 32c29.4 0 53.3 23.9 53.3 53.3s-23.9 53.3-53.3 53.3zM157.5 255.3c-20.9 0-38.9 20.8-40.2 47.9s17.1 38.1 38 38.1s36.6-9.8 37.8-36.9s-14.7-49.1-35.7-49.1zM395 303.1c-1.2-27.1-19.2-47.9-40.2-47.9s-36.9 22-35.7 49.1c1.2 27.1 16.9 36.9 37.8 36.9s39.3-11 38-38.1zm-60.1 70.8c1.5-3.6-1-7.7-4.9-8.1c-23-2.3-47.9-3.6-73.8-3.6s-50.8 1.3-73.8 3.6c-3.9 .4-6.4 4.5-4.9 8.1c12.9 30.8 43.3 52.4 78.7 52.4s65.8-21.6 78.7-52.4z" })
   ] });
-  var WIKIPEDIA = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 50 640 413", class: CSS, children: [
+  var WIKIPEDIA = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 640 413", class: CSS, children: [
     /* @__PURE__ */ u4("title", { children: "Wikipedia" }),
     /* @__PURE__ */ u4("path", { d: "M640 51.2l-.3 12.2c-28.1 .8-45 15.8-55.8 40.3-25 57.8-103.3 240-155.3 358.6H415l-81.9-193.1c-32.5 63.6-68.3 130-99.2 193.1-.3 .3-15 0-15-.3C172 352.3 122.8 243.4 75.8 133.4 64.4 106.7 26.4 63.4 .2 63.7c0-3.1-.3-10-.3-14.2h161.9v13.9c-19.2 1.1-52.8 13.3-43.3 34.2 21.9 49.7 103.6 240.3 125.6 288.6 15-29.7 57.8-109.2 75.3-142.8-13.9-28.3-58.6-133.9-72.8-160-9.7-17.8-36.1-19.4-55.8-19.7V49.8l142.5 .3v13.1c-19.4 .6-38.1 7.8-29.4 26.1 18.9 40 30.6 68.1 48.1 104.7 5.6-10.8 34.7-69.4 48.1-100.8 8.9-20.6-3.9-28.6-38.6-29.4 .3-3.6 0-10.3 .3-13.6 44.4-.3 111.1-.3 123.1-.6v13.6c-22.5 .8-45.8 12.8-58.1 31.7l-59.2 122.8c6.4 16.1 63.3 142.8 69.2 156.7L559.2 91.8c-8.6-23.1-36.4-28.1-47.2-28.3V49.6l127.8 1.1 .2 .5z" })
   ] });
   var STACKOV = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "3 32 379 448", class: CSS, children: [
     /* @__PURE__ */ u4("title", { children: "Stack Overflow" }),
     /* @__PURE__ */ u4("path", { d: "M290.7 311L95 269.7 86.8 309l195.7 41zm51-87L188.2 95.7l-25.5 30.8 153.5 128.3zm-31.2 39.7L129.2 179l-16.7 36.5L293.7 300zM262 32l-32 24 119.3 160.3 32-24zm20.5 328h-200v39.7h200zm39.7 80H42.7V320h-40v160h359.5V320h-40z" })
+  ] });
+  var EXTERN = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "-96 -96 608 608", class: CSS, children: [
+    /* @__PURE__ */ u4("title", { children: "External Link" }),
+    /* @__PURE__ */ u4("path", { d: "M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l82.7 0L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3l0 82.7c0 17.7 14.3 32 32 32s32-14.3 32-32l0-160c0-17.7-14.3-32-32-32L320 0zM80 32C35.8 32 0 67.8 0 112L0 432c0 44.2 35.8 80 80 80l320 0c44.2 0 80-35.8 80-80l0-112c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 112c0 8.8-7.2 16-16 16L80 448c-8.8 0-16-7.2-16-16l0-320c0-8.8 7.2-16 16-16l112 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L80 32z" })
   ] });
 
   // packages/frontend/src/auxiliar/storage.ts
@@ -1559,27 +1559,25 @@
     y3(() => h1Ref.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
     const forGrid = GRID_PAGES.has(page);
     const rels = relations(vertex);
-    return /* @__PURE__ */ u4("div", { class: tw(VSCROLL, forGrid && "p-4", !forGrid && "mb-16", PROSE_BASIC, "max-w-[unset]"), children: [
+    return /* @__PURE__ */ u4("div", { class: tw(VSCROLL, forGrid && "p-4", !forGrid && "sm:mb-16", PROSE_BASIC, "max-w-[unset]"), children: [
       !vertex && /* @__PURE__ */ u4("div", { children: [
         /* @__PURE__ */ u4("h2", { class: tw("mt-0!"), children: "Information" }),
         /* @__PURE__ */ u4("p", { children: [
           /* @__PURE__ */ u4("strong", { class: "text-primary", children: "Click" }),
-          " a thumbnail for more info. ",
-          /* @__PURE__ */ u4("strong", { class: "text-primary", children: "Double-click" }),
-          " a thumbnail to go directly to the item's page."
+          " a thumbnail for more info."
         ] })
       ] }),
       vertex && /* @__PURE__ */ u4("div", { children: [
-        /* @__PURE__ */ u4("div", { class: "float-right flex flex-col items-center pl-4", children: /* @__PURE__ */ u4("div", { class: "flex flex-row gap-4", children: [
-          ret(vertex.urlHome, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: HOME })),
+        /* @__PURE__ */ u4("div", { class: "flex flex-row gap-5 align-middle", children: [
+          /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("m-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
+          /* @__PURE__ */ u4("div", { class: "flex-1" }),
+          ret(vertex.urlHome, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: EXTERN })),
           ret(vertex.urlGithub, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: GITHUB })),
           ret(vertex.urlStackov, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: STACKOV })),
           ret(vertex.urlReddit, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: REDDIT })),
           ret(vertex.urlWikipedia, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: WIKIPEDIA }))
-        ] }) }),
-        /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("mt-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
-        /* @__PURE__ */ u4("span", { class: tw(forGrid ? "dash mx-2 inline-block sm:hidden" : "hidden"), children: "\u2014" }),
-        /* @__PURE__ */ u4("p", { class: tw("clear-both", forGrid && "inline sm:block", "hyphens-auto"), children: [
+        ] }),
+        /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block", "hyphens-auto"), children: [
           !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { vertex, onlyImg: true, class: "h-[6.5rem] w-[6.5rem]" }) }),
           forGrid ? vertex.shortDesc : vertex.description
         ] })
@@ -1591,7 +1589,7 @@
           open,
           children: [
             /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
-            /* @__PURE__ */ u4("div", { class: tw(forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "gap-4 pt-4"), children: [
+            /* @__PURE__ */ u4("div", { class: tw(!forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
               /* @__PURE__ */ u4(DetailCell, { title: "General", children: [
                 vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
                 "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
@@ -1609,9 +1607,9 @@
     return /* @__PURE__ */ u4("a", { href, class: tw("text-primary hover:text-hiliteb"), children: icon2 });
   }
   function DetailCell({ title, children }) {
-    return /* @__PURE__ */ u4("div", { class: tw("col-span-2 grid grid-cols-subgrid", "pt-2", tw("border-foreground/25 border-dotted", "border-t-1")), children: [
-      /* @__PURE__ */ u4("header", { class: "p-2 text-foreground/75", children: title }),
-      /* @__PURE__ */ u4("div", { class: "p-2", children })
+    return /* @__PURE__ */ u4("div", { class: tw("col-span-2 grid grid-cols-subgrid", tw("border-foreground/25 border-dotted sm:border-t-1", "pt-4")), children: [
+      /* @__PURE__ */ u4("header", { class: "p-1 text-foreground/75", children: title }),
+      /* @__PURE__ */ u4("div", { class: "p-1 ", children })
     ] }, title);
   }
   function Pill({ children }) {
@@ -1620,13 +1618,12 @@
       /* @__PURE__ */ u4(
         "div",
         {
-          style: "font-size: 1.125rem; height: 2rem;",
           class: tw(
             "inline-flex items-center",
-            "mr-2 mb-3 max-w-full px-2",
-            "border-2 border-secondary",
+            "m-1 px-1.5",
+            "border-1 border-foreground/25",
             "rounded-tl-2xl rounded-br-2xl",
-            "bg-secondary/50 text-foreground",
+            "bg-secondary/75 text-foreground",
             "overflow-ellipsis whitespace-nowrap"
           ),
           children
@@ -3074,9 +3071,26 @@
       arrayMerge(this.data.images ??= [], images, (i1, i22) => i1.url === i22.url);
       return this;
     }
+    addKeywords(keywords) {
+      arrayMerge(this.data.keywords ??= [], keywords);
+      return this;
+    }
     addLinks(links) {
       arrayMerge(this.data.links ??= [], links, (l1, l22) => l1.url === l22.url);
       return this;
+    }
+    addStackovTags(stackovTags) {
+      arrayMerge(this.data.stackovTags ??= [], stackovTags);
+      return this;
+    }
+    /** Override merge to handle some array fields better. */
+    merge(data2) {
+      const { keywords, images, links, stackovTags, ...rest } = data2;
+      if (images) this.addImages(images);
+      if (keywords) this.addKeywords(keywords);
+      if (links) this.addLinks(links);
+      if (stackovTags) this.addStackovTags(stackovTags);
+      return super.merge(rest);
     }
   };
 
@@ -4176,9 +4190,13 @@
       arrayMerge(this.data.releases ??= [], releases, (r1, r22) => r1.version === r22.version);
       return this;
     }
-    addStackovTags(stackovTags) {
-      arrayMerge(this.data.stackovTags ??= [], stackovTags);
-      return this;
+    /** Override merge to handle some array fields better. */
+    merge(data2) {
+      const { extensions, filenames, releases, ...rest } = data2;
+      if (extensions) this.addExtensions(extensions);
+      if (filenames) this.addFilenames(filenames);
+      if (releases) this.addReleases(releases);
+      return super.merge(rest);
     }
     get extensions() {
       return new IterTap(this.data.extensions);
@@ -4705,15 +4723,6 @@
         on(grid, "pointerdown", ({ target }) => {
           const vertex = getClosestVertex(pg, target);
           if (vertex) renderVertexInfo({ vertex });
-        });
-        on(grid, "dblclick", ({ target }) => {
-          const vertex = getClosestVertex(pg, target);
-          if (!vertex) return;
-          if (vertex.vertexName === "plang") {
-            window.location.href = `/${vertex.plainKey}`;
-          } else {
-            window.location.href = `/${vertex.vertexName}/${vertex.plainKey}`;
-          }
         });
         for (const img of elems("vertexThumbnImg")) {
           const src = img.dataset.src;
