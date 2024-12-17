@@ -1582,35 +1582,35 @@
           forGrid ? vertex.shortDesc : vertex.description
         ] })
       ] }),
-      vertex && rels.length > 0 && /* @__PURE__ */ u4(
-        "details",
-        {
-          class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4", tw("border-foreground/25 border-dotted", "border-1"))),
-          open,
-          children: [
-            /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
-            /* @__PURE__ */ u4("div", { class: tw(!forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
-              /* @__PURE__ */ u4(DetailCell, { title: "General", children: [
-                vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
-                "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
-                "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
-                "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
-              ] }),
-              relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4(DetailCell, { title, children: vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key)) }, title))
-            ] })
-          ]
-        }
-      )
+      vertex && rels.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
+        /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
+        /* @__PURE__ */ u4("div", { class: tw(forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
+          /* @__PURE__ */ u4(DetailCell, { title: "General", children: [
+            vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
+            "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
+            "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
+            "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
+          ] }),
+          relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4(DetailCell, { title, children: vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key)) }, title))
+        ] })
+      ] })
     ] });
   }
   function ExternalLink({ href, icon: icon2 }) {
     return /* @__PURE__ */ u4("a", { href, class: tw("text-primary hover:text-hiliteb"), children: icon2 });
   }
   function DetailCell({ title, children }) {
-    return /* @__PURE__ */ u4("div", { class: tw("col-span-2 grid grid-cols-subgrid", tw("border-foreground/25 border-dotted sm:border-t-1", "pt-4")), children: [
-      /* @__PURE__ */ u4("header", { class: "p-1 text-foreground/75", children: title }),
-      /* @__PURE__ */ u4("div", { class: "p-1 ", children })
-    ] }, title);
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        class: tw("col-span-2 grid grid-cols-subgrid", tw("border-foreground/25 border-dotted sm:border-t-1", "pt-4"), tw("hover:bg-hiliteb/10")),
+        children: [
+          /* @__PURE__ */ u4("header", { class: "p-1 text-foreground/75", children: title }),
+          /* @__PURE__ */ u4("div", { children })
+        ]
+      },
+      title
+    );
   }
   function Pill({ children }) {
     return (
@@ -1620,7 +1620,7 @@
         {
           class: tw(
             "inline-flex items-center",
-            "m-1 px-1.5",
+            "m-2 px-2",
             "border-1 border-foreground/25",
             "rounded-tl-2xl rounded-br-2xl",
             "bg-secondary/75 text-foreground",
@@ -2516,11 +2516,11 @@
     compilesTo: (pl, flt) => flt.matches((key) => pl.relCompilesTo.has(key)),
     createdRecently: (pl, date) => pl.created.isRecent(date.value),
     creationYear: (pl, flt) => ret(pl.created.strYear, (plYear) => flt.matches((year) => plYear === year)),
-    dialectOf: (pl, flt) => flt.matches((key) => pl.relDialectOf.has(key)),
+    dialectOf: (pl, flt) => flt.matches((key) => pl.key === key || pl.relDialectOf.has(key)),
     extensions: (pl, flt) => flt.matches((key) => pl.extensions.includes(key)),
     hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
     hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
-    implements: (pl, flt) => flt.matches((key) => pl.relImplements.has(key)),
+    implements: (pl, flt) => flt.matches((key) => key === pl.key || pl.relImplements.has(key)),
     influenced: (pl, flt) => flt.matches((key) => pl.relInfluenced.has(key)),
     influencedBy: (pl, flt) => flt.matches((key) => pl.relInfluencedBy.has(key)),
     isPopular: (pl, val) => val.value === pl.isPopular,
@@ -2568,15 +2568,20 @@
   };
 
   // packages/plangs/src/facets/index.ts
-  function matchVertex(vertex, predicates, facetValues) {
+  function matchVertex(vertex, predicates, facetValues, mode = "any") {
+    if (facetValues.size === 0) return true;
     for (const [key, value] of facetValues) {
+      if (!value.isPresent) continue;
       const pred = predicates[key];
       if (!pred) console.error(`No predicate found for key: ${key}`);
-      if (pred && value.isPresent && !pred(vertex, value)) return false;
+      if (!pred) continue;
+      const predResult = pred(vertex, value.value);
+      if (mode === "all" && !predResult) return false;
+      if (mode === "any" && predResult) return true;
     }
-    return true;
+    return mode === "all";
   }
-  function matchVertices(vertices, facetValues, limit = -1) {
+  function matchVertices(vertices, facetValues, mode = "any", limit = -1) {
     let predicates = vertexPredicates(vertices.name);
     const result = /* @__PURE__ */ new Set();
     if (!predicates) {
@@ -2585,7 +2590,7 @@
     }
     for (const vertex of vertices.values) {
       if (limit >= 0 && result.size >= limit) break;
-      if (matchVertex(vertex, predicates, facetValues)) result.add(vertex.key);
+      if (matchVertex(vertex, predicates, facetValues, mode)) result.add(vertex.key);
     }
     return result;
   }
@@ -2863,6 +2868,9 @@
     get size() {
       return this.keys.size;
     }
+    toString() {
+      return `RelFrom(${this.from}, ${this.desc})`;
+    }
   };
   var RelTo = class {
     constructor(to, edges) {
@@ -2896,6 +2904,9 @@
     }
     get size() {
       return this.keys.size;
+    }
+    toString() {
+      return `RelTo(${this.to}, ${this.desc})`;
     }
   };
 
@@ -3294,31 +3305,31 @@
     get relations() {
       return new Map(Object.keys(_VAppBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Communities `VCommunity-[communityRelApps]->(this:VApp)`. Inverse: {@link VCommunity.relApps}. */
+    /** Communities `VCommunity-[communityRelApps]->(this:VApp)`. Inverse: {@link VC.VCommunity.relApps}. */
     get relCommunities() {
       return new RelTo(this, this.graph.edges.communityRelApps);
     }
-    /** Learning Resources `VLearning-[learningRelApps]->(this:VApp)`. Inverse: {@link VLearning.relApps}. */
+    /** Learning Resources `VLearning-[learningRelApps]->(this:VApp)`. Inverse: {@link VC.VLearning.relApps}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelApps);
     }
-    /** Licenses `VLicense-[licenseRelApps]->(this:VApp)`. Inverse: {@link VLicense.relApps}. */
+    /** Licenses `VLicense-[licenseRelApps]->(this:VApp)`. Inverse: {@link VC.VLicense.relApps}. */
     get relLicenses() {
       return new RelTo(this, this.graph.edges.licenseRelApps);
     }
-    /** Platforms `(this:VApp)-[appRelPlatforms]->VPlatform`. Inverse: {@link VPlatform.relApps}. */
+    /** Platforms `(this:VApp)-[appRelPlatforms]->VPlatform`. Inverse: {@link VC.VPlatform.relApps}. */
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.appRelPlatforms);
     }
-    /** Posts `VPost-[postRelApps]->(this:VApp)`. Inverse: {@link VPost.relApps}. */
+    /** Posts `VPost-[postRelApps]->(this:VApp)`. Inverse: {@link VC.VPost.relApps}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelApps);
     }
-    /** Tags `VTag-[tagRelApps]->(this:VApp)`. Inverse: {@link VTag.relApps}. */
+    /** Tags `VTag-[tagRelApps]->(this:VApp)`. Inverse: {@link VC.VTag.relApps}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelApps);
     }
-    /** Plangs `(this:VApp)-[appRelWrittenWith]->VPlang`. Inverse: {@link VPlang.relApps}. */
+    /** Plangs `(this:VApp)-[appRelWrittenWith]->VPlang`. Inverse: {@link VC.VPlang.relApps}. */
     get relWrittenWith() {
       return new RelFrom(this, this.graph.edges.appRelWrittenWith);
     }
@@ -3350,11 +3361,11 @@
     get relations() {
       return new Map(Object.keys(_VBundleBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Plangs `(this:VBundle)-[bundleRelPlangs]->VPlang`. Inverse: {@link VPlang.relBundles}. */
+    /** Plangs `(this:VBundle)-[bundleRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relBundles}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.bundleRelPlangs);
     }
-    /** Tools `(this:VBundle)-[bundleRelTools]->VTool`. Inverse: {@link VTool.relBundles}. */
+    /** Tools `(this:VBundle)-[bundleRelTools]->VTool`. Inverse: {@link VC.VTool.relBundles}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.bundleRelTools);
     }
@@ -3392,35 +3403,35 @@
     get relations() {
       return new Map(Object.keys(_VCommunityBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `(this:VCommunity)-[communityRelApps]->VApp`. Inverse: {@link VApp.relCommunities}. */
+    /** Apps `(this:VCommunity)-[communityRelApps]->VApp`. Inverse: {@link VC.VApp.relCommunities}. */
     get relApps() {
       return new RelFrom(this, this.graph.edges.communityRelApps);
     }
-    /** Learning Resources `VLearning-[learningRelCommunities]->(this:VCommunity)`. Inverse: {@link VLearning.relCommunities}. */
+    /** Learning Resources `VLearning-[learningRelCommunities]->(this:VCommunity)`. Inverse: {@link VC.VLearning.relCommunities}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelCommunities);
     }
-    /** Libraries `(this:VCommunity)-[communityRelLibraries]->VLibrary`. Inverse: {@link VLibrary.relCommunities}. */
+    /** Libraries `(this:VCommunity)-[communityRelLibraries]->VLibrary`. Inverse: {@link VC.VLibrary.relCommunities}. */
     get relLibraries() {
       return new RelFrom(this, this.graph.edges.communityRelLibraries);
     }
-    /** Plangs `(this:VCommunity)-[communityRelPlangs]->VPlang`. Inverse: {@link VPlang.relCommunities}. */
+    /** Plangs `(this:VCommunity)-[communityRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relCommunities}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.communityRelPlangs);
     }
-    /** Posts `VPost-[postRelCommunities]->(this:VCommunity)`. Inverse: {@link VPost.relCommunities}. */
+    /** Posts `VPost-[postRelCommunities]->(this:VCommunity)`. Inverse: {@link VC.VPost.relCommunities}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelCommunities);
     }
-    /** Subsystems `(this:VCommunity)-[communityRelSubsystems]->VSubsystem`. Inverse: {@link VSubsystem.relCommunities}. */
+    /** Subsystems `(this:VCommunity)-[communityRelSubsystems]->VSubsystem`. Inverse: {@link VC.VSubsystem.relCommunities}. */
     get relSubsystems() {
       return new RelFrom(this, this.graph.edges.communityRelSubsystems);
     }
-    /** Tags `VTag-[tagRelCommunities]->(this:VCommunity)`. Inverse: {@link VTag.relCommunities}. */
+    /** Tags `VTag-[tagRelCommunities]->(this:VCommunity)`. Inverse: {@link VC.VTag.relCommunities}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelCommunities);
     }
-    /** Tools `(this:VCommunity)-[communityRelTools]->VTool`. Inverse: {@link VTool.relCommunities}. */
+    /** Tools `(this:VCommunity)-[communityRelTools]->VTool`. Inverse: {@link VC.VTool.relCommunities}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.communityRelTools);
     }
@@ -3458,35 +3469,35 @@
     get relations() {
       return new Map(Object.keys(_VLearningBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `(this:VLearning)-[learningRelApps]->VApp`. Inverse: {@link VApp.relLearning}. */
+    /** Apps `(this:VLearning)-[learningRelApps]->VApp`. Inverse: {@link VC.VApp.relLearning}. */
     get relApps() {
       return new RelFrom(this, this.graph.edges.learningRelApps);
     }
-    /** Communities `(this:VLearning)-[learningRelCommunities]->VCommunity`. Inverse: {@link VCommunity.relLearning}. */
+    /** Communities `(this:VLearning)-[learningRelCommunities]->VCommunity`. Inverse: {@link VC.VCommunity.relLearning}. */
     get relCommunities() {
       return new RelFrom(this, this.graph.edges.learningRelCommunities);
     }
-    /** Libraries `(this:VLearning)-[learningRelLibraries]->VLibrary`. Inverse: {@link VLibrary.relLearning}. */
+    /** Libraries `(this:VLearning)-[learningRelLibraries]->VLibrary`. Inverse: {@link VC.VLibrary.relLearning}. */
     get relLibraries() {
       return new RelFrom(this, this.graph.edges.learningRelLibraries);
     }
-    /** Plangs `(this:VLearning)-[learningRelPlangs]->VPlang`. Inverse: {@link VPlang.relLearning}. */
+    /** Plangs `(this:VLearning)-[learningRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relLearning}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.learningRelPlangs);
     }
-    /** Posts `VPost-[postRelLearning]->(this:VLearning)`. Inverse: {@link VPost.relLearning}. */
+    /** Posts `VPost-[postRelLearning]->(this:VLearning)`. Inverse: {@link VC.VPost.relLearning}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelLearning);
     }
-    /** Subsystems `(this:VLearning)-[learningRelSubsystems]->VSubsystem`. Inverse: {@link VSubsystem.relLearning}. */
+    /** Subsystems `(this:VLearning)-[learningRelSubsystems]->VSubsystem`. Inverse: {@link VC.VSubsystem.relLearning}. */
     get relSubsystems() {
       return new RelFrom(this, this.graph.edges.learningRelSubsystems);
     }
-    /** Tags `VTag-[tagRelLearning]->(this:VLearning)`. Inverse: {@link VTag.relLearning}. */
+    /** Tags `VTag-[tagRelLearning]->(this:VLearning)`. Inverse: {@link VC.VTag.relLearning}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelLearning);
     }
-    /** Tools `(this:VLearning)-[learningRelTools]->VTool`. Inverse: {@link VTool.relLearning}. */
+    /** Tools `(this:VLearning)-[learningRelTools]->VTool`. Inverse: {@link VC.VTool.relLearning}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.learningRelTools);
     }
@@ -3524,35 +3535,35 @@
     get relations() {
       return new Map(Object.keys(_VLibraryBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Communities `VCommunity-[communityRelLibraries]->(this:VLibrary)`. Inverse: {@link VCommunity.relLibraries}. */
+    /** Communities `VCommunity-[communityRelLibraries]->(this:VLibrary)`. Inverse: {@link VC.VCommunity.relLibraries}. */
     get relCommunities() {
       return new RelTo(this, this.graph.edges.communityRelLibraries);
     }
-    /** Learning Resources `VLearning-[learningRelLibraries]->(this:VLibrary)`. Inverse: {@link VLearning.relLibraries}. */
+    /** Learning Resources `VLearning-[learningRelLibraries]->(this:VLibrary)`. Inverse: {@link VC.VLearning.relLibraries}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelLibraries);
     }
-    /** Licenses `VLicense-[licenseRelLibraries]->(this:VLibrary)`. Inverse: {@link VLicense.relLibraries}. */
+    /** Licenses `VLicense-[licenseRelLibraries]->(this:VLibrary)`. Inverse: {@link VC.VLicense.relLibraries}. */
     get relLicenses() {
       return new RelTo(this, this.graph.edges.licenseRelLibraries);
     }
-    /** Plangs `(this:VLibrary)-[libraryRelPlangs]->VPlang`. Inverse: {@link VPlang.relLibraries}. */
+    /** Plangs `(this:VLibrary)-[libraryRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relLibraries}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.libraryRelPlangs);
     }
-    /** Platforms `(this:VLibrary)-[libraryRelPlatforms]->VPlatform`. Inverse: {@link VPlatform.relLibraries}. */
+    /** Platforms `(this:VLibrary)-[libraryRelPlatforms]->VPlatform`. Inverse: {@link VC.VPlatform.relLibraries}. */
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.libraryRelPlatforms);
     }
-    /** Posts `VPost-[postRelLibraries]->(this:VLibrary)`. Inverse: {@link VPost.relLibraries}. */
+    /** Posts `VPost-[postRelLibraries]->(this:VLibrary)`. Inverse: {@link VC.VPost.relLibraries}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelLibraries);
     }
-    /** Tags `VTag-[tagRelLibraries]->(this:VLibrary)`. Inverse: {@link VTag.relLibraries}. */
+    /** Tags `VTag-[tagRelLibraries]->(this:VLibrary)`. Inverse: {@link VC.VTag.relLibraries}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelLibraries);
     }
-    /** Written With `(this:VLibrary)-[libraryRelWrittenWith]->VPlang`. Inverse: {@link VPlang.relUsedInLibrary}. */
+    /** Written With `(this:VLibrary)-[libraryRelWrittenWith]->VPlang`. Inverse: {@link VC.VPlang.relUsedInLibrary}. */
     get relWrittenWith() {
       return new RelFrom(this, this.graph.edges.libraryRelWrittenWith);
     }
@@ -3587,23 +3598,23 @@
     get relations() {
       return new Map(Object.keys(_VLicenseBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `(this:VLicense)-[licenseRelApps]->VApp`. Inverse: {@link VApp.relLicenses}. */
+    /** Apps `(this:VLicense)-[licenseRelApps]->VApp`. Inverse: {@link VC.VApp.relLicenses}. */
     get relApps() {
       return new RelFrom(this, this.graph.edges.licenseRelApps);
     }
-    /** Libraries `(this:VLicense)-[licenseRelLibraries]->VLibrary`. Inverse: {@link VLibrary.relLicenses}. */
+    /** Libraries `(this:VLicense)-[licenseRelLibraries]->VLibrary`. Inverse: {@link VC.VLibrary.relLicenses}. */
     get relLibraries() {
       return new RelFrom(this, this.graph.edges.licenseRelLibraries);
     }
-    /** Plangs `(this:VLicense)-[licenseRelPlangs]->VPlang`. Inverse: {@link VPlang.relLicenses}. */
+    /** Plangs `(this:VLicense)-[licenseRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relLicenses}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.licenseRelPlangs);
     }
-    /** Subsystems `(this:VLicense)-[licenseRelSubsystems]->VSubsystem`. Inverse: {@link VSubsystem.relLicenses}. */
+    /** Subsystems `(this:VLicense)-[licenseRelSubsystems]->VSubsystem`. Inverse: {@link VC.VSubsystem.relLicenses}. */
     get relSubsystems() {
       return new RelFrom(this, this.graph.edges.licenseRelSubsystems);
     }
-    /** Tools `(this:VLicense)-[licenseRelTools]->VTool`. Inverse: {@link VTool.relLicenses}. */
+    /** Tools `(this:VLicense)-[licenseRelTools]->VTool`. Inverse: {@link VC.VTool.relLicenses}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.licenseRelTools);
     }
@@ -3632,7 +3643,7 @@
     get relations() {
       return new Map(Object.keys(_VParadigmBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Plangs `VPlang-[plangRelParadigms]->(this:VParadigm)`. Inverse: {@link VPlang.relParadigms}. */
+    /** Plangs `VPlang-[plangRelParadigms]->(this:VParadigm)`. Inverse: {@link VC.VPlang.relParadigms}. */
     get relPlangs() {
       return new RelTo(this, this.graph.edges.plangRelParadigms);
     }
@@ -3687,103 +3698,103 @@
     get relations() {
       return new Map(Object.keys(_VPlangBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `VApp-[appRelWrittenWith]->(this:VPlang)`. Inverse: {@link VApp.relWrittenWith}. */
+    /** Apps `VApp-[appRelWrittenWith]->(this:VPlang)`. Inverse: {@link VC.VApp.relWrittenWith}. */
     get relApps() {
       return new RelTo(this, this.graph.edges.appRelWrittenWith);
     }
-    /** Bundles `VBundle-[bundleRelPlangs]->(this:VPlang)`. Inverse: {@link VBundle.relPlangs}. */
+    /** Bundles `VBundle-[bundleRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VBundle.relPlangs}. */
     get relBundles() {
       return new RelTo(this, this.graph.edges.bundleRelPlangs);
     }
-    /** Communities `VCommunity-[communityRelPlangs]->(this:VPlang)`. Inverse: {@link VCommunity.relPlangs}. */
+    /** Communities `VCommunity-[communityRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VCommunity.relPlangs}. */
     get relCommunities() {
       return new RelTo(this, this.graph.edges.communityRelPlangs);
     }
-    /** Transpiling Targets `(this:VPlang)-[plangRelCompilesTo]->VPlang`. Inverse: {@link VPlang.relTargetOf}. */
+    /** Transpiling Targets `(this:VPlang)-[plangRelCompilesTo]->VPlang`. Inverse: {@link VC.VPlang.relTargetOf}. */
     get relCompilesTo() {
       return new RelFrom(this, this.graph.edges.plangRelCompilesTo);
     }
-    /** Dialect of `(this:VPlang)-[plangRelDialectOf]->VPlang`. Inverse: {@link VPlang.relDialects}. */
+    /** Dialect of `(this:VPlang)-[plangRelDialectOf]->VPlang`. Inverse: {@link VC.VPlang.relDialects}. */
     get relDialectOf() {
       return new RelFrom(this, this.graph.edges.plangRelDialectOf);
     }
-    /** Dialects `VPlang-[plangRelDialectOf]->(this:VPlang)`. Inverse: {@link VPlang.relDialectOf}. */
+    /** Dialects `VPlang-[plangRelDialectOf]->(this:VPlang)`. Inverse: {@link VC.VPlang.relDialectOf}. */
     get relDialects() {
       return new RelTo(this, this.graph.edges.plangRelDialectOf);
     }
-    /** Implemented By `VPlang-[plangRelImplements]->(this:VPlang)`. Inverse: {@link VPlang.relImplements}. */
+    /** Implemented By `VPlang-[plangRelImplements]->(this:VPlang)`. Inverse: {@link VC.VPlang.relImplements}. */
     get relImplementedBy() {
       return new RelTo(this, this.graph.edges.plangRelImplements);
     }
-    /** Implements `(this:VPlang)-[plangRelImplements]->VPlang`. Inverse: {@link VPlang.relImplementedBy}. */
+    /** Implements `(this:VPlang)-[plangRelImplements]->VPlang`. Inverse: {@link VC.VPlang.relImplementedBy}. */
     get relImplements() {
       return new RelFrom(this, this.graph.edges.plangRelImplements);
     }
-    /** Influenced `VPlang-[plangRelInfluencedBy]->(this:VPlang)`. Inverse: {@link VPlang.relInfluencedBy}. */
+    /** Influenced `VPlang-[plangRelInfluencedBy]->(this:VPlang)`. Inverse: {@link VC.VPlang.relInfluencedBy}. */
     get relInfluenced() {
       return new RelTo(this, this.graph.edges.plangRelInfluencedBy);
     }
-    /** Influenced By `(this:VPlang)-[plangRelInfluencedBy]->VPlang`. Inverse: {@link VPlang.relInfluenced}. */
+    /** Influenced By `(this:VPlang)-[plangRelInfluencedBy]->VPlang`. Inverse: {@link VC.VPlang.relInfluenced}. */
     get relInfluencedBy() {
       return new RelFrom(this, this.graph.edges.plangRelInfluencedBy);
     }
-    /** Learning Resources `VLearning-[learningRelPlangs]->(this:VPlang)`. Inverse: {@link VLearning.relPlangs}. */
+    /** Learning Resources `VLearning-[learningRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VLearning.relPlangs}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelPlangs);
     }
-    /** Libraries `VLibrary-[libraryRelPlangs]->(this:VPlang)`. Inverse: {@link VLibrary.relPlangs}. */
+    /** Libraries `VLibrary-[libraryRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VLibrary.relPlangs}. */
     get relLibraries() {
       return new RelTo(this, this.graph.edges.libraryRelPlangs);
     }
-    /** Licenses `VLicense-[licenseRelPlangs]->(this:VPlang)`. Inverse: {@link VLicense.relPlangs}. */
+    /** Licenses `VLicense-[licenseRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VLicense.relPlangs}. */
     get relLicenses() {
       return new RelTo(this, this.graph.edges.licenseRelPlangs);
     }
-    /** Paradigms `(this:VPlang)-[plangRelParadigms]->VParadigm`. Inverse: {@link VParadigm.relPlangs}. */
+    /** Paradigms `(this:VPlang)-[plangRelParadigms]->VParadigm`. Inverse: {@link VC.VParadigm.relPlangs}. */
     get relParadigms() {
       return new RelFrom(this, this.graph.edges.plangRelParadigms);
     }
-    /** Platforms `(this:VPlang)-[plangRelPlatforms]->VPlatform`. Inverse: {@link VPlatform.relPlangs}. */
+    /** Platforms `(this:VPlang)-[plangRelPlatforms]->VPlatform`. Inverse: {@link VC.VPlatform.relPlangs}. */
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.plangRelPlatforms);
     }
-    /** Posts `VPost-[postRelPlangs]->(this:VPlang)`. Inverse: {@link VPost.relPlangs}. */
+    /** Posts `VPost-[postRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VPost.relPlangs}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelPlangs);
     }
-    /** Subsystems `VSubsystem-[subsystemRelWrittenWith]->(this:VPlang)`. Inverse: {@link VSubsystem.relWrittenWith}. */
+    /** Subsystems `VSubsystem-[subsystemRelWrittenWith]->(this:VPlang)`. Inverse: {@link VC.VSubsystem.relWrittenWith}. */
     get relSubsystems() {
       return new RelTo(this, this.graph.edges.subsystemRelWrittenWith);
     }
-    /** Tags `VTag-[tagRelPlangs]->(this:VPlang)`. Inverse: {@link VTag.relPlangs}. */
+    /** Tags `VTag-[tagRelPlangs]->(this:VPlang)`. Inverse: {@link VC.VTag.relPlangs}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelPlangs);
     }
-    /** Source Plangs `VPlang-[plangRelCompilesTo]->(this:VPlang)`. Inverse: {@link VPlang.relCompilesTo}. */
+    /** Source Plangs `VPlang-[plangRelCompilesTo]->(this:VPlang)`. Inverse: {@link VC.VPlang.relCompilesTo}. */
     get relTargetOf() {
       return new RelTo(this, this.graph.edges.plangRelCompilesTo);
     }
-    /** Tools `(this:VPlang)-[plangRelTools]->VTool`. Inverse: {@link VTool.relPlangs}. */
+    /** Tools `(this:VPlang)-[plangRelTools]->VTool`. Inverse: {@link VC.VTool.relPlangs}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.plangRelTools);
     }
-    /** Tool Plang `VTool-[toolRelWrittenWith]->(this:VPlang)`. Inverse: {@link VTool.relWrittenWith}. */
+    /** Tool Plang `VTool-[toolRelWrittenWith]->(this:VPlang)`. Inverse: {@link VC.VTool.relWrittenWith}. */
     get relToolsUsing() {
       return new RelTo(this, this.graph.edges.toolRelWrittenWith);
     }
-    /** Type Systems `(this:VPlang)-[plangRelTypeSystems]->VTypeSystem`. Inverse: {@link VTypeSystem.relPlangs}. */
+    /** Type Systems `(this:VPlang)-[plangRelTypeSystems]->VTypeSystem`. Inverse: {@link VC.VTypeSystem.relPlangs}. */
     get relTypeSystems() {
       return new RelFrom(this, this.graph.edges.plangRelTypeSystems);
     }
-    /** Used for Libraries `VLibrary-[libraryRelWrittenWith]->(this:VPlang)`. Inverse: {@link VLibrary.relWrittenWith}. */
+    /** Used for Libraries `VLibrary-[libraryRelWrittenWith]->(this:VPlang)`. Inverse: {@link VC.VLibrary.relWrittenWith}. */
     get relUsedInLibrary() {
       return new RelTo(this, this.graph.edges.libraryRelWrittenWith);
     }
-    /** Used to Write `VPlang-[plangRelWrittenWith]->(this:VPlang)`. Inverse: {@link VPlang.relWrittenWith}. */
+    /** Used to Write `VPlang-[plangRelWrittenWith]->(this:VPlang)`. Inverse: {@link VC.VPlang.relWrittenWith}. */
     get relUsedToWrite() {
       return new RelTo(this, this.graph.edges.plangRelWrittenWith);
     }
-    /** Written With `(this:VPlang)-[plangRelWrittenWith]->VPlang`. Inverse: {@link VPlang.relUsedToWrite}. */
+    /** Written With `(this:VPlang)-[plangRelWrittenWith]->VPlang`. Inverse: {@link VC.VPlang.relUsedToWrite}. */
     get relWrittenWith() {
       return new RelFrom(this, this.graph.edges.plangRelWrittenWith);
     }
@@ -3818,23 +3829,23 @@
     get relations() {
       return new Map(Object.keys(_VPlatformBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `VApp-[appRelPlatforms]->(this:VPlatform)`. Inverse: {@link VApp.relPlatforms}. */
+    /** Apps `VApp-[appRelPlatforms]->(this:VPlatform)`. Inverse: {@link VC.VApp.relPlatforms}. */
     get relApps() {
       return new RelTo(this, this.graph.edges.appRelPlatforms);
     }
-    /** Libraries `VLibrary-[libraryRelPlatforms]->(this:VPlatform)`. Inverse: {@link VLibrary.relPlatforms}. */
+    /** Libraries `VLibrary-[libraryRelPlatforms]->(this:VPlatform)`. Inverse: {@link VC.VLibrary.relPlatforms}. */
     get relLibraries() {
       return new RelTo(this, this.graph.edges.libraryRelPlatforms);
     }
-    /** Plangs `VPlang-[plangRelPlatforms]->(this:VPlatform)`. Inverse: {@link VPlang.relPlatforms}. */
+    /** Plangs `VPlang-[plangRelPlatforms]->(this:VPlatform)`. Inverse: {@link VC.VPlang.relPlatforms}. */
     get relPlangs() {
       return new RelTo(this, this.graph.edges.plangRelPlatforms);
     }
-    /** Subsystems `VSubsystem-[subsystemRelPlatforms]->(this:VPlatform)`. Inverse: {@link VSubsystem.relPlatforms}. */
+    /** Subsystems `VSubsystem-[subsystemRelPlatforms]->(this:VPlatform)`. Inverse: {@link VC.VSubsystem.relPlatforms}. */
     get relSubsystems() {
       return new RelTo(this, this.graph.edges.subsystemRelPlatforms);
     }
-    /** Tools `VTool-[toolRelPlatforms]->(this:VPlatform)`. Inverse: {@link VTool.relPlatforms}. */
+    /** Tools `VTool-[toolRelPlatforms]->(this:VPlatform)`. Inverse: {@link VC.VTool.relPlatforms}. */
     get relTools() {
       return new RelTo(this, this.graph.edges.toolRelPlatforms);
     }
@@ -3871,31 +3882,31 @@
     get relations() {
       return new Map(Object.keys(_VPostBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps `(this:VPost)-[postRelApps]->VApp`. Inverse: {@link VApp.relPosts}. */
+    /** Apps `(this:VPost)-[postRelApps]->VApp`. Inverse: {@link VC.VApp.relPosts}. */
     get relApps() {
       return new RelFrom(this, this.graph.edges.postRelApps);
     }
-    /** Communities `(this:VPost)-[postRelCommunities]->VCommunity`. Inverse: {@link VCommunity.relPosts}. */
+    /** Communities `(this:VPost)-[postRelCommunities]->VCommunity`. Inverse: {@link VC.VCommunity.relPosts}. */
     get relCommunities() {
       return new RelFrom(this, this.graph.edges.postRelCommunities);
     }
-    /** Learning Resources `(this:VPost)-[postRelLearning]->VLearning`. Inverse: {@link VLearning.relPosts}. */
+    /** Learning Resources `(this:VPost)-[postRelLearning]->VLearning`. Inverse: {@link VC.VLearning.relPosts}. */
     get relLearning() {
       return new RelFrom(this, this.graph.edges.postRelLearning);
     }
-    /** Libraries `(this:VPost)-[postRelLibraries]->VLibrary`. Inverse: {@link VLibrary.relPosts}. */
+    /** Libraries `(this:VPost)-[postRelLibraries]->VLibrary`. Inverse: {@link VC.VLibrary.relPosts}. */
     get relLibraries() {
       return new RelFrom(this, this.graph.edges.postRelLibraries);
     }
-    /** Plangs `(this:VPost)-[postRelPlangs]->VPlang`. Inverse: {@link VPlang.relPosts}. */
+    /** Plangs `(this:VPost)-[postRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relPosts}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.postRelPlangs);
     }
-    /** Subsystems `(this:VPost)-[postRelSubsystems]->VSubsystem`. Inverse: {@link VSubsystem.relPosts}. */
+    /** Subsystems `(this:VPost)-[postRelSubsystems]->VSubsystem`. Inverse: {@link VC.VSubsystem.relPosts}. */
     get relSubsystems() {
       return new RelFrom(this, this.graph.edges.postRelSubsystems);
     }
-    /** Tools `(this:VPost)-[postRelTools]->VTool`. Inverse: {@link VTool.relPosts}. */
+    /** Tools `(this:VPost)-[postRelTools]->VTool`. Inverse: {@link VC.VTool.relPosts}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.postRelTools);
     }
@@ -3932,31 +3943,31 @@
     get relations() {
       return new Map(Object.keys(_VSubsystemBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Communities `VCommunity-[communityRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VCommunity.relSubsystems}. */
+    /** Communities `VCommunity-[communityRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VC.VCommunity.relSubsystems}. */
     get relCommunities() {
       return new RelTo(this, this.graph.edges.communityRelSubsystems);
     }
-    /** Learning Resources `VLearning-[learningRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VLearning.relSubsystems}. */
+    /** Learning Resources `VLearning-[learningRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VC.VLearning.relSubsystems}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelSubsystems);
     }
-    /** Licenses `VLicense-[licenseRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VLicense.relSubsystems}. */
+    /** Licenses `VLicense-[licenseRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VC.VLicense.relSubsystems}. */
     get relLicenses() {
       return new RelTo(this, this.graph.edges.licenseRelSubsystems);
     }
-    /** Platforms `(this:VSubsystem)-[subsystemRelPlatforms]->VPlatform`. Inverse: {@link VPlatform.relSubsystems}. */
+    /** Platforms `(this:VSubsystem)-[subsystemRelPlatforms]->VPlatform`. Inverse: {@link VC.VPlatform.relSubsystems}. */
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.subsystemRelPlatforms);
     }
-    /** Posts `VPost-[postRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VPost.relSubsystems}. */
+    /** Posts `VPost-[postRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VC.VPost.relSubsystems}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelSubsystems);
     }
-    /** Tags `VTag-[tagRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VTag.relSubsystems}. */
+    /** Tags `VTag-[tagRelSubsystems]->(this:VSubsystem)`. Inverse: {@link VC.VTag.relSubsystems}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelSubsystems);
     }
-    /** Plangs `(this:VSubsystem)-[subsystemRelWrittenWith]->VPlang`. Inverse: {@link VPlang.relSubsystems}. */
+    /** Plangs `(this:VSubsystem)-[subsystemRelWrittenWith]->VPlang`. Inverse: {@link VC.VPlang.relSubsystems}. */
     get relWrittenWith() {
       return new RelFrom(this, this.graph.edges.subsystemRelWrittenWith);
     }
@@ -3993,31 +4004,31 @@
     get relations() {
       return new Map(Object.keys(_VTagBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Apps tagged `(this:VTag)-[tagRelApps]->VApp`. Inverse: {@link VApp.relTags}. */
+    /** Apps tagged `(this:VTag)-[tagRelApps]->VApp`. Inverse: {@link VC.VApp.relTags}. */
     get relApps() {
       return new RelFrom(this, this.graph.edges.tagRelApps);
     }
-    /** Communities `(this:VTag)-[tagRelCommunities]->VCommunity`. Inverse: {@link VCommunity.relTags}. */
+    /** Communities `(this:VTag)-[tagRelCommunities]->VCommunity`. Inverse: {@link VC.VCommunity.relTags}. */
     get relCommunities() {
       return new RelFrom(this, this.graph.edges.tagRelCommunities);
     }
-    /** Learning Resources `(this:VTag)-[tagRelLearning]->VLearning`. Inverse: {@link VLearning.relTags}. */
+    /** Learning Resources `(this:VTag)-[tagRelLearning]->VLearning`. Inverse: {@link VC.VLearning.relTags}. */
     get relLearning() {
       return new RelFrom(this, this.graph.edges.tagRelLearning);
     }
-    /** Libraries `(this:VTag)-[tagRelLibraries]->VLibrary`. Inverse: {@link VLibrary.relTags}. */
+    /** Libraries `(this:VTag)-[tagRelLibraries]->VLibrary`. Inverse: {@link VC.VLibrary.relTags}. */
     get relLibraries() {
       return new RelFrom(this, this.graph.edges.tagRelLibraries);
     }
-    /** Plangs `(this:VTag)-[tagRelPlangs]->VPlang`. Inverse: {@link VPlang.relTags}. */
+    /** Plangs `(this:VTag)-[tagRelPlangs]->VPlang`. Inverse: {@link VC.VPlang.relTags}. */
     get relPlangs() {
       return new RelFrom(this, this.graph.edges.tagRelPlangs);
     }
-    /** Subsystems `(this:VTag)-[tagRelSubsystems]->VSubsystem`. Inverse: {@link VSubsystem.relTags}. */
+    /** Subsystems `(this:VTag)-[tagRelSubsystems]->VSubsystem`. Inverse: {@link VC.VSubsystem.relTags}. */
     get relSubsystems() {
       return new RelFrom(this, this.graph.edges.tagRelSubsystems);
     }
-    /** Tools `(this:VTag)-[tagRelTools]->VTool`. Inverse: {@link VTool.relTags}. */
+    /** Tools `(this:VTag)-[tagRelTools]->VTool`. Inverse: {@link VC.VTool.relTags}. */
     get relTools() {
       return new RelFrom(this, this.graph.edges.tagRelTools);
     }
@@ -4056,39 +4067,39 @@
     get relations() {
       return new Map(Object.keys(_VToolBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Bundles `VBundle-[bundleRelTools]->(this:VTool)`. Inverse: {@link VBundle.relTools}. */
+    /** Bundles `VBundle-[bundleRelTools]->(this:VTool)`. Inverse: {@link VC.VBundle.relTools}. */
     get relBundles() {
       return new RelTo(this, this.graph.edges.bundleRelTools);
     }
-    /** Communities `VCommunity-[communityRelTools]->(this:VTool)`. Inverse: {@link VCommunity.relTools}. */
+    /** Communities `VCommunity-[communityRelTools]->(this:VTool)`. Inverse: {@link VC.VCommunity.relTools}. */
     get relCommunities() {
       return new RelTo(this, this.graph.edges.communityRelTools);
     }
-    /** Learning Resources `VLearning-[learningRelTools]->(this:VTool)`. Inverse: {@link VLearning.relTools}. */
+    /** Learning Resources `VLearning-[learningRelTools]->(this:VTool)`. Inverse: {@link VC.VLearning.relTools}. */
     get relLearning() {
       return new RelTo(this, this.graph.edges.learningRelTools);
     }
-    /** Licenses `VLicense-[licenseRelTools]->(this:VTool)`. Inverse: {@link VLicense.relTools}. */
+    /** Licenses `VLicense-[licenseRelTools]->(this:VTool)`. Inverse: {@link VC.VLicense.relTools}. */
     get relLicenses() {
       return new RelTo(this, this.graph.edges.licenseRelTools);
     }
-    /** Plangs `VPlang-[plangRelTools]->(this:VTool)`. Inverse: {@link VPlang.relTools}. */
+    /** Plangs `VPlang-[plangRelTools]->(this:VTool)`. Inverse: {@link VC.VPlang.relTools}. */
     get relPlangs() {
       return new RelTo(this, this.graph.edges.plangRelTools);
     }
-    /** Platforms `(this:VTool)-[toolRelPlatforms]->VPlatform`. Inverse: {@link VPlatform.relTools}. */
+    /** Platforms `(this:VTool)-[toolRelPlatforms]->VPlatform`. Inverse: {@link VC.VPlatform.relTools}. */
     get relPlatforms() {
       return new RelFrom(this, this.graph.edges.toolRelPlatforms);
     }
-    /** Posts `VPost-[postRelTools]->(this:VTool)`. Inverse: {@link VPost.relTools}. */
+    /** Posts `VPost-[postRelTools]->(this:VTool)`. Inverse: {@link VC.VPost.relTools}. */
     get relPosts() {
       return new RelTo(this, this.graph.edges.postRelTools);
     }
-    /** Tags `VTag-[tagRelTools]->(this:VTool)`. Inverse: {@link VTag.relTools}. */
+    /** Tags `VTag-[tagRelTools]->(this:VTool)`. Inverse: {@link VC.VTag.relTools}. */
     get relTags() {
       return new RelTo(this, this.graph.edges.tagRelTools);
     }
-    /** Implemented With `(this:VTool)-[toolRelWrittenWith]->VPlang`. Inverse: {@link VPlang.relToolsUsing}. */
+    /** Implemented With `(this:VTool)-[toolRelWrittenWith]->VPlang`. Inverse: {@link VC.VPlang.relToolsUsing}. */
     get relWrittenWith() {
       return new RelFrom(this, this.graph.edges.toolRelWrittenWith);
     }
@@ -4117,7 +4128,7 @@
     get relations() {
       return new Map(Object.keys(_VTypeSystemBase.relConfig).map((rel2) => [rel2, this[rel2]]));
     }
-    /** Plangs `VPlang-[plangRelTypeSystems]->(this:VTypeSystem)`. Inverse: {@link VPlang.relTypeSystems}. */
+    /** Plangs `VPlang-[plangRelTypeSystems]->(this:VTypeSystem)`. Inverse: {@link VC.VPlang.relTypeSystems}. */
     get relPlangs() {
       return new RelTo(this, this.graph.edges.plangRelTypeSystems);
     }
@@ -4127,16 +4138,16 @@
   var rel = PlangsGraphBase.relConfig;
   var prop = PlangsGraphBase.propConfig;
   var PlangsGraph = class extends PlangsGraphBase {
-    /**
-     * We can derive / infer some data from the existing data.
-     * We may implement some sort of inference engine in the future,
-     * but for now we can just materialize some simple rules.
-     */
+    /** We can derive / infer some data from the existing data. */
     materialize() {
-      for (const pl of this.plang.values) pl.relImplements.add(pl.key);
       for (const bundle of this.bundle.values) {
         for (const tool of bundle.relTools.values) {
           bundle.relPlangs.add(...tool.relPlangs.keys);
+        }
+      }
+      for (const plang of this.plang.values) {
+        if (!plang.isTranspiler && plang.relCompilesTo.size > 0) {
+          plang.data.isTranspiler = true;
         }
       }
       return this;

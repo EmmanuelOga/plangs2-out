@@ -599,8 +599,8 @@
   .m-0\.5 {
     margin: calc(var(--spacing) * 0.5);
   }
-  .m-1 {
-    margin: calc(var(--spacing) * 1);
+  .m-2 {
+    margin: calc(var(--spacing) * 2);
   }
   .mx-auto {
     margin-inline: auto;
@@ -1390,9 +1390,6 @@
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
-  .px-1\.5 {
-    padding-inline: calc(var(--spacing) * 1.5);
-  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -1651,6 +1648,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-hiliteb);
+      }
+    }
+  }
+  .hover\:bg-hiliteb\/10 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-hiliteb) 10%, transparent);
       }
     }
   }
