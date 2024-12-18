@@ -1248,7 +1248,7 @@
   var stapi = typeof localStorage === "undefined" ? void 0 : localStorage;
   var doc2 = typeof document === "undefined" ? void 0 : document;
   var getStore = (page) => new Store(page);
-  var getCurrentPage = () => doc2 ? doc2.body.dataset.page : "_any_page_";
+  var getCurrentPage = () => (doc2 ? doc2.body.dataset.page : void 0) ?? "_any_page_";
   var getCurrentPageStore = () => getStore(getCurrentPage());
   var Store = class {
     constructor(page) {
@@ -1573,6 +1573,11 @@
   // packages/frontend/src/components/vertex-info/vertex-info.tsx
   function VertexInfo({ detail, open, page }) {
     const self = A2(null);
+    const store = getCurrentPageStore();
+    const updateOpen = () => {
+      const elem2 = self.current?.querySelector("details");
+      if (elem2) store.update("vertex-detail-open", !elem2.open);
+    };
     y3(() => {
       if (!self.current) return;
       self.current.querySelector("h2")?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -1608,7 +1613,7 @@
         ] })
       ] }),
       detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
-        /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
+        /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
         /* @__PURE__ */ u4("div", { class: tw(forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
           detail.general.length > 0 && /* @__PURE__ */ u4(RelationCell, { title: "General", children: detail.general.map((value) => /* @__PURE__ */ u4(Pill, { children: value }, value)) }),
           detail.relations.map(([title, vertices]) => /* @__PURE__ */ u4(RelationCell, { title, children: vertices.map((vertex) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex.href, children: vertex.name }) }, vertex.name)) }, title))
@@ -1653,9 +1658,20 @@
   }
 
   // packages/frontend/src/components/vertex-info/index.tsx
-  function renderVertexInfo({ vertex }) {
+  function renderVertexInfo(vertex) {
+    const page = getCurrentPage();
+    const store = getCurrentPageStore();
     for (const elem2 of elems("vertexInfo")) {
-      D(/* @__PURE__ */ u4(VertexInfo, { detail: vertex.detail, page: elem2.dataset.page, open: elem2.dataset.open === "true" }), elem2);
+      let detail = vertex?.detail;
+      let open = elem2.dataset.open === "true";
+      if (detail) {
+        store.update("vertex-detail", detail);
+        store.update("vertex-detail-open", open);
+      } else {
+        open = store.load("vertex-detail-open") ?? open ?? true;
+        detail = store.load("vertex-detail");
+      }
+      D(/* @__PURE__ */ u4(VertexInfo, { detail, page, open }), elem2);
     }
   }
 
@@ -4794,7 +4810,7 @@
         if (!grid) return;
         on(grid, "pointerdown", ({ target }) => {
           const vertex = getClosestVertex(pg, target);
-          if (vertex) renderVertexInfo({ vertex });
+          renderVertexInfo(vertex);
         });
         for (const img of elems("vertexThumbnImg")) {
           const src = img.dataset.src;
@@ -4819,8 +4835,6 @@
   window.restoreFilters = () => ToggleFacetsMenu.initial().runEffects();
   window.restoreHamburguer = () => ToggleHamburguer.initial().runEffects();
   window.restoreLightMode = () => ToggleLights.initial().runEffects();
-  window.restoreVertexInfo = () => {
-    console.log("TODO!");
-  };
+  window.restoreVertexInfo = () => renderVertexInfo();
 })();
 //# sourceMappingURL=app.js.map
