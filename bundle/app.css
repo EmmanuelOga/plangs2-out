@@ -1429,18 +1429,6 @@
   .align-middle {
     vertical-align: middle;
   }
-  .text-2xl {
-    font-size: var(--text-2xl);
-    line-height: var(--tw-leading, var(--text-2xl--line-height));
-  }
-  .text-2xl\! {
-    font-size: var(--text-2xl) !important;
-    line-height: var(--tw-leading, var(--text-2xl--line-height)) !important;
-  }
-  .text-3xl {
-    font-size: var(--text-3xl);
-    line-height: var(--tw-leading, var(--text-3xl--line-height));
-  }
   .text-xl {
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
@@ -1588,12 +1576,6 @@
   .prose-green {
     --tw-prose-links: oklch(0.627 0.194 149.214);
     --tw-prose-invert-links: oklch(0.723 0.219 149.579);
-  }
-  .not-prose-a\:text-2xl {
-    &:not(* :is(:where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)))) {
-      font-size: var(--text-2xl);
-      line-height: var(--tw-leading, var(--text-2xl--line-height));
-    }
   }
   .group-hover\:text-hiliteb {
     &:is(:where(.group):hover *) {
@@ -2810,7 +2792,7 @@
         max-width: 38rem;
       }
       .grid-info {
-        width: 25dvh;
+        width: 25dvw;
       }
     }
   }
