@@ -806,6 +806,10 @@
 
   // packages/auxiliar/src/misc.ts
   var ret = (item, action) => action(item);
+  var tap = (item, action) => {
+    action(item);
+    return item;
+  };
   function isEmpty(obj) {
     for (const prop2 in obj) {
       if (Object.hasOwn(obj, prop2)) return false;
@@ -1241,24 +1245,36 @@
   ] });
 
   // packages/frontend/src/auxiliar/storage.ts
-  function storeKey(page, key, postfix) {
-    if (postfix) return `site-${page}-${key}-${postfix}`;
-    return `site-${page}-${key}`;
-  }
   var stapi = typeof localStorage === "undefined" ? void 0 : localStorage;
-  function storeUpdate(key, data2) {
-    stapi?.setItem(key, JSON.stringify(data2));
-  }
-  function storeLoad(key) {
-    const jsonString = stapi?.getItem(key);
-    if (!jsonString) return void 0;
-    try {
-      return JSON.parse(jsonString);
-    } catch (e3) {
-      console.error("Failed to load data from localStorage", { key, jsonString, e: e3 });
-      stapi?.removeItem(key);
+  var doc2 = typeof document === "undefined" ? void 0 : document;
+  var getStore = (page) => new Store(page);
+  var getCurrentPage = () => doc2 ? doc2.body.dataset.page : "_any_page_";
+  var getCurrentPageStore = () => getStore(getCurrentPage());
+  var Store = class {
+    constructor(page) {
+      this.page = page;
     }
-  }
+    // biome-ignore lint/suspicious/noExplicitAny: JSON can serialize any data.
+    update(key, data2) {
+      const fk = this.fullKey(key);
+      stapi?.setItem(fk, JSON.stringify(data2));
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: JSON can deserialize any data.
+    load(key) {
+      const fk = this.fullKey(key);
+      const jsonString = stapi?.getItem(fk);
+      if (!jsonString) return void 0;
+      try {
+        return JSON.parse(jsonString);
+      } catch (e3) {
+        console.error("Failed to load data from localStorage", { key: fk, jsonString, e: e3 });
+        stapi?.removeItem(fk);
+      }
+    }
+    fullKey(key) {
+      return `plangs-${this.page}-${key}`;
+    }
+  };
 
   // packages/frontend/src/components/icon-button/state.tsx
   function useIconButtonState({ action, disabled, initial }) {
@@ -1282,9 +1298,10 @@
       return data2;
     }
   };
+  var STORE = getStore("_any_page_");
   var ToggleLights = class _ToggleLights extends IconButtonBaseState {
     static initial(disabled = false) {
-      const theme = storeLoad(storeKey("_any_page_", "theme"));
+      const theme = STORE.load("theme");
       return new _ToggleLights({ mode: theme === "light" ? "light" : "dark", disabled });
     }
     get isDark() {
@@ -1298,12 +1315,12 @@
     }
     runEffects() {
       document.body.classList.toggle("dark", this.isDark);
-      storeUpdate(storeKey("_any_page_", "theme"), this.data.mode);
+      STORE.update("theme", this.data.mode);
     }
   };
   var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = storeLoad(storeKey("_any_page_", "hamburger-menu"));
+      const mode = STORE.load("hamburger-menu");
       return new _ToggleHamburguer({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get hide() {
@@ -1317,12 +1334,12 @@
     }
     runEffects() {
       elem("mainNav")?.classList.toggle("hidden", this.hide);
-      storeUpdate(storeKey("_any_page_", "hamburger-menu"), this.data.mode);
+      STORE.update("hamburger-menu", this.data.mode);
     }
   };
   var ToggleFacetsMenu = class _ToggleFacetsMenu extends IconButtonBaseState {
     static initial(disabled = false) {
-      const mode = storeLoad(storeKey("_any_page_", "facets-browser"));
+      const mode = getCurrentPageStore().load("facets-browser");
       return new _ToggleFacetsMenu({ mode: mode === "show" ? "show" : "hide", disabled });
     }
     get show() {
@@ -1349,7 +1366,7 @@
     runEffects() {
       const fm = elems("facetsMain");
       if (fm.length > 0) fm[0].classList.toggle("hidden", !this.show);
-      storeUpdate(storeKey("_any_page_", "facets-browser"), this.data.mode);
+      getCurrentPageStore().update("facets-browser", this.data.mode);
     }
   };
   var ToggleAllAny = class _ToggleAllAny extends IconButtonBaseState {
@@ -1489,11 +1506,11 @@
 
   // packages/server/src/components/vertex-thumbn.tsx
   var PLACEHOLDER = "/images/placeholder.png";
-  function VertexThumbn({ vertex, onlyImg, class: klass }) {
+  function VertexThumbn({ detail, onlyImg, class: klass }) {
     return /* @__PURE__ */ u4(
       "div",
       {
-        ...dataset({ "vertex-key": vertex.key, "vertex-name": vertex.vertexName, "vertex-ranking": vertex.ranking }),
+        ...dataset({ "vertex-key": detail.key, "vertex-name": detail.vertexName, "vertex-ranking": detail.ranking }),
         class: tw(
           cssClass("vertexThumbn"),
           "group",
@@ -1503,7 +1520,7 @@
           klass
         ),
         children: [
-          !onlyImg && /* @__PURE__ */ u4("div", { class: "truncate text-center", children: /* @__PURE__ */ u4("a", { class: "text-foreground group-hover:text-primary", href: vertex.href, children: vertex.name }) }),
+          !onlyImg && /* @__PURE__ */ u4("div", { class: "truncate text-center", children: /* @__PURE__ */ u4("a", { class: "text-foreground group-hover:text-primary", href: detail.href, children: detail.name }) }),
           /* @__PURE__ */ u4(
             "div",
             {
@@ -1521,17 +1538,17 @@
                   "img",
                   {
                     loading: "lazy",
-                    src: onlyImg ? vertex.thumbUrl ?? PLACEHOLDER : PLACEHOLDER,
-                    alt: vertex.name,
-                    "data-src": vertex.thumbUrl ?? "",
+                    src: onlyImg ? detail.thumbUrl ?? PLACEHOLDER : PLACEHOLDER,
+                    alt: detail.name,
+                    "data-src": detail.thumbUrl ?? "",
                     class: tw(cssClass("vertexThumbnImg"), "max-h-full max-w-full object-contain")
                   }
                 ),
-                "ranking" in vertex && vertex.ranking && /* @__PURE__ */ u4(
+                "ranking" in detail && detail.ranking && /* @__PURE__ */ u4(
                   "a",
                   {
-                    href: `https://tjpalmer.github.io/languish/#names=${encodeURIComponent(vertex.name.toLowerCase())}`,
-                    title: `Languish Ranking: ${vertex.ranking}`,
+                    href: `https://tjpalmer.github.io/languish/#names=${encodeURIComponent(detail.name.toLowerCase())}`,
+                    title: `Languish Ranking: ${detail.ranking}`,
                     class: tw(
                       "block",
                       // ALlow hiding the ranking using a data attribute on the wrapper.
@@ -1542,7 +1559,7 @@
                       HOVER,
                       "hover:border-1 hover:border-primary hover:opacity-100"
                     ),
-                    children: vertex.ranking
+                    children: detail.ranking
                   }
                 )
               ]
@@ -1554,52 +1571,55 @@
   }
 
   // packages/frontend/src/components/vertex-info/vertex-info.tsx
-  function VertexInfo({ vertex, open, page }) {
-    const h1Ref = A2(null);
-    y3(() => h1Ref.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
+  function VertexInfo({ detail, open, page }) {
+    const self = A2(null);
+    y3(() => {
+      if (!self.current) return;
+      self.current.querySelector("h2")?.scrollIntoView({ behavior: "smooth", block: "end" });
+      const links = self.current.querySelectorAll(`.${cssClass("externalLink")}`);
+      if (links.length === 0) return;
+      for (const [i6, el] of links.entries()) {
+        el.classList.add("scale-0");
+        setTimeout(() => el.classList.remove("scale-0"), 50 + (links.length - i6) * 50);
+      }
+    });
     const forGrid = GRID_PAGES.has(page);
-    const rels = relations(vertex);
-    return /* @__PURE__ */ u4("div", { class: tw(VSCROLL, forGrid && "p-4", !forGrid && "sm:mb-16", PROSE_BASIC, "max-w-[unset]"), children: [
-      !vertex && /* @__PURE__ */ u4("div", { children: [
+    return /* @__PURE__ */ u4("div", { ref: self, class: tw(VSCROLL, forGrid && "p-4", !forGrid && "sm:mb-16", PROSE_BASIC, "max-w-[unset]"), children: [
+      !detail && /* @__PURE__ */ u4("div", { children: [
         /* @__PURE__ */ u4("h2", { class: tw("mt-0!"), children: "Information" }),
         /* @__PURE__ */ u4("p", { children: [
           /* @__PURE__ */ u4("strong", { class: "text-primary", children: "Click" }),
           " a thumbnail for more info."
         ] })
       ] }),
-      vertex && /* @__PURE__ */ u4("div", { children: [
+      detail && /* @__PURE__ */ u4("div", { children: [
         /* @__PURE__ */ u4("div", { class: "flex flex-row gap-5 align-middle", children: [
-          /* @__PURE__ */ u4("h2", { ref: h1Ref, class: tw("m-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: vertex.href, children: vertex.name }) }),
+          /* @__PURE__ */ u4("h2", { class: tw("m-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: detail.href, children: detail.name }) }),
           /* @__PURE__ */ u4("div", { class: "flex-1" }),
-          ret(vertex.urlHome, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: EXTERN })),
-          ret(vertex.urlGithub, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: GITHUB })),
-          ret(vertex.urlStackov, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: STACKOV })),
-          ret(vertex.urlReddit, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: REDDIT })),
-          ret(vertex.urlWikipedia, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: WIKIPEDIA }))
+          ret(detail.urlHome, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: EXTERN })),
+          ret(detail.urlGithub, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: GITHUB })),
+          ret(detail.urlStackov, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: STACKOV })),
+          ret(detail.urlReddit, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: REDDIT })),
+          ret(detail.urlWikipedia, (url) => url && /* @__PURE__ */ u4(ExternalLink, { href: url, icon: WIKIPEDIA }))
         ] }),
         /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block", "hyphens-auto"), children: [
-          !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { vertex, onlyImg: true, class: "h-[6.5rem] w-[6.5rem]" }) }),
-          forGrid ? vertex.shortDesc : vertex.description
+          !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "h-[6.5rem] w-[6.5rem]" }) }),
+          forGrid ? detail.shortDesc : detail.description
         ] })
       ] }),
-      vertex && rels.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
+      detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
         /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", children: "Details" }),
         /* @__PURE__ */ u4("div", { class: tw(forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
-          /* @__PURE__ */ u4(DetailCell, { title: "General", children: [
-            vertex.created.value && /* @__PURE__ */ u4(Pill, { children: `Appeared ${vertex.created.year}` }),
-            "releases" in vertex && ret(vertex.releases.last, (rel2) => rel2 && /* @__PURE__ */ u4(Pill, { children: `Released ${rel2.date ?? rel2.version}` })),
-            "isTranspiler" in vertex && vertex.isTranspiler && /* @__PURE__ */ u4(Pill, { children: "Transpiler" }),
-            "isPopular" in vertex && vertex.isPopular && /* @__PURE__ */ u4(Pill, { children: "Popular" })
-          ] }),
-          relations(vertex).map(([title, vertices]) => /* @__PURE__ */ u4(DetailCell, { title, children: vertices.map((vertex2) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex2.href, children: vertex2.name }) }, vertex2.key)) }, title))
+          detail.general.length > 0 && /* @__PURE__ */ u4(RelationCell, { title: "General", children: detail.general.map((value) => /* @__PURE__ */ u4(Pill, { children: value }, value)) }),
+          detail.relations.map(([title, vertices]) => /* @__PURE__ */ u4(RelationCell, { title, children: vertices.map((vertex) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex.href, children: vertex.name }) }, vertex.name)) }, title))
         ] })
       ] })
     ] });
   }
   function ExternalLink({ href, icon: icon2 }) {
-    return /* @__PURE__ */ u4("a", { href, class: tw("text-primary hover:text-hiliteb"), children: icon2 });
+    return /* @__PURE__ */ u4("a", { href, class: tw(cssClass("externalLink"), "transition-transform", "text-primary hover:text-hiliteb"), children: icon2 });
   }
-  function DetailCell({ title, children }) {
+  function RelationCell({ title, children }) {
     return /* @__PURE__ */ u4(
       "div",
       {
@@ -1631,20 +1651,11 @@
       )
     );
   }
-  function relations(vertex) {
-    const result = [];
-    if (!vertex) return result;
-    for (const rel2 of vertex.relations.values()) {
-      const relValues = rel2.values.filter((related) => related.key !== vertex.key);
-      if (relValues.length > 0) result.push([rel2.desc, relValues]);
-    }
-    return result;
-  }
 
   // packages/frontend/src/components/vertex-info/index.tsx
   function renderVertexInfo({ vertex }) {
     for (const elem2 of elems("vertexInfo")) {
-      D(/* @__PURE__ */ u4(VertexInfo, { vertex, page: elem2.dataset.page, open: elem2.dataset.open === "true" }), elem2);
+      D(/* @__PURE__ */ u4(VertexInfo, { detail: vertex.detail, page: elem2.dataset.page, open: elem2.dataset.open === "true" }), elem2);
     }
   }
 
@@ -1710,6 +1721,9 @@
     // biome-ignore lint/suspicious/noExplicitAny: we can't know for sure the type of the values here.
     static isSerialized(val) {
       return !!val && typeof val === "object" && "mode" in val && (val.mode === "all" || val.mode === "any") && "values" in val && Array.isArray(val.values);
+    }
+    toString() {
+      return `Filter(${this.mode}: ${JSON.stringify([...this.values]).slice(1, -1)})`;
     }
   };
 
@@ -1809,8 +1823,17 @@
     console.log("Attempt to deserialize an unrecognized value shape:", val);
   }
 
+  // packages/auxiliar/src/debounce.ts
+  function debounce(callback, millies) {
+    let timeout;
+    return (...args) => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => callback(...args), millies);
+    };
+  }
+
   // packages/auxiliar/src/map2.ts
-  var Map2 = class {
+  var Map2 = class _Map2 {
     #map = /* @__PURE__ */ new Map();
     has(k1, k22) {
       return this.#map.get(k1)?.has(k22) ?? false;
@@ -1892,6 +1915,14 @@
       }
       return results;
     }
+    /** Return a new Map with filtered entries. */
+    filter(predicate) {
+      const m4 = new _Map2();
+      for (const [k1, map2] of this.#map) {
+        for (const [k22, v4] of map2) if (predicate(k1, k22, v4)) m4.set(k1, k22, v4);
+      }
+      return m4;
+    }
     values() {
       return [...this.#map.values()].flatMap((map) => [...map.values()]);
     }
@@ -1899,39 +1930,183 @@
       const m4 = this.#map.get(k1);
       return m4 ? [...m4.values()] : [];
     }
-    /** Get all values going from first dimension, them map them and return the non-falsey values. */
-    values2Mapped(k1, mapper) {
-      return this.values2(k1).map(mapper).filter((v4) => v4);
-    }
     toString() {
       const entries = [...this.flatEntries()].map(([k1, k22, v4]) => `(${k1}, ${k22}) => ${v4}`);
       return `Map2(size: ${this.size})${entries.length > 0 ? ` { ${entries.join(", ")} }` : ""}`;
     }
   };
 
-  // packages/auxiliar/src/debounce.ts
-  function debounce(callback, millies) {
-    let timeout;
-    return (...args) => {
-      if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => callback(...args), millies);
-    };
-  }
+  // packages/plangs/src/facets/apps.ts
+  var APP_FACET_PREDICATES = {
+    createdRecently: (app, date) => app.created.isRecent(date.value),
+    creationYear: (app, flt) => ret(app.created.strYear, (appYear) => flt.matches((year) => appYear === year)),
+    ghStars: (app, num) => app.github.stars > num.value,
+    licenses: (app, flt) => flt.matches((key) => app.relLicenses.has(key)),
+    name: (app, str) => app.lcName.includes(str.value),
+    platforms: (app, flt) => flt.matches((key) => app.relPlatforms.has(key)),
+    releasedRecently: (app, date) => ret(app.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (app, flt) => flt.matches((key) => app.relTags.has(key)),
+    writtenWith: (app, flt) => flt.matches((key) => app.relWrittenWith.has(key))
+  };
 
-  // packages/frontend/src/facets/main/grid_util.ts
-  function doUpdateThumbns(vertexKeys) {
-    for (const div of elems("vertexThumbn")) {
-      const plKey = div.dataset.vertexKey;
-      const visible = vertexKeys.has(plKey);
-      div.classList.toggle("hidden", !visible);
+  // packages/plangs/src/facets/communities.ts
+  var COMMUNITY_FACET_PREDICATES = {
+    apps: (comm, flt) => flt.matches((key) => comm.relApps.has(key)),
+    createdRecently: (comm, date) => comm.created.isRecent(date.value),
+    creationYear: (comm, flt) => ret(comm.created.strYear, (communityYear) => flt.matches((year) => communityYear === year)),
+    libraries: (comm, flt) => flt.matches((key) => comm.relLibraries.has(key)),
+    name: (comm, str) => comm.lcName.includes(str.value),
+    plangs: (com, flt) => flt.matches((key) => com.relPlangs.has(key)),
+    tags: (comm, flt) => flt.matches((key) => comm.relTags.has(key)),
+    tools: (comm, flt) => flt.matches((key) => comm.relTools.has(key))
+  };
+
+  // packages/plangs/src/facets/learning.ts
+  var LEARNING_FACET_PREDICATES = {
+    apps: (learn, flt) => flt.matches((key) => learn.relApps.has(key)),
+    createdRecently: (learn, date) => learn.created.isRecent(date.value),
+    creationYear: (learn, flt) => ret(learn.created.strYear, (learningYear) => flt.matches((year) => learningYear === year)),
+    libraries: (learn, flt) => flt.matches((key) => learn.relLibraries.has(key)),
+    name: (learn, str) => learn.lcName.includes(str.value),
+    plangs: (learn, flt) => flt.matches((key) => learn.relPlangs.has(key)),
+    tags: (learn, flt) => flt.matches((key) => learn.relTags.has(key)),
+    tools: (learn, flt) => flt.matches((key) => learn.relTools.has(key))
+  };
+
+  // packages/plangs/src/facets/libraries.ts
+  var LIBRARY_FACET_PREDICATES = {
+    createdRecently: (lib, date) => lib.created.isRecent(date.value),
+    creationYear: (lib, flt) => ret(lib.created.strYear, (libraryYear) => flt.matches((year) => libraryYear === year)),
+    ghStars: (lib, num) => lib.github.stars > num.value,
+    licenses: (lib, flt) => flt.matches((key) => lib.relLicenses.has(key)),
+    name: (lib, str) => lib.lcName.includes(str.value),
+    platforms: (lib, flt) => flt.matches((key) => lib.relPlatforms.has(key)),
+    releasedRecently: (lib, date) => ret(lib.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (lib, flt) => flt.matches((key) => lib.relTags.has(key)),
+    writtenFor: (lib, flt) => flt.matches((key) => lib.relPlangs.has(key)),
+    writtenWith: (lib, flt) => flt.matches((key) => lib.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/plangs.ts
+  var PLANG_FACET_PREDICATES = {
+    compilesTo: (pl, flt) => flt.matches((key) => pl.relCompilesTo.has(key)),
+    createdRecently: (pl, date) => pl.created.isRecent(date.value),
+    creationYear: (pl, flt) => ret(pl.created.strYear, (plYear) => flt.matches((year) => plYear === year)),
+    dialectOf: (pl, flt) => flt.matches((key) => pl.key === key || pl.relDialectOf.has(key)),
+    extensions: (pl, flt) => flt.matches((key) => pl.extensions.includes(key)),
+    hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
+    hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
+    implements: (pl, flt) => flt.matches((key) => key === pl.key || pl.relImplements.has(key)),
+    influenced: (pl, flt) => flt.matches((key) => pl.relInfluenced.has(key)),
+    influencedBy: (pl, flt) => flt.matches((key) => pl.relInfluencedBy.has(key)),
+    isPopular: (pl, val) => val.value === pl.isPopular,
+    isTranspiler: (pl, val) => val.value === pl.isTranspiler,
+    licenses: (pl, flt) => flt.matches((key) => pl.relLicenses.has(key)),
+    paradigms: (pl, flt) => flt.matches((key) => pl.relParadigms.has(key)),
+    plangName: (pl, str) => pl.lcName.includes(str.value),
+    platforms: (pl, flt) => flt.matches((key) => pl.relPlatforms.has(key)),
+    releasedRecently: (pl, date) => ret(pl.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (pl, flt) => flt.matches((key) => pl.relTags.has(key)),
+    typeSystems: (pl, flt) => flt.matches((key) => pl.relTypeSystems.has(key)),
+    writtenWith: (pl, flt) => flt.matches((key) => pl.relWrittenWith.has(key))
+    // These relationships are probably less useful for filtering.
+    // dialects: // "Dialects", rel("plang", "relDialects")). Ex. Pick "VisualBasic" and see "Basic".
+    // implementedBy: // "Implemented By", rel("plang", "relImplementedBy")). Ex. Pick "CPython" and see "Python".
+    // targetOf: // "Target of", rel("plang", "relTargetOf")). Ex. Pick "Haxe" and see what languages it targets.
+    // usedToWrite: //  "Used to Write", rel("plang", "relUsedToWrite")). Ex Pick "C++" and see "C".
+  };
+
+  // packages/plangs/src/facets/subsystems.ts
+  var SUBSYSTEM_FACET_PREDICATES = {
+    createdRecently: (sys, date) => sys.created.isRecent(date.value),
+    creationYear: (sys, flt) => ret(sys.created.strYear, (appYear) => flt.matches((year) => appYear === year)),
+    ghStars: (sys, num) => sys.github.stars > num.value,
+    licenses: (sys, flt) => flt.matches((key) => sys.relLicenses.has(key)),
+    name: (sys, str) => sys.lcName.includes(str.value),
+    platforms: (sys, flt) => flt.matches((key) => sys.relPlatforms.has(key)),
+    releasedRecently: (sys, date) => ret(sys.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (sys, flt) => flt.matches((key) => sys.relTags.has(key)),
+    writtenWith: (sys, flt) => flt.matches((key) => sys.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/tools.ts
+  var TOOL_FACET_PREDICATES = {
+    createdRecently: (tool, date) => tool.created.isRecent(date.value),
+    creationYear: (tool, flt) => ret(tool.created.strYear, (toolYear) => flt.matches((year) => toolYear === year)),
+    ghStars: (tool, num) => tool.github.stars > num.value,
+    licenses: (tool, flt) => flt.matches((key) => tool.relLicenses.has(key)),
+    name: (tool, str) => tool.lcName.includes(str.value),
+    platforms: (tool, flt) => flt.matches((key) => tool.relPlatforms.has(key)),
+    releasedRecently: (tool, date) => ret(tool.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
+    tags: (tool, flt) => flt.matches((key) => tool.relTags.has(key)),
+    writtenFor: (tool, flt) => flt.matches((key) => tool.relPlangs.has(key)),
+    writtenWith: (tool, flt) => flt.matches((key) => tool.relWrittenWith.has(key))
+  };
+
+  // packages/plangs/src/facets/index.ts
+  function matchVertex(vertex, predicates, facetValues, mode = "any") {
+    let someFilter = false;
+    for (const [key, value] of facetValues) {
+      if (!value.isPresent) continue;
+      someFilter = true;
+      const pred = predicates[key];
+      if (!pred) {
+        console.error(`No predicate found for key: ${key}`);
+        continue;
+      }
+      const predResult = pred(vertex, value);
+      if (mode === "all" && !predResult) return false;
+      if (mode === "any" && predResult) return true;
+    }
+    if (!someFilter) return true;
+    return mode === "all";
+  }
+  function matchVertices(vertices, facetValues, mode = "all") {
+    const predicates = vertexPredicates(vertices.name);
+    if (!predicates) {
+      console.warn(`No predicates found for vertex name: ${vertices.name}`);
+      return new Set(vertices.keys);
+    }
+    return new Set([...vertices.values].filter((v4) => matchVertex(v4, predicates, facetValues, mode)).map((v4) => v4.key));
+  }
+  function matchVerticesFromGroups(vertices, facetValues, mode = "any") {
+    let results = /* @__PURE__ */ new Set();
+    for (const [_2, fkValueMap] of facetValues.entries()) {
+      const groupResult = matchVertices(vertices, fkValueMap, "all");
+      if (mode === "all") {
+        if (groupResult.size === 0) return /* @__PURE__ */ new Set();
+        results = results.intersection(groupResult);
+        if (results.size === 0) return results;
+      } else {
+        results = results.union(groupResult);
+      }
+    }
+    return results;
+  }
+  function vertexPredicates(name) {
+    switch (name) {
+      case "app":
+        return APP_FACET_PREDICATES;
+      case "community":
+        return COMMUNITY_FACET_PREDICATES;
+      case "learning":
+        return LEARNING_FACET_PREDICATES;
+      case "library":
+        return LIBRARY_FACET_PREDICATES;
+      case "plang":
+        return PLANG_FACET_PREDICATES;
+      case "tool":
+        return TOOL_FACET_PREDICATES;
+      case "subsystem":
+        return SUBSYSTEM_FACET_PREDICATES;
     }
   }
-  var updateThumbns = debounce(doUpdateThumbns, 30);
 
   // packages/frontend/src/facets/main/state.ts
   var FacetsMainState = class _FacetsMainState extends Dispatchable {
     constructor() {
       super(...arguments);
+      this.updateThumbns = debounce(this._updateThumbs.bind(this), 30);
       /** Push state to the history, but debounced. */
       this.pushState = debounce(
         ((data2) => {
@@ -1962,7 +2137,7 @@
     }
     doSetCurrentGroup(groupKey) {
       this.data.currentGroupKey = groupKey;
-      storeUpdate(storeKey(this.page, "facets-last-group"), groupKey);
+      getStore(this.page).update("facets-last-group", groupKey);
       this.dispatch();
     }
     /** Removes any and all values for the given group.  */
@@ -1985,7 +2160,7 @@
       const { values } = this.data;
       let result;
       if (value.isPresent) {
-        if (!value.equalTo(values.get(groupKey, facetKey))) {
+        if (!values.has(groupKey, facetKey) || !value.equalTo(values.get(groupKey, facetKey))) {
           values.set(groupKey, facetKey, value);
           result = "changed";
         } else {
@@ -2027,6 +2202,20 @@
       return this.groupsConfig.get(key)?.title ?? key;
     }
     /** Helpers */
+    /** A static thumbnail grid will be render server side, we just need to show or hide each element.  */
+    _updateThumbs() {
+      const selection = this.values.filter((g2, f5, v4) => v4.isPresent);
+      const vertexKeys = selection.isEmpty ? void 0 : (
+        // biome-ignore lint/suspicious/noExplicitAny: the loop up next can handle any kind of key returned.
+        matchVerticesFromGroups(this.pg[this.vertexName], selection)
+      );
+      for (const div of elems("vertexThumbn")) {
+        const vkey = div.dataset.vertexKey;
+        if (!vkey) continue;
+        const visible = vertexKeys === void 0 || vertexKeys.has(vkey);
+        div.classList.toggle("hidden", !visible);
+      }
+    }
     /**
      * Run any side effects without dispatching.
      * Useful for instance on start, for instance: where we don't want to dispatch
@@ -2036,9 +2225,9 @@
       if (persist === "persist") {
         const data2 = this.serialized;
         this.pushState(data2);
-        storeUpdate(storeKey(this.page, "facet-value"), data2);
+        getStore(this.page).update("facet-value", data2);
       }
-      updateThumbns(this.results);
+      this.updateThumbns();
       this.updateClearFacets();
       return this;
     }
@@ -2227,9 +2416,9 @@
         console.error("No edges found for:", edgeName, direction);
         return [];
       }
-      const relations2 = direction === "direct" ? edges.entriesBackward : edges.entriesForward;
+      const relations = direction === "direct" ? edges.entriesBackward : edges.entriesForward;
       const source = direction === "direct" ? edges.toSource : edges.fromSource;
-      const entries = [...relations2].map(([key, toKeys]) => {
+      const entries = [...relations].map(([key, toKeys]) => {
         const name = source.get(key)?.name ?? key;
         return { value: key, label: name, count: toKeys.size };
       });
@@ -2458,159 +2647,6 @@
     }
     const component = createFacetGroupsComponent(groupsMap);
     return [groupsMap, gkByFk, component];
-  }
-
-  // packages/plangs/src/facets/apps.ts
-  var APP_FACET_PREDICATES = {
-    createdRecently: (app, date) => app.created.isRecent(date.value),
-    creationYear: (app, flt) => ret(app.created.strYear, (appYear) => flt.matches((year) => appYear === year)),
-    ghStars: (app, num) => app.github.stars > num.value,
-    licenses: (app, flt) => flt.matches((key) => app.relLicenses.has(key)),
-    name: (app, str) => app.lcName.includes(str.value),
-    platforms: (app, flt) => flt.matches((key) => app.relPlatforms.has(key)),
-    releasedRecently: (app, date) => ret(app.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
-    tags: (app, flt) => flt.matches((key) => app.relTags.has(key)),
-    writtenWith: (app, flt) => flt.matches((key) => app.relWrittenWith.has(key))
-  };
-
-  // packages/plangs/src/facets/communities.ts
-  var COMMUNITY_FACET_PREDICATES = {
-    apps: (comm, flt) => flt.matches((key) => comm.relApps.has(key)),
-    createdRecently: (comm, date) => comm.created.isRecent(date.value),
-    creationYear: (comm, flt) => ret(comm.created.strYear, (communityYear) => flt.matches((year) => communityYear === year)),
-    libraries: (comm, flt) => flt.matches((key) => comm.relLibraries.has(key)),
-    name: (comm, str) => comm.lcName.includes(str.value),
-    plangs: (com, flt) => flt.matches((key) => com.relPlangs.has(key)),
-    tags: (comm, flt) => flt.matches((key) => comm.relTags.has(key)),
-    tools: (comm, flt) => flt.matches((key) => comm.relTools.has(key))
-  };
-
-  // packages/plangs/src/facets/learning.ts
-  var LEARNING_FACET_PREDICATES = {
-    apps: (learn, flt) => flt.matches((key) => learn.relApps.has(key)),
-    createdRecently: (learn, date) => learn.created.isRecent(date.value),
-    creationYear: (learn, flt) => ret(learn.created.strYear, (learningYear) => flt.matches((year) => learningYear === year)),
-    libraries: (learn, flt) => flt.matches((key) => learn.relLibraries.has(key)),
-    name: (learn, str) => learn.lcName.includes(str.value),
-    plangs: (learn, flt) => flt.matches((key) => learn.relPlangs.has(key)),
-    tags: (learn, flt) => flt.matches((key) => learn.relTags.has(key)),
-    tools: (learn, flt) => flt.matches((key) => learn.relTools.has(key))
-  };
-
-  // packages/plangs/src/facets/libraries.ts
-  var LIBRARY_FACET_PREDICATES = {
-    createdRecently: (lib, date) => lib.created.isRecent(date.value),
-    creationYear: (lib, flt) => ret(lib.created.strYear, (libraryYear) => flt.matches((year) => libraryYear === year)),
-    ghStars: (lib, num) => lib.github.stars > num.value,
-    licenses: (lib, flt) => flt.matches((key) => lib.relLicenses.has(key)),
-    name: (lib, str) => lib.lcName.includes(str.value),
-    platforms: (lib, flt) => flt.matches((key) => lib.relPlatforms.has(key)),
-    releasedRecently: (lib, date) => ret(lib.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
-    tags: (lib, flt) => flt.matches((key) => lib.relTags.has(key)),
-    writtenFor: (lib, flt) => flt.matches((key) => lib.relPlangs.has(key)),
-    writtenWith: (lib, flt) => flt.matches((key) => lib.relWrittenWith.has(key))
-  };
-
-  // packages/plangs/src/facets/plangs.ts
-  var PLANG_FACET_PREDICATES = {
-    compilesTo: (pl, flt) => flt.matches((key) => pl.relCompilesTo.has(key)),
-    createdRecently: (pl, date) => pl.created.isRecent(date.value),
-    creationYear: (pl, flt) => ret(pl.created.strYear, (plYear) => flt.matches((year) => plYear === year)),
-    dialectOf: (pl, flt) => flt.matches((key) => pl.key === key || pl.relDialectOf.has(key)),
-    extensions: (pl, flt) => flt.matches((key) => pl.extensions.includes(key)),
-    hasLogo: (pl, val) => val.value === pl.images.some((img) => img.kind === "logo"),
-    hasWikipedia: (pl, val) => val.value === !!pl.data.extWikipediaPath,
-    implements: (pl, flt) => flt.matches((key) => key === pl.key || pl.relImplements.has(key)),
-    influenced: (pl, flt) => flt.matches((key) => pl.relInfluenced.has(key)),
-    influencedBy: (pl, flt) => flt.matches((key) => pl.relInfluencedBy.has(key)),
-    isPopular: (pl, val) => val.value === pl.isPopular,
-    isTranspiler: (pl, val) => val.value === pl.isTranspiler,
-    licenses: (pl, flt) => flt.matches((key) => pl.relLicenses.has(key)),
-    paradigms: (pl, flt) => flt.matches((key) => pl.relParadigms.has(key)),
-    plangName: (pl, str) => pl.lcName.includes(str.value),
-    platforms: (pl, flt) => flt.matches((key) => pl.relPlatforms.has(key)),
-    releasedRecently: (pl, date) => ret(pl.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
-    tags: (pl, flt) => flt.matches((key) => pl.relTags.has(key)),
-    typeSystems: (pl, flt) => flt.matches((key) => pl.relTypeSystems.has(key)),
-    writtenWith: (pl, flt) => flt.matches((key) => pl.relWrittenWith.has(key))
-    // These relationships are probably less useful for filtering.
-    // dialects: // "Dialects", rel("plang", "relDialects")). Ex. Pick "VisualBasic" and see "Basic".
-    // implementedBy: // "Implemented By", rel("plang", "relImplementedBy")). Ex. Pick "CPython" and see "Python".
-    // targetOf: // "Target of", rel("plang", "relTargetOf")). Ex. Pick "Haxe" and see what languages it targets.
-    // usedToWrite: //  "Used to Write", rel("plang", "relUsedToWrite")). Ex Pick "C++" and see "C".
-  };
-
-  // packages/plangs/src/facets/subsystems.ts
-  var SUBSYSTEM_FACET_PREDICATES = {
-    createdRecently: (sys, date) => sys.created.isRecent(date.value),
-    creationYear: (sys, flt) => ret(sys.created.strYear, (appYear) => flt.matches((year) => appYear === year)),
-    ghStars: (sys, num) => sys.github.stars > num.value,
-    licenses: (sys, flt) => flt.matches((key) => sys.relLicenses.has(key)),
-    name: (sys, str) => sys.lcName.includes(str.value),
-    platforms: (sys, flt) => flt.matches((key) => sys.relPlatforms.has(key)),
-    releasedRecently: (sys, date) => ret(sys.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
-    tags: (sys, flt) => flt.matches((key) => sys.relTags.has(key)),
-    writtenWith: (sys, flt) => flt.matches((key) => sys.relWrittenWith.has(key))
-  };
-
-  // packages/plangs/src/facets/tools.ts
-  var TOOL_FACET_PREDICATES = {
-    createdRecently: (tool, date) => tool.created.isRecent(date.value),
-    creationYear: (tool, flt) => ret(tool.created.strYear, (toolYear) => flt.matches((year) => toolYear === year)),
-    ghStars: (tool, num) => tool.github.stars > num.value,
-    licenses: (tool, flt) => flt.matches((key) => tool.relLicenses.has(key)),
-    name: (tool, str) => tool.lcName.includes(str.value),
-    platforms: (tool, flt) => flt.matches((key) => tool.relPlatforms.has(key)),
-    releasedRecently: (tool, date) => ret(tool.releases.last, (lastRel) => lastRel?.isRecent(date.value)),
-    tags: (tool, flt) => flt.matches((key) => tool.relTags.has(key)),
-    writtenFor: (tool, flt) => flt.matches((key) => tool.relPlangs.has(key)),
-    writtenWith: (tool, flt) => flt.matches((key) => tool.relWrittenWith.has(key))
-  };
-
-  // packages/plangs/src/facets/index.ts
-  function matchVertex(vertex, predicates, facetValues, mode = "any") {
-    if (facetValues.size === 0) return true;
-    for (const [key, value] of facetValues) {
-      if (!value.isPresent) continue;
-      const pred = predicates[key];
-      if (!pred) console.error(`No predicate found for key: ${key}`);
-      if (!pred) continue;
-      const predResult = pred(vertex, value.value);
-      if (mode === "all" && !predResult) return false;
-      if (mode === "any" && predResult) return true;
-    }
-    return mode === "all";
-  }
-  function matchVertices(vertices, facetValues, mode = "any", limit = -1) {
-    let predicates = vertexPredicates(vertices.name);
-    const result = /* @__PURE__ */ new Set();
-    if (!predicates) {
-      console.warn(`No predicates found for vertex name: ${vertices.name}`);
-      predicates = {};
-    }
-    for (const vertex of vertices.values) {
-      if (limit >= 0 && result.size >= limit) break;
-      if (matchVertex(vertex, predicates, facetValues, mode)) result.add(vertex.key);
-    }
-    return result;
-  }
-  function vertexPredicates(name) {
-    switch (name) {
-      case "app":
-        return APP_FACET_PREDICATES;
-      case "community":
-        return COMMUNITY_FACET_PREDICATES;
-      case "learning":
-        return LEARNING_FACET_PREDICATES;
-      case "library":
-        return LIBRARY_FACET_PREDICATES;
-      case "plang":
-        return PLANG_FACET_PREDICATES;
-      case "tool":
-        return TOOL_FACET_PREDICATES;
-      case "subsystem":
-        return SUBSYSTEM_FACET_PREDICATES;
-    }
   }
 
   // packages/auxiliar/src/array.ts
@@ -2951,6 +2987,10 @@
     get month() {
       return parseMonth(this.release.date);
     }
+    get yearMonth() {
+      const { year, month } = this;
+      return year && month ? `${year}-${month.toString().padStart(2, "0")}` : year;
+    }
     isRecent(referenceDate) {
       return isRecent(this.date, referenceDate);
     }
@@ -3014,6 +3054,42 @@
     constructor(graph, key) {
       super(key);
       this.graph = graph;
+    }
+    /** Generate a detail of the vertex, used to render thumbnails and info boxes. */
+    get detail() {
+      const relations = [];
+      const vertex = this;
+      for (const rel2 of vertex.relations.values()) {
+        const relValues = rel2.values.filter((related) => related.key !== vertex.key);
+        if (relValues.length === 0) continue;
+        relations.push([rel2.desc, relValues.map(({ name, href }) => ({ name, href }))]);
+      }
+      const general = [];
+      if (vertex instanceof VPlang) {
+        tap(vertex.created.year, (year) => year && general.push(`Appeared ${vertex.created.year}`));
+        tap(vertex.isPopular, (pop) => pop && general.push("Popular"));
+        tap(vertex.isTranspiler, (tsp) => tsp && general.push("Transpiler"));
+        tap(vertex.releases.last, (rel2) => rel2 && general.push(`Released ${rel2.yearMonth ?? rel2.version}`));
+      }
+      return {
+        description: vertex.description,
+        href: vertex.href,
+        key: vertex.key,
+        name: vertex.name,
+        ranking: vertex.ranking,
+        shortDesc: vertex.shortDesc,
+        thumbUrl: vertex.thumbUrl,
+        urlGithub: vertex.urlGithub,
+        urlHome: vertex.urlHome,
+        urlReddit: vertex.urlReddit,
+        urlStackov: vertex.urlStackov,
+        urlWikipedia: vertex.urlWikipedia,
+        vertexDesc: vertex.vertexDesc,
+        vertexKind: vertex.vertexKind,
+        vertexName: vertex.vertexName,
+        general,
+        relations
+      };
     }
     /** Internal path name for rendering the vertex in the web UI.  */
     get href() {
@@ -4310,18 +4386,16 @@
       super(...arguments);
       this.nav = NAV;
       this.page = PAGE;
+      this.vertexName = "app";
       this.gkByFk = GK_BY_FK;
       this.groupsConfig = GROUPS;
       this.groupsComponent = COMPONENT;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE, "facets-last-group")) ?? NAV.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE, "facet-value")));
+      const store = getStore(PAGE);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _AppsFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.app, this.values.getMap2());
     }
   };
 
@@ -4351,18 +4425,16 @@
       super(...arguments);
       this.nav = NAV2;
       this.page = PAGE2;
+      this.vertexName = "community";
       this.gkByFk = GK_BY_FK2;
       this.groupsConfig = GROUPS2;
       this.groupsComponent = COMPONENT2;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE2, "facets-last-group")) ?? NAV2.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE2, "facet-value")));
+      const store = getStore(PAGE2);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV2.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK2, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _CommunitiesFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.community, this.values.getMap2());
     }
   };
 
@@ -4392,18 +4464,16 @@
       super(...arguments);
       this.nav = NAV3;
       this.page = PAGE3;
+      this.vertexName = "learning";
       this.gkByFk = GK_BY_FK3;
       this.groupsConfig = GROUPS3;
       this.groupsComponent = COMPONENT3;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE3, "facets-last-group")) ?? NAV3.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE3, "facet-value")));
+      const store = getStore(PAGE3);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV3.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK3, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _LearningFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.learning, this.values.getMap2());
     }
   };
 
@@ -4444,18 +4514,16 @@
       super(...arguments);
       this.nav = NAV4;
       this.page = PAGE4;
+      this.vertexName = "library";
       this.gkByFk = GK_BY_FK4;
       this.groupsConfig = GROUPS4;
       this.groupsComponent = COMPONENT4;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE4, "facets-last-group")) ?? NAV4.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE4, "facet-value")));
+      const store = getStore(PAGE4);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV4.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK4, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _LibrariesFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.library, this.values.getMap2());
     }
   };
 
@@ -4510,18 +4578,16 @@
       super(...arguments);
       this.nav = NAV5;
       this.page = PAGE5;
+      this.vertexName = "plang";
       this.gkByFk = GK_BY_FK5;
       this.groupsConfig = GROUPS5;
       this.groupsComponent = COMPONENT5;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE5, "facets-last-group")) ?? NAV5.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE5, "facet-value")));
+      const store = getStore(PAGE5);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV5.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK5, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _PlangsFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.plang, this.values.getMap2());
     }
   };
 
@@ -4552,18 +4618,16 @@
       super(...arguments);
       this.nav = NAV6;
       this.page = PAGE6;
+      this.vertexName = "subsystem";
       this.gkByFk = GK_BY_FK6;
       this.groupsConfig = GROUPS6;
       this.groupsComponent = COMPONENT6;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE6, "facets-last-group")) ?? NAV6.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE6, "facet-value")));
+      const store = getStore(PAGE6);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV6.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK6, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _SubsystemsFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.subsystem, this.values.getMap2());
     }
   };
 
@@ -4595,18 +4659,16 @@
       super(...arguments);
       this.nav = NAV7;
       this.page = PAGE7;
+      this.vertexName = "tool";
       this.gkByFk = GK_BY_FK7;
       this.groupsConfig = GROUPS7;
       this.groupsComponent = COMPONENT7;
     }
     static initial(pg) {
-      const currentGroupKey = storeLoad(storeKey(PAGE7, "facets-last-group")) ?? NAV7.default;
-      const values = FacetsMainState.deserialize(GK_BY_FK7, FragmentTracker.deserialize() ?? storeLoad(storeKey(PAGE7, "facet-value")));
+      const store = getStore(PAGE7);
+      const currentGroupKey = store.load("facets-last-group") ?? NAV7.default;
+      const values = FacetsMainState.deserialize(GK_BY_FK7, FragmentTracker.deserialize() ?? store.load("facet-value"));
       return new _ToolsFacetsState({ pg, currentGroupKey, values });
-    }
-    get results() {
-      if (!this.pg) return /* @__PURE__ */ new Set();
-      return matchVertices(this.pg.tool, this.values.getMap2());
     }
   };
 
@@ -4648,7 +4710,10 @@
             "bg-linear-to-t from-secondary to-background"
           ),
           children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]"), children: [
-            /* @__PURE__ */ u4("header", { class: tw("uppercase", "text-primary", "mb-4", "ml-4"), children: "Filters" }),
+            /* @__PURE__ */ u4("header", { class: tw("uppercase", "text-primary", "mb-4", "ml-4"), children: [
+              "Filter ",
+              page
+            ] }),
             state2.nav.groupKeys.map((group) => /* @__PURE__ */ u4("nav", { class: tw("sm:mb-6", "min-w-[12rem] max-w-[15rem]", SUBGRID), children: mapGroups(state2, group, (groupKey, isCurrent, hasValues) => /* @__PURE__ */ u4(
               "div",
               {
@@ -4687,7 +4752,7 @@
           ] })
         }
       ),
-      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50", "relative"), children: /* @__PURE__ */ u4(state2.groupsComponent, { currentFacetGroup: state2.currentGroupKey }) })
+      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", tw(BORDER, "border-r-1"), "bg-linear-to-b to-secondary/50", "relative"), children: /* @__PURE__ */ u4(state2.groupsComponent, { currentFacetGroup: state2.currentGroupKey }) })
     ] });
     return /* @__PURE__ */ u4("aside", { ref: self, class: tw("flex flex-row items-stretch", "h-full overflow-hidden"), children: state && body(state) });
   }
@@ -4718,10 +4783,6 @@
   }
 
   // packages/frontend/src/app/index.tsx
-  window.fragment = new FragmentTracker().bind();
-  window.restoreFilters = () => ToggleFacetsMenu.initial().runEffects();
-  window.restoreHamburguer = () => ToggleHamburguer.initial().runEffects();
-  window.restoreLightMode = () => ToggleLights.initial().runEffects();
   async function start() {
     const pg = new PlangsGraph();
     const loadData = fetch("/plangs.json").then(async (r3) => pg.loadJSON(await r3.json())).then((g2) => g2.materialize());
@@ -4754,5 +4815,12 @@
   } catch (err) {
     console.error(err);
   }
+  window.fragment = new FragmentTracker().bind();
+  window.restoreFilters = () => ToggleFacetsMenu.initial().runEffects();
+  window.restoreHamburguer = () => ToggleHamburguer.initial().runEffects();
+  window.restoreLightMode = () => ToggleLights.initial().runEffects();
+  window.restoreVertexInfo = () => {
+    console.log("TODO!");
+  };
 })();
 //# sourceMappingURL=app.js.map
