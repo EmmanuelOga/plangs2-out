@@ -1467,7 +1467,7 @@
         ref: self,
         tabIndex: disabled ? void 0 : 0,
         ...onClickOnEnter(toggle),
-        class: tw("group", "cursor-pointer", !disabled && "cursor-pointer", HOVER_ICON, state?.hilight && "ring-1 ring-primary", cssClass2),
+        class: tw("group", "scale-75 cursor-pointer", !disabled && "cursor-pointer", HOVER_ICON, state?.hilight && "ring-1 ring-primary", cssClass2),
         children: state?.icon
       }
     );
@@ -1604,7 +1604,7 @@
       if (links.length === 0) return;
       for (const [i6, el] of links.entries()) {
         el.classList.add("scale-0");
-        setTimeout(() => el.classList.remove("scale-0"), 50 + (links.length - i6) * 50);
+        setTimeout(() => el.classList.remove("scale-0"), 50 + (i6 + 1) * 50);
       }
     });
     const forGrid = GRID_PAGES.has(page);
@@ -1617,20 +1617,19 @@
         ] })
       ] }),
       detail && /* @__PURE__ */ u4("div", { children: [
-        /* @__PURE__ */ u4("div", { class: "flex flex-row gap-5 align-middle", children: [
-          /* @__PURE__ */ u4("h2", { class: tw("m-0!", forGrid && "inline sm:block"), children: /* @__PURE__ */ u4("a", { class: "text-primary", href: detail.href, children: detail.name }) }),
-          /* @__PURE__ */ u4("div", { class: "flex-1" }),
+        /* @__PURE__ */ u4("h2", { class: tw("mt-0!", forGrid && "inline sm:block"), children: [
+          !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "size-24" }) }),
+          /* @__PURE__ */ u4("a", { class: "text-primary", href: detail.href, children: detail.name })
+        ] }),
+        /* @__PURE__ */ u4("div", { class: "-mx-1 flex flex-row gap-1 align-middle", children: [
           ret(detail.urlHome, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: EXTERN })),
-          ret(detail.urlLanguish, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: LANGUISH, title: `Ranked #${detail.ranking} on Languish` })),
+          ret(detail.urlLanguish, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: LANGUISH, title: `#${detail.ranking} on Languish` })),
           ret(detail.urlGithub, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: GITHUB })),
           ret(detail.urlWikipedia, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: WIKIPEDIA })),
           ret(detail.urlStackov, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: STACKOV })),
           ret(detail.urlReddit, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: REDDIT }))
         ] }),
-        /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block", "hyphens-auto"), children: [
-          !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "h-[6.5rem] w-[6.5rem]" }) }),
-          forGrid ? detail.shortDesc : detail.description
-        ] })
+        /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block", "hyphens-auto"), children: forGrid ? detail.shortDesc : detail.description })
       ] }),
       detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
         /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
@@ -1642,7 +1641,15 @@
     ] });
   }
   function IconLink({ href, icon: icon2, title }) {
-    return /* @__PURE__ */ u4("a", { ...title ? { title } : {}, href, class: tw(cssClass("externalLink"), "transition-transform", "text-primary", HOVER_ICON), children: icon2 });
+    return /* @__PURE__ */ u4(
+      "a",
+      {
+        ...title ? { title } : {},
+        href,
+        class: tw(cssClass("externalLink"), "inline-block aspect-square", "transition-transform", "text-primary"),
+        children: /* @__PURE__ */ u4("div", { class: tw("inline-block scale-75", HOVER_ICON), children: icon2 })
+      }
+    );
   }
   function RelationCell({ title, children }) {
     return /* @__PURE__ */ u4(
@@ -3085,14 +3092,14 @@
       if (vertex instanceof VPlang) {
         tap(vertex.created.year, (year) => year && general.push({ kind: "text", value: `Appeared ${vertex.created.year}` }));
         tap(vertex.isPopular, (pop) => pop && general.push({ kind: "text", value: "Popular", title: "Languish's Rank <= #25 or popular on Github." }));
-        tap(
-          [vertex.urlLanguish, vertex.ranking && `#${vertex.ranking} on Languish`],
-          ([href, value]) => href && value && general.push({ kind: "link", href, value, title: value })
-        );
         tap(vertex.isTranspiler, (tsp) => tsp && general.push({ kind: "text", value: "Transpiler", title: "a.k.a. Source-to-Source Compiler." }));
         tap(
           vertex.releases.last,
           (rel2) => rel2 && general.push({ kind: "text", value: `Released ${rel2.yearMonth ?? rel2.version}`, title: "Last Release we know about." })
+        );
+        tap(
+          [vertex.urlLanguish, vertex.ranking && `#${vertex.ranking} on Languish`],
+          ([href, value]) => href && value && general.push({ kind: "link", href, value, title: value })
         );
       }
       for (const link of vertex.links ?? []) {
