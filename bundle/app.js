@@ -3013,7 +3013,7 @@
     }
     get yearMonth() {
       const { year, month } = this;
-      return year && month ? `${year}-${month.toString().padStart(2, "0")}` : year;
+      return year && month ? `${month.toString().padStart(2, "0")}/${year}` : year;
     }
     isRecent(referenceDate) {
       return isRecent(this.date, referenceDate);
