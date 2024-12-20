@@ -1931,6 +1931,10 @@
     width: calc(var(--spacing) * 24);
     height: calc(var(--spacing) * 24);
   }
+  .size-50 {
+    width: calc(var(--spacing) * 50);
+    height: calc(var(--spacing) * 50);
+  }
   .size-\[1\.5rem\] {
     width: 1.5rem;
     height: 1.5rem;
@@ -1947,6 +1951,21 @@
   }
   .h-12 {
     height: calc(var(--spacing) * 12);
+  }
+  .h-50 {
+    height: calc(var(--spacing) * 50);
+  }
+  .h-\[15rem\] {
+    height: 15rem;
+  }
+  .h-\[1rem\] {
+    height: 1rem;
+  }
+  .h-\[8rem\] {
+    height: 8rem;
+  }
+  .h-\[25rem\] {
+    height: 25rem;
   }
   .h-dvh {
     height: 100dvh;
@@ -2077,8 +2096,17 @@
   .flex-wrap {
     flex-wrap: wrap;
   }
+  .items-baseline {
+    align-items: baseline;
+  }
   .items-center {
     align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
   }
   .items-stretch {
     align-items: stretch;
@@ -2290,8 +2318,20 @@
   .text-right {
     text-align: right;
   }
+  .align-baseline {
+    vertical-align: baseline;
+  }
+  .align-bottom {
+    vertical-align: bottom;
+  }
   .align-middle {
     vertical-align: middle;
+  }
+  .align-super {
+    vertical-align: super;
+  }
+  .align-text-top {
+    vertical-align: text-top;
   }
   .text-xl {
     font-size: var(--text-xl);
@@ -2301,8 +2341,26 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-\[clamp\(2\.5rem\,3vh\,7rem\)\] {
+    font-size: clamp(2.5rem, 3vh, 7rem);
+  }
+  .text-\[clamp\(2\.5rem\,5vh\,7rem\)\] {
+    font-size: clamp(2.5rem, 5vh, 7rem);
+  }
   .text-\[clamp\(2\.5rem\,5vw\,7rem\)\] {
     font-size: clamp(2.5rem, 5vw, 7rem);
+  }
+  .text-\[clamp\(2\.5rem\,10vh\,7rem\)\] {
+    font-size: clamp(2.5rem, 10vh, 7rem);
+  }
+  .text-\[clamp\(2\.5rem\,10vh\,8rem\)\] {
+    font-size: clamp(2.5rem, 10vh, 8rem);
+  }
+  .text-\[clamp\(2\.5rem\,10vw\,7rem\)\] {
+    font-size: clamp(2.5rem, 10vw, 7rem);
+  }
+  .text-\[clamp\(2\.5rem\,20vw\,7rem\)\] {
+    font-size: clamp(2.5rem, 20vw, 7rem);
   }
   .overflow-ellipsis {
     text-overflow: ellipsis;
