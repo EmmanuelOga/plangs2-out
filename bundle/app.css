@@ -602,6 +602,9 @@
   .m-0 {
     margin: calc(var(--spacing) * 0);
   }
+  .m-1 {
+    margin: calc(var(--spacing) * 1);
+  }
   .m-2 {
     margin: calc(var(--spacing) * 2);
   }
@@ -1954,6 +1957,9 @@
   .max-h-full {
     max-height: 100%;
   }
+  .w-4 {
+    width: calc(var(--spacing) * 4);
+  }
   .w-\[12rem\] {
     width: 12rem;
   }
@@ -2131,6 +2137,10 @@
   .border-1 {
     border-style: var(--tw-border-style);
     border-width: 1px;
+  }
+  .border-t-1 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 1px;
   }
   .border-r-1 {
     border-right-style: var(--tw-border-style);
