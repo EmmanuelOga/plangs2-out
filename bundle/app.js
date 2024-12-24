@@ -1164,7 +1164,7 @@
   }
 
   // packages/frontend/src/auxiliar/icons.tsx
-  var CSS = "fill-current size-[1.75rem]";
+  var CSS = "fill-current size-[1.5rem]";
   var ABC = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: CSS, children: [
     /* @__PURE__ */ u4("title", { children: "Alphabetic" }),
     /* @__PURE__ */ u4("path", { d: "M3.0805,8.3675,2.31,10.878c-.028.091-.0705.122-.154.122H.756c-.0845,0-.1125-.0455-.1-.15L3.5425,1.9285A2.51436,2.51436,0,0,0,3.669,1.107c0-.0615.028-.107.084-.107H5.7c.0705,0,.084.015.1.0915L9.0355,10.863c.0145.0915,0,.137-.084.137H7.381a.14051.14051,0,0,1-.1405-.0915L6.428,8.3675Zm2.9-1.6595c-.294-1.005-.9525-3.12-1.233-4.1855h-.014c-.224,1.02-.785,2.8-1.2045,4.1855Z" }),
@@ -1328,7 +1328,7 @@
   var ToggleHamburguer = class _ToggleHamburguer extends IconButtonBaseState {
     static initial(disabled = false) {
       const mode = STORE.load("hamburger-menu");
-      return new _ToggleHamburguer({ mode: mode === "show" ? "show" : "hide", disabled });
+      return new _ToggleHamburguer({ mode: mode === "hide" ? "hide" : "show", disabled });
     }
     get hilight() {
       return !this.hide;
@@ -1598,14 +1598,18 @@
         setTimeout(() => el.classList.remove("scale-0"), 50 + (i6 + 1) * 50);
       }
     });
-    const header = /* @__PURE__ */ u4("h2", { class: tw("m-0!", "truncate"), children: detail ? /* @__PURE__ */ u4("a", { class: "pr-2", href: detail.href, children: detail.name }) : "Information" });
-    const iconLinks = detail && /* @__PURE__ */ u4("div", { class: "flex flex-row items-center gap-2 align-middle", children: [
+    const iconLinks = detail && /* @__PURE__ */ u4("div", { class: "flex flex-row flex-nowrap items-center gap-2 align-middle", children: [
       ret(detail.urlHome, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: EXTERN })),
       ret(detail.urlLanguish, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: LANGUISH, title: `#${detail.ranking} on Languish` })),
       ret(detail.urlGithub, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: GITHUB })),
       ret(detail.urlWikipedia, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: WIKIPEDIA })),
       ret(detail.urlStackov, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: STACKOV })),
       ret(detail.urlReddit, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: REDDIT }))
+    ] });
+    const header = /* @__PURE__ */ u4("header", { class: "flex flex-wrap", children: [
+      /* @__PURE__ */ u4("h2", { class: tw("m-0!", "truncate", "w-full sm:w-auto"), children: detail ? /* @__PURE__ */ u4("a", { class: "pr-2", href: detail.href, children: detail.name }) : "Information" }),
+      /* @__PURE__ */ u4("div", { class: "flex-1" }),
+      iconLinks
     ] });
     const info = detail ? /* @__PURE__ */ u4("p", { class: tw("hidden sm:block landscape-short:hidden"), children: [
       !forGrid && detail.thumbUrl && /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "float-right my-2 mr-1 ml-4 size-24" }),
@@ -1615,7 +1619,7 @@
       " a thumbnail for more info."
     ] });
     const relations = detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block landscape-short:hidden", "overflow-hidden"), open, children: [
-      /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
+      /* @__PURE__ */ u4("summary", { class: "cursor-pointer pb-4 text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
       /* @__PURE__ */ u4("div", { class: tw("flex flex-col"), children: [
         detail.general.length > 0 && /* @__PURE__ */ u4(RelationCell, { title: "General", children: detail.general.map((item) => /* @__PURE__ */ u4(Pill, { title: item.title, children: item.kind === "text" ? /* @__PURE__ */ u4("span", { children: item.value }) : /* @__PURE__ */ u4("a", { href: item.href, class: tw("inline-flex"), children: [
           /* @__PURE__ */ u4("span", { children: item.value }),
@@ -1628,10 +1632,14 @@
       "div",
       {
         ref: self,
-        class: tw(VSCROLL, tw(PROSE_BASIC, "max-w-[unset]"), forGrid && "px-2 py-1", forGrid && "border-primary/50 landscape-narrow:border-t-1"),
+        class: tw(
+          VSCROLL,
+          tw(PROSE_BASIC, "max-w-[unset]"),
+          forGrid && "px-2 py-1 sm:p-4",
+          forGrid && "border-primary/50 landscape-narrow:border-t-1"
+        ),
         children: [
           header,
-          detail && iconLinks,
           info,
           relations
         ]
@@ -1643,8 +1651,8 @@
   }
   function RelationCell({ title, children }) {
     return /* @__PURE__ */ u4("div", { class: tw("hover:bg-hiliteb/10"), children: [
-      /* @__PURE__ */ u4("header", { class: "mb-2 py-1 text-foreground/75", children: title }),
-      /* @__PURE__ */ u4("div", { class: "ml-1 flex flex-row flex-wrap", children })
+      /* @__PURE__ */ u4("header", { class: "mb-2 p-2 text-foreground text-sm uppercase", children: title }),
+      /* @__PURE__ */ u4("div", { class: "ml-2 flex flex-row flex-wrap", children })
     ] }, title);
   }
 
@@ -4835,7 +4843,7 @@
   }
   function FacetsAsideMenu({ state, page, class: klass }) {
     const mapGroups = (state2, group, callback) => group.map((groupKey) => callback(groupKey, state2.currentGroupKey === groupKey, state2.groupHasValues(groupKey)));
-    return /* @__PURE__ */ u4("aside", { class: tw("h-full min-w-[12rem]", VSCROLL, "bg-linear-to-r from-secondary/50 to-transparent", klass), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto]", "ml-2"), children: [
+    return /* @__PURE__ */ u4("aside", { class: tw("h-full min-w-[12rem] sm:pt-2", VSCROLL, "bg-linear-to-r from-secondary/50 to-transparent", klass), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto]", "ml-2"), children: [
       /* @__PURE__ */ u4("header", { class: tw("text-primary uppercase", "col-span-2 py-2"), children: [
         "Filter ",
         page
