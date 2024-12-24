@@ -1140,14 +1140,13 @@
   }
 
   // packages/frontend/src/auxiliar/styles.ts
-  var VSCROLL = "overflow-hidden overflow-y-auto";
-  var BORDER = "border-primary/85 border-dotted";
-  var INPUT = "bg-background text-foreground placeholder:text-foreground/50 mx-2";
   var HOVER = "hover:bg-hiliteb/75 hover:text-hilitef cursor-pointer";
-  var HOVER_ICON = "rounded p-1 hover:bg-primary/20 hover:text-hiliteb hover:ring-2 hover:ring-primary";
+  var HOVER_ICON = "rounded p-1 hover:text-hiliteb hover:ring-1 hover:ring-primary";
   var HOVER_ICON_BG = "rounded-2xl hover:bg-background/20 hover:text-hiliteb";
+  var INPUT = "bg-background text-foreground placeholder:text-foreground/50";
   var PROSE_BASIC = "prose dark:prose-invert sm:prose-sm lg:prose-lg xl:prose-xl";
   var PROSE = `${PROSE_BASIC} max-w-[80ch] mx-auto`;
+  var VSCROLL = "overflow-hidden overflow-y-auto";
   function tw(...classes) {
     return classes.flat(5).filter((s4) => typeof s4 === "string" && !/^;|;$/.test(s4)).join(" ");
   }
@@ -1165,7 +1164,7 @@
   }
 
   // packages/frontend/src/auxiliar/icons.tsx
-  var CSS = "fill-current size-[1.5rem] sm:size-[1.75rem] lg:size-[2rem] xl:size-[2.25rem] 2xl:size-[2.5rem]";
+  var CSS = "fill-current size-[1.75rem]";
   var ABC = /* @__PURE__ */ u4("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 18 18", class: CSS, children: [
     /* @__PURE__ */ u4("title", { children: "Alphabetic" }),
     /* @__PURE__ */ u4("path", { d: "M3.0805,8.3675,2.31,10.878c-.028.091-.0705.122-.154.122H.756c-.0845,0-.1125-.0455-.1-.15L3.5425,1.9285A2.51436,2.51436,0,0,0,3.669,1.107c0-.0615.028-.107.084-.107H5.7c.0705,0,.084.015.1.0915L9.0355,10.863c.0145.0915,0,.137-.084.137H7.381a.14051.14051,0,0,1-.1405-.0915L6.428,8.3675Zm2.9-1.6595c-.294-1.005-.9525-3.12-1.233-4.1855h-.014c-.224,1.02-.785,2.8-1.2045,4.1855Z" }),
@@ -1299,6 +1298,9 @@
       const { disabled, ...data2 } = this.data;
       return data2;
     }
+    get hidden() {
+      return false;
+    }
     get hilight() {
       return false;
     }
@@ -1328,11 +1330,14 @@
       const mode = STORE.load("hamburger-menu");
       return new _ToggleHamburguer({ mode: mode === "show" ? "show" : "hide", disabled });
     }
+    get hilight() {
+      return !this.hide;
+    }
     get hide() {
       return this.data.mode === "hide";
     }
     get icon() {
-      return this.hide ? MENU : CLOSE;
+      return MENU;
     }
     doAction() {
       this.data.mode = this.hide ? "show" : "hide";
@@ -1392,15 +1397,18 @@
     static initial(disabled = false) {
       return new _ToggleClearFacets({ disabled, mode: "" });
     }
-    get icon() {
-      return this.data.mode === "clearFacets" ? DESELECT : null;
-    }
     doAction() {
       this.data.mode = "";
     }
     doToggleMode(mode) {
       this.data.mode = mode;
       this.dispatch();
+    }
+    get icon() {
+      return DESELECT;
+    }
+    get hidden() {
+      return this.data.mode === "";
     }
     runEffects() {
       for (const el of elems("facetsMain")) el.state?.doResetAll();
@@ -1453,7 +1461,7 @@
       }
     }, [disabled]);
     const toggle = () => {
-      if (!state) return;
+      if (!state || state.disabled) return;
       state.doAction();
       state.runEffects();
       state.dispatch();
@@ -1468,8 +1476,10 @@
         class: tw(
           "group",
           disabled ? "cursor-auto opacity-50" : "cursor-pointer",
-          state?.hilight && "ring-1 ring-primary",
-          action !== "allAny" && HOVER_ICON
+          "border-1 border-dotted",
+          state?.hilight ? "border-primary" : "border-transparent",
+          action !== "allAny" && HOVER_ICON,
+          state?.hidden && "invisible"
         ),
         children: state?.icon
       }
@@ -1490,23 +1500,20 @@
 
   // packages/frontend/src/components/misc/pill.tsx
   function Pill({ children, title }) {
-    return (
-      // shadow-md inset-shadow-sm inset-shadow-white/20 ring ring-blue-600 inset-ring inset-ring-white/15
-      /* @__PURE__ */ u4(
-        "div",
-        {
-          ...title ? { title } : {},
-          class: tw(
-            "inline-flex items-center",
-            "mr-4 mb-3 h-8 px-2",
-            "border-1 border-foreground/25",
-            "rounded-tl-2xl rounded-br-2xl",
-            "bg-secondary/75 text-foreground/85",
-            "overflow-ellipsis whitespace-nowrap"
-          ),
-          children
-        }
-      )
+    return /* @__PURE__ */ u4(
+      "div",
+      {
+        ...title ? { title } : {},
+        class: tw(
+          "max-w-full",
+          "mr-4 mb-3 px-2",
+          "outline-1 outline-primary/50",
+          "rounded-tl-lg rounded-br-lg",
+          "bg-secondary/75 text-foreground/85",
+          "truncate"
+        ),
+        children
+      }
     );
   }
 
@@ -1533,17 +1540,16 @@
         ...dataset({ "vertex-key": detail.key, "vertex-name": detail.vertexName, "vertex-ranking": detail.ranking }),
         class: tw(cssClass("vertexThumbn"), "group", !onlyImg && "cursor-pointer", klass),
         children: [
-          !onlyImg && /* @__PURE__ */ u4("div", { class: "truncate text-center", children: /* @__PURE__ */ u4("a", { class: "text-foreground group-hover:text-primary", href: detail.href, children: detail.name }) }),
+          !onlyImg && /* @__PURE__ */ u4("div", { class: "truncate pb-0.5 text-center", children: /* @__PURE__ */ u4("a", { class: "text-foreground underline group-hover:text-primary", href: detail.href, children: detail.name }) }),
           /* @__PURE__ */ u4(
             "div",
             {
               class: tw(
                 "relative",
-                "p-4",
                 "aspect-square overflow-hidden",
                 "flex items-center justify-center",
                 "bg-thumbnails",
-                "border-1 border-primary",
+                "ring-1 ring-primary/50",
                 "shadow-background shadow-lg group-hover:shadow-md group-hover:shadow-primary"
               ),
               children: [
@@ -1551,26 +1557,17 @@
                   "img",
                   {
                     loading: "lazy",
-                    src: onlyImg ? detail.thumbUrl ?? PLACEHOLDER : PLACEHOLDER,
                     alt: detail.name,
                     "data-src": detail.thumbUrl ?? "",
-                    class: tw(cssClass("vertexThumbnImg"), "max-h-full max-w-full object-contain")
+                    src: onlyImg ? detail.thumbUrl ?? PLACEHOLDER : PLACEHOLDER,
+                    class: tw(cssClass("vertexThumbnImg"), "max-h-full max-w-full p-1")
                   }
                 ),
                 "ranking" in detail && detail.ranking && /* @__PURE__ */ u4(
                   "div",
                   {
                     title: `Languish Ranking: ${detail.ranking}`,
-                    class: tw(
-                      "block",
-                      // ALlow hiding the ranking using a data attribute on the wrapper.
-                      "group-[[data-hide-ranking='1']]:hidden",
-                      "-bottom-1 absolute right-0",
-                      "p-1 text-primary text-xs",
-                      "rounded opacity-50",
-                      HOVER,
-                      "hover:border-1 hover:border-primary hover:opacity-100"
-                    ),
+                    class: tw("absolute", "-bottom-1 right-0", "p-1 text-primary text-xs", "rounded opacity-50", HOVER, "hover:opacity-100"),
                     children: detail.ranking
                   }
                 )
@@ -1585,6 +1582,7 @@
   // packages/frontend/src/components/vertex-info/vertex-info.tsx
   function VertexInfo({ detail, open, page }) {
     const self = A2(null);
+    const forGrid = GRID_PAGES.has(page);
     const store = getCurrentPageStore();
     const updateOpen = () => {
       const elem2 = self.current?.querySelector("details");
@@ -1600,57 +1598,53 @@
         setTimeout(() => el.classList.remove("scale-0"), 50 + (i6 + 1) * 50);
       }
     });
-    const forGrid = GRID_PAGES.has(page);
-    return /* @__PURE__ */ u4("div", { ref: self, class: tw(VSCROLL, forGrid && "p-4", !forGrid && "sm:mb-16", PROSE_BASIC, "max-w-[unset]"), children: [
-      !detail && /* @__PURE__ */ u4("div", { children: [
-        /* @__PURE__ */ u4("h2", { class: tw("mt-0!"), children: "Information" }),
-        /* @__PURE__ */ u4("p", { children: [
-          /* @__PURE__ */ u4("strong", { class: "text-primary", children: "Click" }),
-          " a thumbnail for more info."
-        ] })
-      ] }),
-      detail && /* @__PURE__ */ u4("div", { children: [
-        /* @__PURE__ */ u4("h2", { class: tw("mt-0!", forGrid && "inline sm:block"), children: [
-          !forGrid && /* @__PURE__ */ u4("div", { class: tw("float-right ml-2 p-4", tw(BORDER, "border-1")), children: /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "size-24" }) }),
-          /* @__PURE__ */ u4("a", { class: "text-primary", href: detail.href, children: detail.name })
-        ] }),
-        /* @__PURE__ */ u4("div", { class: "-mx-1 flex flex-row gap-1 align-middle", children: [
-          ret(detail.urlHome, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: EXTERN })),
-          ret(detail.urlLanguish, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: LANGUISH, title: `#${detail.ranking} on Languish` })),
-          ret(detail.urlGithub, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: GITHUB })),
-          ret(detail.urlWikipedia, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: WIKIPEDIA })),
-          ret(detail.urlStackov, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: STACKOV })),
-          ret(detail.urlReddit, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: REDDIT }))
-        ] }),
-        /* @__PURE__ */ u4("p", { class: tw(forGrid && "inline sm:block", "hyphens-auto"), children: forGrid ? detail.shortDesc : detail.description })
-      ] }),
-      detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block", "overflow-hidden", !forGrid && tw("p-4")), open, children: [
-        /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
-        /* @__PURE__ */ u4("div", { class: tw(forGrid ? "flex flex-col" : "grid grid-cols-[auto_1fr]", "sm:gap-4", "sm:p-4"), children: [
-          detail.general.length > 0 && /* @__PURE__ */ u4(RelationCell, { title: "General", children: detail.general.map((item) => /* @__PURE__ */ u4(Pill, { title: item.title, children: item.kind === "text" ? item.value : /* @__PURE__ */ u4("a", { href: item.href, class: tw("inline-flex flex-row items-center align-middle"), children: [
-            /* @__PURE__ */ u4("span", { children: item.value }),
-            /* @__PURE__ */ u4("span", { class: tw("inline-block scale-50", "rounded"), children: EXTERN })
-          ] }) }, item)) }),
-          detail.relations.map(([title, vertices]) => /* @__PURE__ */ u4(RelationCell, { title, children: vertices.map((vertex) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex.href, children: vertex.name }) }, vertex.name)) }, title))
-        ] })
+    const header = /* @__PURE__ */ u4("h2", { class: tw("m-0!", "truncate"), children: detail ? /* @__PURE__ */ u4("a", { class: "pr-2", href: detail.href, children: detail.name }) : "Information" });
+    const iconLinks = detail && /* @__PURE__ */ u4("div", { class: "flex flex-row items-center gap-2 align-middle", children: [
+      ret(detail.urlHome, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: EXTERN })),
+      ret(detail.urlLanguish, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: LANGUISH, title: `#${detail.ranking} on Languish` })),
+      ret(detail.urlGithub, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: GITHUB })),
+      ret(detail.urlWikipedia, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: WIKIPEDIA })),
+      ret(detail.urlStackov, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: STACKOV })),
+      ret(detail.urlReddit, (url) => url && /* @__PURE__ */ u4(IconLink, { href: url, icon: REDDIT }))
+    ] });
+    const info = detail ? /* @__PURE__ */ u4("p", { class: tw("hidden sm:block landscape-short:hidden"), children: [
+      !forGrid && detail.thumbUrl && /* @__PURE__ */ u4(VertexThumbn, { detail, onlyImg: true, class: "float-right my-2 mr-1 ml-4 size-24" }),
+      /* @__PURE__ */ u4("div", { class: "hyphens-auto text-justify", children: forGrid ? detail.shortDesc : detail.description })
+    ] }) : /* @__PURE__ */ u4("p", { children: [
+      /* @__PURE__ */ u4("strong", { class: "text-primary", children: "Click" }),
+      " a thumbnail for more info."
+    ] });
+    const relations = detail && detail.relations.length > 0 && /* @__PURE__ */ u4("details", { class: tw(forGrid && "hidden sm:block landscape-short:hidden", "overflow-hidden"), open, children: [
+      /* @__PURE__ */ u4("summary", { class: "cursor-pointer text-primary", ...onClickOnEnter(updateOpen), children: "Details" }),
+      /* @__PURE__ */ u4("div", { class: tw("flex flex-col"), children: [
+        detail.general.length > 0 && /* @__PURE__ */ u4(RelationCell, { title: "General", children: detail.general.map((item) => /* @__PURE__ */ u4(Pill, { title: item.title, children: item.kind === "text" ? /* @__PURE__ */ u4("span", { children: item.value }) : /* @__PURE__ */ u4("a", { href: item.href, class: tw("inline-flex"), children: [
+          /* @__PURE__ */ u4("span", { children: item.value }),
+          /* @__PURE__ */ u4("span", { class: "scale-50", children: EXTERN })
+        ] }) }, item)) }),
+        detail.relations.map(([title, vertices]) => /* @__PURE__ */ u4(RelationCell, { title, children: vertices.map((vertex) => /* @__PURE__ */ u4(Pill, { children: /* @__PURE__ */ u4("a", { href: vertex.href, children: vertex.name }) }, vertex.name)) }, title))
       ] })
     ] });
-  }
-  function IconLink({ href, icon: icon2, title }) {
     return /* @__PURE__ */ u4(
-      "a",
+      "div",
       {
-        ...title ? { title } : {},
-        href,
-        class: tw(cssClass("externalLink"), "inline-block aspect-square", "transition-transform", "text-primary"),
-        children: /* @__PURE__ */ u4("div", { class: tw("inline-block scale-75", HOVER_ICON), children: icon2 })
+        ref: self,
+        class: tw(VSCROLL, tw(PROSE_BASIC, "max-w-[unset]"), forGrid && "px-2 py-1", forGrid && "border-primary/50 landscape-narrow:border-t-1"),
+        children: [
+          header,
+          detail && iconLinks,
+          info,
+          relations
+        ]
       }
     );
   }
+  function IconLink({ href, icon: icon2, title }) {
+    return /* @__PURE__ */ u4("a", { ...title ? { title } : {}, href, class: tw(cssClass("externalLink"), "inline-block aspect-square", "transition-transform", "p-1"), children: /* @__PURE__ */ u4("div", { class: tw("inline-block", HOVER_ICON), children: icon2 }) });
+  }
   function RelationCell({ title, children }) {
-    return /* @__PURE__ */ u4("div", { class: tw("col-span-2 grid grid-cols-subgrid", tw("border-foreground/25 border-dotted", "pt-4"), tw("hover:bg-hiliteb/10")), children: [
-      /* @__PURE__ */ u4("header", { class: "p-1 text-foreground/75", children: title }),
-      /* @__PURE__ */ u4("div", { children })
+    return /* @__PURE__ */ u4("div", { class: tw("hover:bg-hiliteb/10"), children: [
+      /* @__PURE__ */ u4("header", { class: "mb-2 py-1 text-foreground/75", children: title }),
+      /* @__PURE__ */ u4("div", { class: "ml-1 flex flex-row flex-wrap", children })
     ] }, title);
   }
 
@@ -2274,21 +2268,20 @@
     const toggle = handler((checkbox) => {
       main.doSetValue(groupKey, facetKey, valueMapper(checkbox.checked));
     });
-    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("block", "px-2"), children: [
+    return /* @__PURE__ */ u4("label", { for: facetKey, class: tw("inline-flex items-center gap-2", "mx-2"), children: [
       /* @__PURE__ */ u4(
         "input",
         {
           id: facetKey,
           name: facetKey,
           type: "checkbox",
-          class: tw("-mt-1"),
           placeholder: label2,
           ...onClickOnEnter(toggle),
           checked: !!main.values.get(groupKey, facetKey)?.isPresent,
           ref: input
         }
       ),
-      /* @__PURE__ */ u4("span", { class: "ml-2", children: label2 })
+      label2
     ] });
   }
 
@@ -2306,7 +2299,7 @@
       50
     );
     const current = main.values.get(groupKey, facetKey)?.value ?? "";
-    return /* @__PURE__ */ u4("input", { type: "search", onInput, placeholder: label2, class: tw(INPUT, "mt-8"), value: current });
+    return /* @__PURE__ */ u4("input", { type: "search", onInput, placeholder: label2, class: tw("m-2", INPUT), value: current });
   }
 
   // packages/frontend/src/facets/multisel/state.ts
@@ -2391,7 +2384,17 @@
       return Array.from([...state.value.values].entries()).map(mapper);
     }
     const body = () => /* @__PURE__ */ u4(k, { children: [
-      /* @__PURE__ */ u4("input", { type: "search", name: facetKey, ref: input, placeholder: label2, class: tw(INPUT), onKeyDown: add }),
+      /* @__PURE__ */ u4(
+        "input",
+        {
+          type: "text",
+          name: facetKey,
+          ref: input,
+          placeholder: label2,
+          class: tw(INPUT, "m-2"),
+          onKeyDown: add
+        }
+      ),
       /* @__PURE__ */ u4("span", { class: tw(state.value.size === 0 && "hidden", state.value.size < 2 ? "text-foreground/50" : "text-foreground", "pl-2"), children: /* @__PURE__ */ u4(IconButton, { action: "allAny", disabled: state.value.size < 2, initial: "any" }) }),
       /* @__PURE__ */ u4("ul", { children: mapEntries(([idx, value]) => /* @__PURE__ */ u4("li", { children: /* @__PURE__ */ u4(
         "button",
@@ -2483,13 +2486,21 @@
       "button",
       {
         type: "button",
-        class: tw("px-1", "italic", "underline decoration-1 decoration-dotted", "cursor-pointer", cssClass2),
+        class: tw(
+          HOVER,
+          "flex flex-row gap-1 px-2 py-1",
+          "items-center justify-between",
+          "italic",
+          "underline decoration-1 decoration-dotted",
+          "cursor-pointer",
+          cssClass2
+        ),
         ...onClickOnEnter(action),
-        children: /* @__PURE__ */ u4("div", { class: tw(HOVER, "inline-flex w-full", "px-1", "items-center justify-between", "gap-1"), children: [
+        children: [
           /* @__PURE__ */ u4("span", { children: label(col, config) }),
-          /* @__PURE__ */ u4("span", { class: tw("scale-75", "mt-1"), children: icon(col, order) }),
+          /* @__PURE__ */ u4("span", { class: tw("scale-75"), children: icon(col, order) }),
           /* @__PURE__ */ u4("span", { class: "flex-1" })
-        ] })
+        ]
       }
     );
   }
@@ -2574,16 +2585,15 @@
       })
     );
     const SUBGRID2 = tw("col-span-3", "grid grid-cols-subgrid");
-    const ROW = tw(SUBGRID2, tw("border-b-1", BORDER));
-    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", VSCROLL, "relative"), children: [
-      /* @__PURE__ */ u4("div", { class: tw(ROW, "sticky top-0", "bg-primary text-background/80", "cursor-pointer", tw(BORDER, "border-b-1")), children: [
-        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "flex flex-row items-center gap-2", "px-1", "border-secondary border-b-1 border-dotted"), children: [
-          /* @__PURE__ */ u4("label", { for: "filter-facets", class: "inline-block", children: "Filter:" }),
+    const ROW = tw(SUBGRID2, tw("border-b-1", "border-foreground/25 border-dotted"));
+    const body = () => /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto_auto]", "overflow-hidden"), children: [
+      /* @__PURE__ */ u4("div", { class: tw(ROW, "bg-secondary text-foreground"), children: [
+        /* @__PURE__ */ u4("div", { class: tw("col-span-3", "flex flex-row", "items-center justify-between"), children: [
           /* @__PURE__ */ u4(
             "input",
             {
-              id: "filter-facets",
-              class: "m-2 inline-block flex-1 p-1",
+              class: tw(INPUT, "m-1 block h-8 w-[100%]"),
+              placeholder: "Filter...",
               value: state.filter,
               onInput: (ev) => state.doSetFilter(ev.currentTarget.value)
             }
@@ -2592,28 +2602,26 @@
           /* @__PURE__ */ u4(
             "div",
             {
-              ...onClickOnEnter(() => state.doResetSelection()),
               class: tw("scale-75 p-1", state.hasSelection ? tw("hover:text-hiliteb", HOVER_ICON_BG) : "opacity-25"),
+              ...onClickOnEnter(() => state.doResetSelection()),
               children: DESELECT
             }
           )
         ] }),
-        /* @__PURE__ */ u4("div", { class: tw(ROW, "col-span-3"), children: [
-          /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
-          /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
-        ] })
+        /* @__PURE__ */ u4(Header, { class: "text-left", action: () => state.doToggleOrder("facet"), col: "facet", config, order: state.order }),
+        /* @__PURE__ */ u4(Header, { class: "text-center", action: () => state.doToggleOrder("count"), col: "count", config, order: state.order }),
+        /* @__PURE__ */ u4(Header, { class: "text-right", action: () => state.doToggleOrder("sel"), col: "sel", config, order: state.order })
       ] }),
-      state.filteredEntries.map(
+      /* @__PURE__ */ u4("div", { class: tw(ROW, "overflow-hidden", "overflow-y-scroll"), children: state.filteredEntries.map(
         (entry) => ret(
           onClickOnEnter(() => state.doToggle(entry.value)),
-          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-primary/20"), ...clickOrEnter, children: [
+          (clickOrEnter) => /* @__PURE__ */ u4("div", { class: tw(ROW, HOVER, state.value.has(entry.value) && "bg-secondary/20"), ...clickOrEnter, children: [
             /* @__PURE__ */ u4("div", { class: tw("p-2", "text-left", "overflow-hidden text-ellipsis", "line-clamp-3"), children: entry.label }),
             /* @__PURE__ */ u4("div", { class: tw("p-2", "text-center"), children: entry.count }),
             /* @__PURE__ */ u4("div", { class: tw("p-2", "text-right"), children: /* @__PURE__ */ u4("input", { type: "checkbox", checked: state.value.has(entry.value), ...clickOrEnter }) })
           ] }, entry.value)
         )
-      )
+      ) })
     ] });
     return /* @__PURE__ */ u4("div", { ref: self, class: tw("flex flex-col", "size-full overflow-hidden"), children: active ? body() : null });
   }
@@ -2649,11 +2657,11 @@
           "relative",
           !active && "hidden",
           // Self.
-          "flex-1",
+          "flex-1 pt-1",
           "self-center",
           "size-full overflow-hidden overflow-y-auto",
           // Children.
-          "flex flex-col gap-4"
+          "flex flex-col gap-2"
         ),
         children
       }
@@ -4799,69 +4807,74 @@
     const state = useFacetState(page, pg);
     const self = useRootState(state);
     y3(() => window.fragment.onUserChange((ev) => state?.doResetAll(ev.deserFrag)));
-    const mapGroups = (state2, group, callback) => group.map((groupKey) => callback(groupKey, state2.currentGroupKey === groupKey, state2.groupHasValues(groupKey)));
     const body = (state2) => /* @__PURE__ */ u4(FacetsMainContext.Provider, { value: state2, children: [
-      /* @__PURE__ */ u4(
-        "aside",
+      /* @__PURE__ */ u4(FacetsAsideMenu, { page, state: state2, class: cssClass("facetsBar") }),
+      /* @__PURE__ */ u4("div", { class: tw(cssClass("facetsSelect"), "flex-row items-center gap-2 bg-primary/85 p-2"), children: [
+        /* @__PURE__ */ u4("select", { class: tw(INPUT, "block h-8 w-full flex-1 py-0 text-black/85"), onChange: (ev) => state2.doSetCurrentGroup(ev.currentTarget.value), children: state2.nav.groupKeys.map((group) => /* @__PURE__ */ u4("optgroup", { children: group.map((gk) => /* @__PURE__ */ u4("option", { value: gk, selected: state2.currentGroupKey === gk, children: [
+          state2.groupTitle(gk),
+          state2.groupHasValues(gk) ? " \u2611" : ""
+        ] }, gk)) }, group.join("-"))) }),
+        /* @__PURE__ */ u4("span", { class: "text-background", title: "Show items matching either all or any of the categories on the select box.", children: /* @__PURE__ */ u4(IconButton, { action: "allAny" }) })
+      ] }),
+      /* @__PURE__ */ u4("div", { class: tw("w-full ", "flex flex-col", "overflow-hidden", "bg-linear-to-b to-secondary/50", "relative"), children: /* @__PURE__ */ u4(state2.groupsComponent, { currentFacetGroup: state2.currentGroupKey }) })
+    ] });
+    return /* @__PURE__ */ u4(
+      "aside",
+      {
+        ref: self,
+        class: tw(
+          //
+          cssClass("facetsWrapper"),
+          "flex",
+          "size-full overflow-hidden",
+          "border-1 border-primary/25 border-t-0"
+        ),
+        children: state && body(state)
+      }
+    );
+  }
+  function FacetsAsideMenu({ state, page, class: klass }) {
+    const mapGroups = (state2, group, callback) => group.map((groupKey) => callback(groupKey, state2.currentGroupKey === groupKey, state2.groupHasValues(groupKey)));
+    return /* @__PURE__ */ u4("aside", { class: tw("h-full min-w-[12rem]", VSCROLL, "bg-linear-to-r from-secondary/50 to-transparent", klass), children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[1fr_auto]", "ml-2"), children: [
+      /* @__PURE__ */ u4("header", { class: tw("text-primary uppercase", "col-span-2 py-2"), children: [
+        "Filter ",
+        page
+      ] }),
+      state.nav.groupKeys.map((group) => /* @__PURE__ */ u4("nav", { class: tw("md:mb-6", SUBGRID), children: mapGroups(state, group, (groupKey, isCurrent, hasValues) => /* @__PURE__ */ u4(
+        "div",
         {
           class: tw(
-            tw("h-full", VSCROLL),
-            "min-w-[10rem] sm:min-w-[12rem]",
-            // ---
-            tw(BORDER, "border-r-1"),
-            "bg-linear-to-t from-secondary to-background"
+            SUBGRID,
+            isCurrent ? tw(tw("border-secondary border-dotted", "border-l-1"), "bg-primary/85 text-background") : "hover:bg-primary/25"
           ),
-          children: /* @__PURE__ */ u4("div", { class: tw("grid grid-cols-[auto_auto]"), children: [
-            /* @__PURE__ */ u4("header", { class: tw("uppercase", "text-primary", "mb-4", "ml-4"), children: [
-              "Filter ",
-              page
-            ] }),
-            state2.nav.groupKeys.map((group) => /* @__PURE__ */ u4("nav", { class: tw("sm:mb-6", "min-w-[12rem] max-w-[15rem]", SUBGRID), children: mapGroups(state2, group, (groupKey, isCurrent, hasValues) => /* @__PURE__ */ u4(
+          style: `${hasValues ? "font-weight: bold" : ""}`,
+          children: [
+            /* @__PURE__ */ u4(
+              "button",
+              {
+                ...onClickOnEnter(() => state.doSetCurrentGroup(groupKey)),
+                class: tw("block w-full", "truncate text-left", "px-4 py-1.5", "cursor-pointer", isCurrent && "text-background/85"),
+                children: state.groupTitle(groupKey)
+              }
+            ),
+            /* @__PURE__ */ u4(
               "div",
               {
+                ...onClickOnEnter(() => state.doResetGroup(groupKey)),
                 class: tw(
-                  SUBGRID,
-                  isCurrent ? tw(tw("border-secondary border-dotted", "border-l-1"), "bg-primary/85 text-background") : "hover:bg-primary/25"
+                  "p-1",
+                  "scale-75",
+                  "cursor-pointer",
+                  state.groupHasValues(groupKey) ? tw("hover:text-hiliteb", HOVER_ICON_BG) : "hidden"
                 ),
-                style: `${hasValues ? "font-weight: bold" : ""}`,
-                children: [
-                  /* @__PURE__ */ u4(
-                    "button",
-                    {
-                      ...onClickOnEnter(() => state2.doSetCurrentGroup(groupKey)),
-                      class: tw(
-                        "block w-full",
-                        "truncate text-left",
-                        "mr-2 px-4 py-1.5 sm:mb-1 sm:ml-4",
-                        "cursor-pointer",
-                        isCurrent ? "text-background/85" : hasValues ? "text-primary" : "text-foreground"
-                      ),
-                      children: state2.groupTitle(groupKey)
-                    }
-                  ),
-                  /* @__PURE__ */ u4(
-                    "div",
-                    {
-                      ...onClickOnEnter(() => state2.doResetGroup(groupKey)),
-                      class: tw(
-                        "mr-1 p-1",
-                        "scale-75",
-                        "cursor-pointer",
-                        state2.groupHasValues(groupKey) ? tw("hover:text-hiliteb", HOVER_ICON_BG) : "hidden"
-                      ),
-                      children: DESELECT
-                    }
-                  )
-                ]
-              },
-              groupKey
-            )) }, group.join("-")))
-          ] })
-        }
-      ),
-      /* @__PURE__ */ u4("div", { class: tw("flex w-full flex-col", "overflow-hidden", tw(BORDER, "border-r-1"), "bg-linear-to-b to-secondary/50", "relative"), children: /* @__PURE__ */ u4(state2.groupsComponent, { currentFacetGroup: state2.currentGroupKey }) })
-    ] });
-    return /* @__PURE__ */ u4("aside", { ref: self, class: tw("flex flex-row items-stretch", "size-full overflow-hidden"), children: state && body(state) });
+                children: DESELECT
+              }
+            )
+          ]
+        },
+        groupKey
+      )) }, group.join("-")))
+    ] }) });
   }
 
   // packages/frontend/src/facets/main/index.tsx
@@ -4877,6 +4890,40 @@
         console.error("Missing prop for FacetsMain component.");
       }
     }
+  }
+
+  // packages/frontend/src/auxiliar/aspect.ts
+  function approxRatio(x3, y4) {
+    const targetRatio = x3 / y4;
+    let bestDiff = Number.POSITIVE_INFINITY;
+    let bestRatio = [1, 1];
+    for (let a4 = 1; a4 <= 9; a4++) {
+      for (let b2 = 1; b2 <= 9; b2++) {
+        const currentRatio = a4 / b2;
+        const diff = Math.abs(targetRatio - currentRatio);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestRatio = [a4, b2];
+        }
+      }
+    }
+    return `${bestRatio[0]}:${bestRatio[1]}`;
+  }
+  function debugAspectRatio() {
+    const debugDiv = document.createElement("div");
+    debugDiv.id = "debug";
+    debugDiv.classList.add("absolute", "text-white", "bg-red-500/50", "bottom-0", "right-0");
+    const updater = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const aspectRatio = width / height;
+      debugDiv.textContent = `Aspect Ratio: ${aspectRatio.toFixed(2)} ~(${approxRatio(width, height)}) `;
+    };
+    window.addEventListener("DOMContentLoaded", () => {
+      document.body.appendChild(debugDiv);
+      window.addEventListener("resize", updater);
+      updater();
+    });
   }
 
   // packages/frontend/src/app/vertices.ts
@@ -4916,6 +4963,7 @@
     } catch (err) {
       console.error(err);
     }
+    debugAspectRatio();
   }
   try {
     start();
